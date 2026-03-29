@@ -186,7 +186,23 @@ Before ANY coding task, read these files in order:
 
 Load the relevant skill when the task matches:
 
-- [skills will be added as needed]
+| Tarea FleetControl                  | Skill a cargar                                       | Ruta                                                                  |
+| ----------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------- |
+| UI components, layout, responsive   | `ui-ux-pro-max`                                      | `file:///home/cesar/.agents/skills/ui-ux-pro-max`                     |
+| Frontend patterns, a11y, testing    | `senior-frontend`                                    | `file:///home/cesar/.agents/skills/senior-frontend`                   |
+| Testing TDD, factories, mocking     | `testing-patterns`                                   | `file:///home/cesar/.agents/skills/testing-patterns`                  |
+| Supabase/Postgres schema, RLS, perf | `supabase-postgres-best-practices`                   | `file:///home/cesar/.agents/skills/supabase-postgres-best-practices`  |
+| Vue patterns, Composition API       | `vue-best-practices` (ref AGENTS.md §4 Vue Patterns) | —                                                                     |
+| Git workflows, PRs, branching       | `git-advanced-workflows`                             | `file:///home/cesar/.agents/skills/git-advanced-workflows`            |
+| Deployment, CI/CD                   | `cicd-automation-workflow-automate`                  | `file:///home/cesar/.agents/skills/cicd-automation-workflow-automate` |
+| Security audit, vulnerabilities     | `security-audit`                                     | `file:///home/cesar/.agents/skills/security-audit`                    |
+| API design, REST patterns           | `api-design-principles`                              | `file:///home/cesar/.agents/skills/api-design-principles`             |
+| Accessibility audit (WCAG)          | `fixing-accessibility`                               | `file:///home/cesar/.agents/skills/fixing-accessibility`              |
+| Clean code, refactoring             | `clean-code`                                         | `file:///home/cesar/.agents/skills/clean-code`                        |
+| Debugging, error analysis           | `systematic-debugging`                               | `file:///home/cesar/.agents/skills/systematic-debugging`              |
+
+> **Regla**: Cargar el skill ANTES de empezar la tarea. El skill inyecta
+> instrucciones y workflows específicos en el contexto de la conversación.
 
 After completing ANY task, update `AI_CONTEXT.md` with:
 
