@@ -4,7 +4,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import { router } from './plugins/router.js'
 import { vuetify } from './plugins/vuetify.js'
-import { vueQueryPlugin } from './plugins/query-client.js'
+import { VueQueryPlugin, vueQueryPluginOptions } from './plugins/query-client.js'
 import './styles/tokens.css'
 
 const app = createApp(App)
@@ -15,6 +15,6 @@ pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 app.use(router)
 app.use(vuetify)
-app.use(vueQueryPlugin)
+app.use(VueQueryPlugin, vueQueryPluginOptions)
 
 app.mount('#app')

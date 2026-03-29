@@ -1,6 +1,8 @@
 import { VueQueryPlugin } from '@tanstack/vue-query'
 
-export const vueQueryPlugin = new VueQueryPlugin({
+export { VueQueryPlugin }
+
+export const vueQueryPluginOptions = {
   queryClientConfig: {
     defaultOptions: {
       queries: {
@@ -10,4 +12,4 @@ export const vueQueryPlugin = new VueQueryPlugin({
       },
     },
   },
-})
+}
