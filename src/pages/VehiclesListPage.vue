@@ -1,12 +1,16 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Vehículos</h1>
-    <v-card>
-      <v-card-text>
-        <p class="text-body-1 text-medium-emphasis">Página en construcción</p>
-      </v-card-text>
-    </v-card>
+    <div class="d-flex justify-space-between align-center mb-4">
+      <h1 class="text-h4">Vehículos</h1>
+      <v-btn color="primary" :to="{ name: 'VehicleCreate' }" data-testid="vehicles-create-btn">
+        <v-icon start>mdi-plus</v-icon>
+        Nuevo vehículo
+      </v-btn>
+    </div>
+    <VehicleList />
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import VehicleList from '@/components/vehicles/VehicleList.vue'
+</script>

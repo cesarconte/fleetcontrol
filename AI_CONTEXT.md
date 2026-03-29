@@ -90,7 +90,7 @@ Automatización:       [PENDIENTE]
 | Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                  |
 | Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod) |
 | Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                      |
-| Módulo Vehículos           | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT                        |
+| Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                |
 | Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                               |
 | Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                         |
 | Módulo Mantenimiento       | 🔴 Sin empezar | Preventivo, correctivo, repuestos                         |
@@ -211,14 +211,16 @@ _(Complementa las de AGENTS.md)_
 **Fecha:** 2026-03-29
 **Trabajo realizado:**
 
-- Fases 1-4 completadas: Setup + BD + Layout + Auth
-- Servicio `api-auth.js`: login, register, logout, getSession, resetPassword
-- Composable `use-auth.js`: wrapper reactivo con redirect y notificaciones
-- LoginPage refactorizada con Vee-Validate + Zod (schema validación)
-- RegisterPage creada con confirmación de contraseña
-- Auth store delega a api-auth service
-- Router guard: redirect query param, Login + Register protegidos
-- 63 tests pasando, `npm run check` limpio
+- Fases 1-5 completadas: Setup + BD + Layout + Auth + Vehículos CRUD
+- `api-vehicles.js`: getPaginated con filtros, search por matrícula
+- `use-vehicles.js`: composable reactivo con paginación, filtros, CRUD
+- `vehicle-schema.js`: Zod — matrícula española, MMA ≤ 44000, dimensiones
+- `VehicleList.vue`: VDataTableServer (desktop) + cards (mobile), filtros
+- `VehicleForm.vue`: formulario con 4 secciones colapsables (Vee-Validate)
+- `VehicleDetail.vue`: ficha con expansion panels + documentos
+- `VehicleDocuments.vue`: tabla documentos por vehículo
+- 4 páginas: List, Detail, Create, Edit (con rutas)
+- 92 tests pasando, `npm run check` limpio (0 errores)
 
 **Próximos pasos:**
 

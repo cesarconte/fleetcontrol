@@ -24,6 +24,24 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/vehiculos/nuevo',
+    name: 'VehicleCreate',
+    component: () => import('@/pages/VehicleCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehiculos/:id',
+    name: 'VehicleDetail',
+    component: () => import('@/pages/VehicleDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehiculos/:id/edit',
+    name: 'VehicleEdit',
+    component: () => import('@/pages/VehicleEditPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/conductores',
     name: 'Drivers',
     component: () => import('@/pages/DriversListPage.vue'),
