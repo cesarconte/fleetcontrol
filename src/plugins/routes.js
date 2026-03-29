@@ -1,0 +1,86 @@
+export const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/pages/LoginPage.vue'),
+    meta: { requiresAuth: false, layout: 'blank' },
+  },
+  {
+    path: '/',
+    name: 'Dashboard',
+    component: () => import('@/pages/DashboardPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/vehiculos',
+    name: 'Vehicles',
+    component: () => import('@/pages/VehiclesListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/conductores',
+    name: 'Drivers',
+    component: () => import('@/pages/DriversListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/rutas',
+    name: 'Routes',
+    component: () => import('@/pages/RoutesListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/mantenimiento',
+    name: 'Maintenance',
+    component: () => import('@/pages/MaintenanceListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/combustible',
+    name: 'Fuel',
+    component: () => import('@/pages/FuelListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cargas',
+    name: 'Cargo',
+    component: () => import('@/pages/CargoListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/tacografos',
+    name: 'Tachographs',
+    component: () => import('@/pages/TachographsPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/alertas',
+    name: 'Alerts',
+    component: () => import('@/pages/AlertsListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/documentacion',
+    name: 'Documents',
+    component: () => import('@/pages/DocumentsListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/informes',
+    name: 'Reports',
+    component: () => import('@/pages/ReportsListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/configuracion',
+    name: 'Settings',
+    component: () => import('@/pages/SettingsPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/pages/NotFoundPage.vue'),
+    meta: { requiresAuth: false },
+  },
+]

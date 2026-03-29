@@ -1,40 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
-const routes = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/pages/LoginPage.vue'),
-    meta: { requiresAuth: false, layout: 'blank' },
-  },
-  {
-    path: '/',
-    name: 'Dashboard',
-    component: () => import('@/pages/DashboardPage.vue'),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/pages/NotFoundPage.vue'),
-    meta: { requiresAuth: false },
-  },
-]
+import { routes } from './routes.js'
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 
-router.beforeEach((to) => {
-  // TODO 2026-03-29 #1: Implement real auth check from store
-  const isAuthenticated = false
+router.beforeEach(async to => {
+  // Lazy import to avoid circular dependency
+  const { useAuthStore } = await import('@/stores/auth.js')
+  const auth = useAuthStore()
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  // Try to restore session on first navigation
+  if (!auth.isAuthenticated) {
+    await auth.getSession()
+  }
+
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'Login', query: { redirect: to.fullPath } }
   }
 
-  if (to.name === 'Login' && isAuthenticated) {
+  if (to.name === 'Login' && auth.isAuthenticated) {
     return { name: 'Dashboard' }
   }
 })

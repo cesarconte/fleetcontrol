@@ -88,8 +88,8 @@ Automatización:       [PENDIENTE]
 | Módulo                     | Estado         | Notas                                                    |
 | -------------------------- | -------------- | -------------------------------------------------------- |
 | Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                 |
-| Autenticación y roles      | 🔴 Sin empezar | Supabase Auth                                            |
-| Dashboard principal        | 🔴 Sin empezar | KPIs operativos                                          |
+| Autenticación y roles      | 🟡 Parcial     | Supabase Auth integrada (login/logout/session)           |
+| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                     |
 | Módulo Vehículos           | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT                       |
 | Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                              |
 | Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                        |
@@ -211,25 +211,21 @@ _(Complementa las de AGENTS.md)_
 **Fecha:** 2026-03-29
 **Trabajo realizado:**
 
-- Fase 1 completada: Setup inicial del proyecto (scaffolding)
-- Proyecto Vite + Vue 3 creado con todas las dependencias
-- Vuetify 4 configurado con theme oscuro y colores del proyecto
-- Vue Router 4 con lazy loading y auth guard placeholder
-- Pinia con persistencia (ui store)
-- TanStack Query configurado
-- Estructura de carpetas completa creada
-- Tokens CSS, `.env.example`, ESLint, Prettier, Vitest configurados
-- `legal-limits.js` con todos los límites regulatorios (deep frozen)
-- `error-map.js` para mapeo de errores Supabase
-- `create-crud-service.js` factory CRUD base
-- Stores: auth, ui, notifications
-- Páginas placeholder: Login, Dashboard, 404
-- 39 tests pasando, `npm run check` limpio, build OK
+- Fases 1-3 completadas: Setup + BD + Layout base
+- AppSidebar (responsive: permanent lg+, temporary md/sm)
+- AppTopBar (hamburger, búsqueda, notificaciones, avatar)
+- AppLayout (sidebar + topbar + router-view con transición fade)
+- AppNotifications (toasts centralizados desde store)
+- Auth store con Supabase Auth (login, logout, getSession, fetchProfile)
+- Router refactorizado (routes.js separado, auth guard real)
+- 11 páginas placeholder para todas las rutas
+- 53 tests pasando, `npm run check` limpio
+- RLS policies corregidas (0 warnings Supabase advisors)
+- Flujo git documentado: main → dev → feature/\*
 
 **Próximos pasos:**
 
-1. Fase 3: Layout base (AppSidebar, AppTopBar, AppLayout)
-2. Fase 4: CRUD Vehículos (template)
+1. Fase 4: CRUD Vehículos (template para todos los módulos)
 
 **Bloqueos activos:**
 
