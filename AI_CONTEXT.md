@@ -1,4 +1,5 @@
 # AI_CONTEXT.md — Estado Actual del Proyecto
+
 ## FleetControl
 
 > **DOCUMENTO VIVO.** Actualizar al final de cada sesión de trabajo o cuando
@@ -84,114 +85,114 @@ Automatización:       [PENDIENTE]
 
 ### Gestión — Core (v1.0)
 
-| Módulo | Estado | Notas |
-|---|---|---|
-| Setup inicial del proyecto | 🔴 Sin empezar | Vite + Vue 3 + Vuetify 4 |
-| Autenticación y roles | 🔴 Sin empezar | Supabase Auth |
-| Dashboard principal | 🔴 Sin empezar | KPIs operativos |
-| Módulo Vehículos | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT |
-| Módulo Conductores | 🔴 Sin empezar | CRUD, licencias, horas, CAP |
-| Módulo Rutas | 🔴 Sin empezar | Activas, historial, planificación |
-| Módulo Mantenimiento | 🔴 Sin empezar | Preventivo, correctivo, repuestos |
-| Módulo Combustible | 🔴 Sin empezar | Registro, estadísticas |
-| Módulo Cargas | 🔴 Sin empezar | CRUD, ADR, tipos de carga |
-| Módulo Tacógrafos | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones |
-| Gestión Documental | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría |
-| Módulo Alertas | 🔴 Sin empezar | Tabla, filtros, acciones, compliance |
-| Módulo Informes | 🔴 Sin empezar | Operativos + regulatorios |
-| Configuración | 🔴 Sin empezar | Empresa, usuarios, integraciones |
-| Sistema de Notificaciones | 🔴 Sin empezar | In-app, email |
-| GPS/Telemática | 🔴 Sin empezar | Integración con proveedor |
-| Sistema Realtime | 🔴 Sin empezar | Tablas Tier 1 |
-| Testing (TDD) | 🔴 Sin empezar | Vitest + Cypress |
+| Módulo                     | Estado         | Notas                                                    |
+| -------------------------- | -------------- | -------------------------------------------------------- |
+| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                 |
+| Autenticación y roles      | 🔴 Sin empezar | Supabase Auth                                            |
+| Dashboard principal        | 🔴 Sin empezar | KPIs operativos                                          |
+| Módulo Vehículos           | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT                       |
+| Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                              |
+| Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                        |
+| Módulo Mantenimiento       | 🔴 Sin empezar | Preventivo, correctivo, repuestos                        |
+| Módulo Combustible         | 🔴 Sin empezar | Registro, estadísticas                                   |
+| Módulo Cargas              | 🔴 Sin empezar | CRUD, ADR, tipos de carga                                |
+| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones |
+| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría |
+| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                     |
+| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                |
+| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                         |
+| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                            |
+| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                |
+| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                            |
+| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                         |
 
 ### Documentación de Transporte (v1.0)
 
-| Documento | Estado | Base Legal | Obligatorio |
-|---|---|---|---|
-| Carta de Porte CMR | 🔴 | Convenio CMR 1956 (arts. 5-6) | Sí (internacional) |
-| Carta de Porte Nacional | 🔴 | LCTTM (Ley 15/2009, art. 10-12) | Sí (>€150 con porteador) |
-| Documento de Control Digital | 🔴 | Orden FOM/2861/2012 + Ley 9/2025 | **Sí (desde 05/10/2026)** |
-| Albarán de Entrega | 🔴 | Práctica comercial + UNE 56100 | Sí (práctica) |
-| Hoja de Ruta | 🔴 | LOTT / RD 70/2019 | Recomendado (funcional) |
-| Nota de Gastos | 🔴 | IRPF + Convenio colectivo transporte | Sí (si hay reembolso) |
-| Factura de Transporte | 🔴 | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal) |
-| Certificado de Entrega (POD) | 🔴 | LCTTM / práctica comercial | Sí (prueba de entrega) |
-| Documento de Transporte ADR | 🔴 | ADR 2025 (5.4) + RD 97/2014 | Sí (mercancías peligrosas) |
-| Declaración de Valor CMR | 🔴 | CMR art. 24/26 | Si valor > límite CMR |
-| Certificado ATP + control temp. | 🔴 | ATP + RD 635/1984 | Sí (perecederos) |
-| Packing List | 🔴 | Práctica comercial | Recomendado |
-| Ficha de Estiba | 🔴 | RD 551/2020 | Si carga pesada/especial |
-| Doc. conductores desplazados | 🔴 | Dir. UE 2020/1057 + RD 362/2023 | Si aplica (internacional) |
+| Documento                       | Estado | Base Legal                            | Obligatorio                |
+| ------------------------------- | ------ | ------------------------------------- | -------------------------- |
+| Carta de Porte CMR              | 🔴     | Convenio CMR 1956 (arts. 5-6)         | Sí (internacional)         |
+| Carta de Porte Nacional         | 🔴     | LCTTM (Ley 15/2009, art. 10-12)       | Sí (>€150 con porteador)   |
+| Documento de Control Digital    | 🔴     | Orden FOM/2861/2012 + Ley 9/2025      | **Sí (desde 05/10/2026)**  |
+| Albarán de Entrega              | 🔴     | Práctica comercial + UNE 56100        | Sí (práctica)              |
+| Hoja de Ruta                    | 🔴     | LOTT / RD 70/2019                     | Recomendado (funcional)    |
+| Nota de Gastos                  | 🔴     | IRPF + Convenio colectivo transporte  | Sí (si hay reembolso)      |
+| Factura de Transporte           | 🔴     | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal)                |
+| Certificado de Entrega (POD)    | 🔴     | LCTTM / práctica comercial            | Sí (prueba de entrega)     |
+| Documento de Transporte ADR     | 🔴     | ADR 2025 (5.4) + RD 97/2014           | Sí (mercancías peligrosas) |
+| Declaración de Valor CMR        | 🔴     | CMR art. 24/26                        | Si valor > límite CMR      |
+| Certificado ATP + control temp. | 🔴     | ATP + RD 635/1984                     | Sí (perecederos)           |
+| Packing List                    | 🔴     | Práctica comercial                    | Recomendado                |
+| Ficha de Estiba                 | 🔴     | RD 551/2020                           | Si carga pesada/especial   |
+| Doc. conductores desplazados    | 🔴     | Dir. UE 2020/1057 + RD 362/2023       | Si aplica (internacional)  |
 
 ### Análisis (v1.5 — implementar TRAS gestión y documentación)
 
-| Módulo | Estado | Notas |
-|---|---|---|
-| Análisis de Costes (CPM/TCO) | 🔴 Sin empezar | Coste/km, coste por vehículo/ruta/conductor |
-| Análisis Combustible | 🔴 Sin empezar | Eficiencia L/100km, anomalías, robo |
-| Scoring de Conductores | 🔴 Sin empezar | Frenadas, aceleración, velocidad, HOS |
-| Utilización de Flota | 🔴 Sin empezar | Ratio horas activas/disponibles |
-| Análisis Mantenimiento | 🔴 Sin empezar | MTBF, MTTR, compliance PM, tendencia costes |
-| Huella de Carbono | 🔴 Sin empezar | CO2 por vehículo/flota, Scope 1, CSRD |
-| Benchmarking | 🔴 Sin empezar | Comparación vehículos/conductores/rutas |
-| Tendencias Temporales | 🔴 Sin empezar | Evolución costes, eficiencia, consumo, averías |
-| Compliance Regulatorio | 🔴 Sin empezar | % cumplimiento ITV, CAP, ADR, tacógrafo, conducción |
-| Análisis de Rutas | 🔴 Sin empezar | Planificado vs real, puntualidad |
+| Módulo                       | Estado         | Notas                                               |
+| ---------------------------- | -------------- | --------------------------------------------------- |
+| Análisis de Costes (CPM/TCO) | 🔴 Sin empezar | Coste/km, coste por vehículo/ruta/conductor         |
+| Análisis Combustible         | 🔴 Sin empezar | Eficiencia L/100km, anomalías, robo                 |
+| Scoring de Conductores       | 🔴 Sin empezar | Frenadas, aceleración, velocidad, HOS               |
+| Utilización de Flota         | 🔴 Sin empezar | Ratio horas activas/disponibles                     |
+| Análisis Mantenimiento       | 🔴 Sin empezar | MTBF, MTTR, compliance PM, tendencia costes         |
+| Huella de Carbono            | 🔴 Sin empezar | CO2 por vehículo/flota, Scope 1, CSRD               |
+| Benchmarking                 | 🔴 Sin empezar | Comparación vehículos/conductores/rutas             |
+| Tendencias Temporales        | 🔴 Sin empezar | Evolución costes, eficiencia, consumo, averías      |
+| Compliance Regulatorio       | 🔴 Sin empezar | % cumplimiento ITV, CAP, ADR, tacógrafo, conducción |
+| Análisis de Rutas            | 🔴 Sin empezar | Planificado vs real, puntualidad                    |
 
 ### Futuras Ampliaciones (v2.0+)
 
-| Módulo | Prioridad | Notas |
-|---|---|---|
-| Gestión de Remolques/Activos | Alta | Ciclo de vida independiente |
-| Inventario de Repuestos | Alta | Stock, costes, reposición, vinculación a órdenes |
-| Planificación/Dispatch | Alta | Asignación de jobs, calendario |
-| Integración Tarjetas Combustible | Alta | Importación automática transacciones |
-| Sostenibilidad/Emisiones ZBE | Alta | Etiqueta DGT, Euro class, CSRD |
-| Gestión de Clientes/Expedidores | Media | Base de datos, contratos, precios |
-| Gastos de Viaje | Media | Peajes, parking, ferry, dietas |
-| Gestión de Seguros | Media | Pólizas, primas, vencimientos, siniestros |
-| Gestión de Sanciones/Multas | Media | Tráfico, LOTT, vinculación conductor/vehículo |
-| Comunicación con Conductores | Media | Mensajería in-app |
-| Optimización de Carga | Media | Peso ejes, distribución, límites MMA |
-| Presupuestación | Baja | Presupuesto anual, real vs previsto |
-| Gestión de Contratos | Baja | Tarifas, SLAs, volúmenes |
-| Portal de Cliente | Baja | Seguimiento envíos, descarga documentos |
-| Gestión de Garantías | Baja | Coberturas, reparaciones cubiertas |
-| App Móvil Conductores | Futuro | Rutas, documentos, horas disponibles |
+| Módulo                           | Prioridad | Notas                                            |
+| -------------------------------- | --------- | ------------------------------------------------ |
+| Gestión de Remolques/Activos     | Alta      | Ciclo de vida independiente                      |
+| Inventario de Repuestos          | Alta      | Stock, costes, reposición, vinculación a órdenes |
+| Planificación/Dispatch           | Alta      | Asignación de jobs, calendario                   |
+| Integración Tarjetas Combustible | Alta      | Importación automática transacciones             |
+| Sostenibilidad/Emisiones ZBE     | Alta      | Etiqueta DGT, Euro class, CSRD                   |
+| Gestión de Clientes/Expedidores  | Media     | Base de datos, contratos, precios                |
+| Gastos de Viaje                  | Media     | Peajes, parking, ferry, dietas                   |
+| Gestión de Seguros               | Media     | Pólizas, primas, vencimientos, siniestros        |
+| Gestión de Sanciones/Multas      | Media     | Tráfico, LOTT, vinculación conductor/vehículo    |
+| Comunicación con Conductores     | Media     | Mensajería in-app                                |
+| Optimización de Carga            | Media     | Peso ejes, distribución, límites MMA             |
+| Presupuestación                  | Baja      | Presupuesto anual, real vs previsto              |
+| Gestión de Contratos             | Baja      | Tarifas, SLAs, volúmenes                         |
+| Portal de Cliente                | Baja      | Seguimiento envíos, descarga documentos          |
+| Gestión de Garantías             | Baja      | Coberturas, reparaciones cubiertas               |
+| App Móvil Conductores            | Futuro    | Rutas, documentos, horas disponibles             |
 
 ---
 
 ## 5. Decisiones Tomadas
 
-| Fecha | Decisión | Alternativas descartadas | Razón |
-|---|---|---|---|
-| 2026-03 | Vue 3 + Composition API | React, Angular | Ecosistema, experiencia previa |
-| 2026-03 | Vuetify 4 | PrimeVue, Quasar | Material Design, madurez |
-| 2026-03 | Supabase (BaaS) | Firebase, Railway | Mejor integración Postgres, RLS |
-| 2026-03 | TanStack Query | Pinia directo, SWR | Cache servidor, separación estado |
-| 2026-03 | Vitest + Cypress | Jest, Playwright | Velocidad, ecosistema Vue |
-| 2026-03 | TDD como metodología | Tests post-código | Calidad desde el inicio |
-| 2026-03 | Feature branches (dev→main) | Trunk-based | Claridad, revisión antes de merge |
-| 2026-03 | Mobile-first responsive | Desktop-first | Uso en campo por técnicos |
+| Fecha   | Decisión                    | Alternativas descartadas | Razón                             |
+| ------- | --------------------------- | ------------------------ | --------------------------------- |
+| 2026-03 | Vue 3 + Composition API     | React, Angular           | Ecosistema, experiencia previa    |
+| 2026-03 | Vuetify 4                   | PrimeVue, Quasar         | Material Design, madurez          |
+| 2026-03 | Supabase (BaaS)             | Firebase, Railway        | Mejor integración Postgres, RLS   |
+| 2026-03 | TanStack Query              | Pinia directo, SWR       | Cache servidor, separación estado |
+| 2026-03 | Vitest + Cypress            | Jest, Playwright         | Velocidad, ecosistema Vue         |
+| 2026-03 | TDD como metodología        | Tests post-código        | Calidad desde el inicio           |
+| 2026-03 | Feature branches (dev→main) | Trunk-based              | Claridad, revisión antes de merge |
+| 2026-03 | Mobile-first responsive     | Desktop-first            | Uso en campo por técnicos         |
 
 ---
 
 ## 6. Decisiones Pendientes
 
-| Decisión | Opciones | Impacto | Urgencia |
-|---|---|---|---|
-| Proveedor de despliegue | Vercel, Netlify, Railway | Hosting producción | Media |
-| Proveedor GPS/telemática | Webfleet, Frotcom, Geotab | Integración realtime | Alta |
-| Proveedor email transaccional | Brevo, Resend, SendGrid | Notificaciones | Alta |
-| Proveedor mapas | Google Maps, Mapbox | Visualización rutas | Media |
-| Tarjetas combustible (integración) | WABCO, UTA, DKV | Automatización datos combustible | Baja (v2.0) |
+| Decisión                           | Opciones                  | Impacto                          | Urgencia    |
+| ---------------------------------- | ------------------------- | -------------------------------- | ----------- |
+| Proveedor de despliegue            | Vercel, Netlify, Railway  | Hosting producción               | Media       |
+| Proveedor GPS/telemática           | Webfleet, Frotcom, Geotab | Integración realtime             | Alta        |
+| Proveedor email transaccional      | Brevo, Resend, SendGrid   | Notificaciones                   | Alta        |
+| Proveedor mapas                    | Google Maps, Mapbox       | Visualización rutas              | Media       |
+| Tarjetas combustible (integración) | WABCO, UTA, DKV           | Automatización datos combustible | Baja (v2.0) |
 
 ---
 
 ## 7. Convenciones Acordadas
 
-*(Complementa las de AGENTS.md)*
+_(Complementa las de AGENTS.md)_
 
 - Los mockups de referencia están en `/docs/mockups/`.
 - Los colores se definen como tokens CSS en `/src/styles/tokens.css`.
@@ -206,35 +207,53 @@ Automatización:       [PENDIENTE]
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** [FECHA]
+**Fecha:** 2026-03-29
 **Trabajo realizado:**
-- [Describir trabajo de la sesión]
+
+- Fase 1 completada: Setup inicial del proyecto (scaffolding)
+- Proyecto Vite + Vue 3 creado con todas las dependencias
+- Vuetify 4 configurado con theme oscuro y colores del proyecto
+- Vue Router 4 con lazy loading y auth guard placeholder
+- Pinia con persistencia (ui store)
+- TanStack Query configurado
+- Estructura de carpetas completa creada
+- Tokens CSS, `.env.example`, ESLint, Prettier, Vitest configurados
+- `legal-limits.js` con todos los límites regulatorios (deep frozen)
+- `error-map.js` para mapeo de errores Supabase
+- `create-crud-service.js` factory CRUD base
+- Stores: auth, ui, notifications
+- Páginas placeholder: Login, Dashboard, 404
+- 39 tests pasando, `npm run check` limpio, build OK
 
 **Próximos pasos:**
-1. [Pendiente]
+
+1. Fase 2: Base de datos (Supabase schema + RLS + migrations)
+2. Fase 3: Layout base (AppSidebar, AppTopBar, AppLayout)
+3. Fase 4: CRUD Vehículos (template)
 
 **Bloqueos activos:**
-- [Ninguno / describir bloqueo]
+
+- Ninguno
 
 ---
 
 ## 9. Referencias y Recursos
 
-| Recurso | Tipo | Ubicación |
-|---|---|---|
-| PRD completo | Documento | `PRD.md` |
-| Reglas del agente | Documento | `AGENTS.md` |
-| Workflows del agente | Plantillas | `.opencode/workflows/` (10 archivos) |
-| Constantes legales | Código | `src/constants/legal-limits.js` |
-| Tipos de documentos | Código | `src/constants/document-types.js` |
-| Schema BD | SQL | `supabase/migrations/` |
-| Material Design 3 | Docs | https://m3.material.io |
-| Vuetify 4 | Docs | https://vuetifyjs.com |
-| Reglamento CE 561/2006 | Normativa UE | https://eur-lex.europa.eu |
-| LCTTM (Ley 15/2009) | Normativa ES | BOE |
-| ADR 2025 | Normativa | UNECE |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025 |
+| Recurso                         | Tipo         | Ubicación                            |
+| ------------------------------- | ------------ | ------------------------------------ |
+| PRD completo                    | Documento    | `PRD.md`                             |
+| Reglas del agente               | Documento    | `AGENTS.md`                          |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos) |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`      |
+| Tipos de documentos             | Código       | `src/constants/document-types.js`    |
+| Schema BD                       | SQL          | `supabase/migrations/`               |
+| Material Design 3               | Docs         | https://m3.material.io               |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu            |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                  |
+| ADR 2025                        | Normativa    | UNECE                                |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                       |
 
 ---
 
-*Actualiza este fichero al final de cada sesión de trabajo. Verificar que la sección 4 (Estado de Desarrollo) refleja el progreso real.*
+_Actualiza este fichero al final de cada sesión de trabajo. Verificar que la sección 4 (Estado de Desarrollo) refleja el progreso real._
