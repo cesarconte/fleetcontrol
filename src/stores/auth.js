@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { supabase } from '@/services/supabase-client.js'
+import { apiAuth } from '@/services/api-auth.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -27,11 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = null
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      if (authError) throw authError
+      const data = await apiAuth.login(email, password)
       currentUser.value = data.user
       await fetchProfile()
     } catch (err) {
@@ -42,20 +39,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function register(email, password, metadata = {}) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const data = await apiAuth.register(email, password, metadata)
+      currentUser.value = data.user
+      if (data.user) await fetchProfile()
+    } catch (err) {
+      error.value = mapSupabaseError(err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function logout() {
-    await supabase.auth.signOut()
+    await apiAuth.logout()
     currentUser.value = null
     profile.value = null
     error.value = null
   }
 
   async function getSession() {
-    const { data } = await supabase.auth.getSession()
-    if (data.session?.user) {
-      currentUser.value = data.session.user
+    const session = await apiAuth.getSession()
+    if (session?.user) {
+      currentUser.value = session.user
       await fetchProfile()
     }
-    return data.session
+    return session
   }
 
   async function fetchProfile() {
@@ -66,6 +78,12 @@ export const useAuthStore = defineStore('auth', () => {
       .eq('id', currentUser.value.id)
       .single()
     if (data) profile.value = data
+  }
+
+  function resetState() {
+    currentUser.value = null
+    profile.value = null
+    error.value = null
   }
 
   return {
@@ -79,8 +97,10 @@ export const useAuthStore = defineStore('auth', () => {
     userInitials,
     userProfile: computed(() => profile.value),
     login,
+    register,
     logout,
     getSession,
     fetchProfile,
+    resetState,
   }
 })

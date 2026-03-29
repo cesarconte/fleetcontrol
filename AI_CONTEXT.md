@@ -85,26 +85,26 @@ Automatización:       [PENDIENTE]
 
 ### Gestión — Core (v1.0)
 
-| Módulo                     | Estado         | Notas                                                    |
-| -------------------------- | -------------- | -------------------------------------------------------- |
-| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                 |
-| Autenticación y roles      | 🟡 Parcial     | Supabase Auth integrada (login/logout/session)           |
-| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                     |
-| Módulo Vehículos           | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT                       |
-| Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                              |
-| Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                        |
-| Módulo Mantenimiento       | 🔴 Sin empezar | Preventivo, correctivo, repuestos                        |
-| Módulo Combustible         | 🔴 Sin empezar | Registro, estadísticas                                   |
-| Módulo Cargas              | 🔴 Sin empezar | CRUD, ADR, tipos de carga                                |
-| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones |
-| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría |
-| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                     |
-| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                |
-| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                         |
-| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                            |
-| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                |
-| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                            |
-| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                         |
+| Módulo                     | Estado         | Notas                                                     |
+| -------------------------- | -------------- | --------------------------------------------------------- |
+| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                  |
+| Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod) |
+| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                      |
+| Módulo Vehículos           | 🔴 Sin empezar | CRUD, fichas, documentos, Euro/DGT                        |
+| Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                               |
+| Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                         |
+| Módulo Mantenimiento       | 🔴 Sin empezar | Preventivo, correctivo, repuestos                         |
+| Módulo Combustible         | 🔴 Sin empezar | Registro, estadísticas                                    |
+| Módulo Cargas              | 🔴 Sin empezar | CRUD, ADR, tipos de carga                                 |
+| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones  |
+| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría  |
+| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                      |
+| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                 |
+| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                          |
+| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                             |
+| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                 |
+| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                             |
+| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                          |
 
 ### Documentación de Transporte (v1.0)
 
@@ -211,21 +211,18 @@ _(Complementa las de AGENTS.md)_
 **Fecha:** 2026-03-29
 **Trabajo realizado:**
 
-- Fases 1-3 completadas: Setup + BD + Layout base
-- AppSidebar (responsive: permanent lg+, temporary md/sm)
-- AppTopBar (hamburger, búsqueda, notificaciones, avatar)
-- AppLayout (sidebar + topbar + router-view con transición fade)
-- AppNotifications (toasts centralizados desde store)
-- Auth store con Supabase Auth (login, logout, getSession, fetchProfile)
-- Router refactorizado (routes.js separado, auth guard real)
-- 11 páginas placeholder para todas las rutas
-- 53 tests pasando, `npm run check` limpio
-- RLS policies corregidas (0 warnings Supabase advisors)
-- Flujo git documentado: main → dev → feature/\*
+- Fases 1-4 completadas: Setup + BD + Layout + Auth
+- Servicio `api-auth.js`: login, register, logout, getSession, resetPassword
+- Composable `use-auth.js`: wrapper reactivo con redirect y notificaciones
+- LoginPage refactorizada con Vee-Validate + Zod (schema validación)
+- RegisterPage creada con confirmación de contraseña
+- Auth store delega a api-auth service
+- Router guard: redirect query param, Login + Register protegidos
+- 63 tests pasando, `npm run check` limpio
 
 **Próximos pasos:**
 
-1. Fase 4: CRUD Vehículos (template para todos los módulos)
+1. Fase 5: CRUD Vehículos (template para todos los módulos)
 
 **Bloqueos activos:**
 

@@ -6,6 +6,12 @@ export const routes = [
     meta: { requiresAuth: false, layout: 'blank' },
   },
   {
+    path: '/registro',
+    name: 'Register',
+    component: () => import('@/pages/RegisterPage.vue'),
+    meta: { requiresAuth: false, layout: 'blank' },
+  },
+  {
     path: '/',
     name: 'Dashboard',
     component: () => import('@/pages/DashboardPage.vue'),

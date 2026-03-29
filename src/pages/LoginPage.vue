@@ -3,38 +3,56 @@
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="4">
         <v-card>
-          <v-card-title class="text-h5 text-center pa-6">
-            FleetControl
-          </v-card-title>
+          <v-card-title class="text-h5 text-center pa-6">FleetControl</v-card-title>
+          <v-card-subtitle class="text-center pb-4">
+            Gestión de flotas de transporte
+          </v-card-subtitle>
+
           <v-card-text>
-            <v-form ref="formRef" @submit.prevent="handleLogin">
+            <v-form @submit.prevent="onSubmit">
               <v-text-field
                 v-model="email"
                 label="Correo electrónico"
                 type="email"
-                :rules="emailRules"
+                :error-messages="errors.email"
+                autocomplete="email"
                 required
                 data-testid="login-email"
               />
+
               <v-text-field
                 v-model="password"
                 label="Contraseña"
                 type="password"
-                :rules="passwordRules"
+                :error-messages="errors.password"
+                autocomplete="current-password"
                 required
                 data-testid="login-password"
               />
+
               <v-btn
                 type="submit"
                 color="primary"
                 block
-                :loading="isLoading"
-                :disabled="isLoading"
+                :loading="isSubmitting"
+                :disabled="isSubmitting"
                 class="mt-4"
                 data-testid="login-submit"
               >
                 Iniciar sesión
               </v-btn>
+
+              <div class="text-center mt-4">
+                <v-btn
+                  variant="text"
+                  color="primary"
+                  size="small"
+                  to="/registro"
+                  data-testid="login-register-link"
+                >
+                  Crear cuenta
+                </v-btn>
+              </div>
             </v-form>
           </v-card-text>
         </v-card>
@@ -44,33 +62,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { useForm, useField } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
+import { useAuth } from '@/composables/use-auth.js'
 
-const formRef = ref(null)
-const email = ref('')
-const password = ref('')
-const isLoading = ref(false)
+const { login } = useAuth()
 
-const emailRules = [
-  v => !!v || 'El correo es obligatorio',
-  v => /.+@.+\..+/.test(v) || 'Formato de correo inválido',
-]
+const loginSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: 'El correo es obligatorio' })
+      .email('Formato de correo inválido'),
+    password: z
+      .string({ required_error: 'La contraseña es obligatoria' })
+      .min(6, 'Mínimo 6 caracteres'),
+  }),
+)
 
-const passwordRules = [
-  v => !!v || 'La contraseña es obligatoria',
-  v => v.length >= 6 || 'Mínimo 6 caracteres',
-]
+const { handleSubmit, errors, isSubmitting } = useForm({
+  validationSchema: loginSchema,
+})
 
-async function handleLogin() {
-  const { valid } = await formRef.value.validate()
-  if (!valid) return
+const { value: email } = useField('email')
+const { value: password } = useField('password')
 
-  isLoading.value = true
-  try {
-    // TODO 2026-03-29 #1: Implement auth service call
-    void email.value
-  } finally {
-    isLoading.value = false
-  }
-}
+const onSubmit = handleSubmit(async values => {
+  await login(values.email, values.password)
+})
 </script>
