@@ -202,6 +202,7 @@ _(Complementa las de AGENTS.md)_
 - Las migraciones SQL van en `supabase/migrations/`.
 - Los documentos de transporte se generan desde `/src/services/document-*.js`.
 - Los workflows del agente están en `.opencode/workflows/`.
+- Los skills del agente están en `/home/cesar/.agents/skills/`.
 
 ---
 
@@ -227,9 +228,8 @@ _(Complementa las de AGENTS.md)_
 
 **Próximos pasos:**
 
-1. Fase 2: Base de datos (Supabase schema + RLS + migrations)
-2. Fase 3: Layout base (AppSidebar, AppTopBar, AppLayout)
-3. Fase 4: CRUD Vehículos (template)
+1. Fase 3: Layout base (AppSidebar, AppTopBar, AppLayout)
+2. Fase 4: CRUD Vehículos (template)
 
 **Bloqueos activos:**
 
@@ -244,6 +244,7 @@ _(Complementa las de AGENTS.md)_
 | PRD completo                    | Documento    | `PRD.md`                             |
 | Reglas del agente               | Documento    | `AGENTS.md`                          |
 | Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos) |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`        |
 | Constantes legales              | Código       | `src/constants/legal-limits.js`      |
 | Tipos de documentos             | Código       | `src/constants/document-types.js`    |
 | Schema BD                       | SQL          | `supabase/migrations/`               |
