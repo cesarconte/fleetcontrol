@@ -32,7 +32,8 @@ export const apiVehicles = {
       .order(sort.col, { ascending: sort.asc })
 
     if (filters.status) query = query.eq('status', filters.status)
-    if (filters.tipo_vehiculo) query = query.eq('tipo_vehiculo', filters.tipo_vehiculo)
+    if (filters.categoria_ue) query = query.eq('categoria_ue', filters.categoria_ue)
+    if (filters.tipo_carroceria) query = query.eq('tipo_carroceria', filters.tipo_carroceria)
     if (filters.distintivo_ambiental)
       query = query.eq('distintivo_ambiental', filters.distintivo_ambiental)
     if (filters.search) query = query.ilike('matricula', `%${filters.search}%`)

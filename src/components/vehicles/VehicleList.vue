@@ -34,7 +34,7 @@
             <v-select
               v-model="filterType"
               :items="typeOptions"
-              label="Tipo"
+              label="Carrocería"
               variant="outlined"
               density="compact"
               clearable
@@ -88,8 +88,8 @@
           </v-chip>
         </template>
 
-        <template v-slot:item.tipo_vehiculo="{ item }">
-          {{ getTypeLabel(item.tipo_vehiculo) }}
+        <template v-slot:item.tipo_carroceria="{ item }">
+          {{ getBodyLabel(item.tipo_carroceria) }}
         </template>
 
         <template v-slot:item.actions="{ item }">
@@ -149,6 +149,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVehicles } from '@/composables/use-vehicles.js'
 import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers.js'
+import { getBodyOptions, getBodyLabel } from '@/constants/vehicle-types.js'
 import VehicleCard from './VehicleCard.vue'
 
 const router = useRouter()
@@ -176,7 +177,7 @@ const headers = [
   { title: 'Matrícula', key: 'matricula', sortable: true },
   { title: 'Marca', key: 'marca', sortable: true },
   { title: 'Modelo', key: 'modelo', sortable: true },
-  { title: 'Tipo', key: 'tipo_vehiculo', sortable: true },
+  { title: 'Carrocería', key: 'tipo_carroceria', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'DGT', key: 'distintivo_ambiental', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
@@ -190,36 +191,7 @@ const statusOptions = [
   { title: 'Dado de baja', value: 'dado_de_baja' },
 ]
 
-const typeOptions = [
-  { title: 'Tractora', value: 'tractora' },
-  { title: 'Rígido', value: 'vehiculo_rigido' },
-  { title: 'Semirremolque', value: 'semirremolque' },
-  { title: 'Remolque', value: 'remolque' },
-  { title: 'Cisterna', value: 'cisterna' },
-  { title: 'Frigorífico', value: 'frigorifico' },
-  { title: 'Volquete', value: 'basculante' },
-  { title: 'Lona', value: 'lona' },
-  { title: 'Furgón', value: 'caja_cerrada' },
-  { title: 'Especial', value: 'especial' },
-  { title: 'Portacoches', value: 'portacoches' },
-]
-
-function getTypeLabel(type) {
-  const map = {
-    tractora: 'Tractora',
-    vehiculo_rigido: 'Rígido',
-    semirremolque: 'Semirremolque',
-    remolque: 'Remolque',
-    cisterna: 'Cisterna',
-    frigorifico: 'Frigorífico',
-    basculante: 'Volquete',
-    lona: 'Lona',
-    caja_cerrada: 'Furgón',
-    especial: 'Especial',
-    portacoches: 'Portacoches',
-  }
-  return map[type] ?? type
-}
+const typeOptions = getBodyOptions()
 
 function debouncedSearch() {
   clearTimeout(searchTimer)
@@ -230,7 +202,7 @@ function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
   if (filterStatus.value) f.status = filterStatus.value
-  if (filterType.value) f.tipo_vehiculo = filterType.value
+  if (filterType.value) f.tipo_carroceria = filterType.value
   setFilters(f)
 }
 

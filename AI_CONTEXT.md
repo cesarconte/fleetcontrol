@@ -209,48 +209,67 @@ _(Complementa las de AGENTS.md)_
 ## 8. Contexto de la Última Sesión
 
 **Fecha:** 2026-03-30
-**Branch:** feature/taxonomia-cargas
+**Branch:** dev (feature/taxonomia-cargas merged)
 
 **Trabajo realizado:**
 
-- **Taxonomía de Cargas**: Implementada taxonomía jerárquica completa (4 categorías, 27 subcategorías) con requisitos de vehículo por subcategoría
-- **Equipamiento Normativo**: Definidos requisitos de equipamiento obligatorio por subcategoría (ADR, ATP, Animales, Carga General) con referencias legales
-- **Compliance de Vehículos**: Creado módulo de verificación de compatibilidad vehículo-carga con auto-checks y checklists de equipamiento
-- **Selector jerárquico en CargoForm**: Reemplazado selector plano de tipo por dos selects encadenados (categoría → subcategoría) con info de normativa y requisitos
-- **Ampliación CargoDetail**: Nueva sección "Requisitos y Normativa" con checklist de equipamiento y referencia legal
-- **Validación Zod**: Añadido `subcategoria_id` al schema con validación cruzada tipo↔subcategoría
-- **Ampliación vehicle_type**: 11 nuevos tipos de vehículo añadidos al enum PostgreSQL (furgoneta, furgon, ganadero, isotermo, mega, plataforma_abierta, gondola, portacovertores, tolva, grua, mixto)
-- **Refactorización cargo-helpers**: `CARGO_TYPE_OPTIONS` derivado de `cargo-categories.js` (DRY)
-- **Migración SQL creada**: `20260330_015_cargo_taxonomia.sql` (subcategoria_id + vehicle_type ampliado)
-- **Tests**: 111 tests nuevos/actualizados para el módulo de cargas (375 totales pasando, lint 0 errores)
+### Sesión 1 — Taxonomía de Cargas (completada)
 
-**Archivos creados (6):**
+- Taxonomía jerárquica completa: 4 categorías, 27 subcategorías con requisitos de vehículo
+- Equipamiento normativo por subcategoría (ADR, ATP, Animales, Carga General) con referencias legales
+- Módulo de compliance: verificación vehículo-carga con auto-checks y checklists
+- Selector jerárquico en CargoForm (categoría → subcategoría)
+- Sección "Requisitos y Normativa" en CargoDetail
+- Validación Zod con `subcategoria_id` y cross-validation
+- Migración `20260330_015_cargo_taxonomia.sql` (11 nuevos vehicle_type + subcategoria_id)
+- 375 tests pasando
 
-- `src/constants/cargo-categories.js` + `.spec.js` (taxonomía + 49 tests)
-- `src/constants/vehicle-equipment.js` + `.spec.js` (equipamiento normativo)
-- `src/utils/cargo-compliance.js` + `.spec.js` (verificación compliance + 24 tests)
-- `supabase/migrations/20260330_015_cargo_taxonomia.sql`
+### Sesión 2 — Reestructuración Modelo Vehículos (EU)
 
-**Archivos modificados (5):**
+- **Nuevo modelo de 3 campos** según normativa UE/RD 2822/1998:
+  - `categoria_ue` (eu_categoria enum): N1, N2, N3, O1, O2, O3, O4
+  - `tipo_carroceria` (vehicle_body_type enum): 21 valores de utilización
+  - Campo antiguo `tipo_vehiculo` renombrado a `tipo_vehiculo_deprecated`
+- **Nuevas constantes**: `vehicle-types.js` con 3 enums congeladas + 30 tests
+- **Migración SQL creada**: `20260330_016_vehicle_types.sql` (252 líneas)
+  - Crea 2 enums nuevos, migra datos existentes, índices nuevos
+- **Schema Zod actualizado**: `vehicle-schema.js` derivado de constantes (DRY)
+- **4 componentes UI actualizados**: VehicleForm (2 selects), VehicleDetail (2 campos), VehicleList (filtro carrocería), VehicleCard (label carrocería)
+- **Compliance actualizado**: `cargo-compliance.js` usa `tipo_carroceria` para compatibilidad
+- **Eliminados**: 4 copias de `getTypeLabel()` hardcodeado, 2 copias de `typeOptions` hardcodeado
+- **411 tests pasando**, lint 0 errores, typecheck OK
 
-- `src/utils/cargo-helpers.js` (derivado de constantes)
-- `src/components/cargo/CargoForm.vue` (selector jerárquico)
-- `src/components/cargo/CargoDetail.vue` (sección requisitos y normativa)
-- `src/validations/cargo-schema.js` + `.spec.js` (subcategoria_id + 7 tests nuevos)
+**Archivos creados (esta sesión):**
 
-**Próximos pasos:**
+- `src/constants/vehicle-types.js` + `.spec.js` (3 enums UE + helpers + 30 tests)
+- `supabase/migrations/20260330_016_vehicle_types.sql`
 
-1. ✅ Crear PR → dev y merge
-2. **PENDIENTE: Aplicar migración `20260330_015` a Supabase** (conexión no disponible en esta sesión). Ejecutar manualmente o cuando la conexión esté activa.
-3. **PENDIENTE Fase 5.1**: Integrar `checkVehicleCompliance()` en la planificación de rutas (§4.4.3 PRD) — validar automáticamente si el vehículo es apto para la carga al planificar una ruta.
-4. **PENDIENTE**: Definir equipamiento para 6 subcategorías de carga general sin equipamiento específico: `gen-granel-solido`, `gen-granel-liquido`, `gen-textil`, `gen-maquinaria`, `gen-gran-volumen`, `gen-mudanzas` (ver TODO en `vehicle-equipment.spec.js`).
-5. **PENDIENTE**: Crear tabla `vehicle_documents` en BD para almacenar certificaciones del vehículo (permiso ADR, certificado ATP, ITV, seguro, etc.) y habilitar compliance automático real contra documentos vigentes.
+**Archivos modificados (esta sesión):**
+
+- `src/validations/vehicle-schema.js` + `.spec.js` (3 campos UE)
+- `src/components/vehicles/VehicleForm.vue` (3 selects: UE + carrocería + estado)
+- `src/components/vehicles/VehicleDetail.vue` (2 campos + imports)
+- `src/components/vehicles/VehicleList.vue` (filtro carrocería + imports)
+- `src/components/vehicles/VehicleCard.vue` (label carrocería + imports)
+- `src/utils/cargo-compliance.js` + `.spec.js` (compatibilidad por carrocería)
+- `src/services/api-vehicles.js` (filtros por categoria_ue y tipo_carroceria)
+
+**Próximos pasos (tareas pendientes):**
+
+1. **PENDIENTE URGENTE: Aplicar migraciones a Supabase**
+   - `20260330_015_cargo_taxonomia.sql` (subcategoria_id + vehicle_type ampliado)
+   - `20260330_016_vehicle_types.sql` (reestructuración 3 campos UE)
+   - Conexión no disponible en estas sesiones. Ejecutar manualmente o cuando la conexión esté activa.
+2. **PENDIENTE**: Eliminar columnas de backup en futura migración (`tipo_vehiculo_deprecated`, `tipo_vehiculo_old_value`) una vez verificado que todo funciona con los nuevos campos.
+3. **PENDIENTE Fase 5.1**: Integrar `checkVehicleCompliance()` en la planificación de rutas (§4.4.3 PRD).
+4. **PENDIENTE**: Definir equipamiento para 6 subcategorías gen sin equipamiento específico.
+5. **PENDIENTE**: Crear tabla `vehicle_documents` para compliance real contra documentos vigentes.
 6. **PENDIENTE**: Actualizar `CargoList.vue` y `CargoCard.vue` para mostrar subcategoría y badge de compliance.
-7. Revisar si otros módulos (vehículos, rutas, etc.) tienen el mismo problema de nombres EN vs ES
+7. **PENDIENTE**: Actualizar `api-vehicles.spec.js` para usar los nuevos campos en fixtures.
 
 **Bloqueos activos:**
 
-- Conexión a Supabase no disponible para aplicar migración (no bloqueante para desarrollo local)
+- Conexión a Supabase no disponible para aplicar migraciones (no bloqueante para desarrollo local)
 
 ---
 
@@ -265,11 +284,13 @@ _(Complementa las de AGENTS.md)_
 | Constantes legales              | Código       | `src/constants/legal-limits.js`                        |
 | Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                    |
 | Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                   |
+| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                       |
 | Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
 | Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
 | Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
 | Schema BD                       | SQL          | `supabase/migrations/`                                 |
 | Migración taxonomía cargas      | SQL          | `supabase/migrations/20260330_015_cargo_taxonomia.sql` |
+| Migración tipos vehículo UE     | SQL          | `supabase/migrations/20260330_016_vehicle_types.sql`   |
 | Material Design 3               | Docs         | https://m3.material.io                                 |
 | Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
 | Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                              |

@@ -6,7 +6,8 @@ describe('vehicleSchema', () => {
     matricula: '1234ABC',
     marca: 'Mercedes',
     modelo: 'Actros',
-    tipo_vehiculo: 'tractora',
+    categoria_ue: 'N3',
+    tipo_carroceria: 'lona',
     tipo_combustible: 'diesel',
     distintivo_ambiental: 'sin_etiqueta',
   }
@@ -46,14 +47,46 @@ describe('vehicleSchema', () => {
     })
   })
 
-  describe('tipo_vehiculo', () => {
-    it('debería aceptar tractora', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_vehiculo: 'tractora' })
+  describe('categoria_ue', () => {
+    it('debería aceptar N3', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'N3' })
       expect(result.success).toBe(true)
     })
 
-    it('debería rechazar tipo inválido', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_vehiculo: 'spaceship' })
+    it('debería aceptar N1', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'N1' })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería aceptar O4', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'O4' })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería rechazar categoría inválida', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'X9' })
+      expect(result.success).toBe(false)
+    })
+  })
+
+  describe('tipo_carroceria', () => {
+    it('debería aceptar lona', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'lona' })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería aceptar cisterna', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'cisterna' })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería aceptar frigorifico', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'frigorifico' })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería rechazar carrocería inválida', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'spaceship' })
       expect(result.success).toBe(false)
     })
   })
@@ -138,11 +171,12 @@ describe('vehicleSearchSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('debería aceptar filtros', () => {
+  it('debería aceptar filtros con nuevos campos', () => {
     const result = vehicleSearchSchema.safeParse({
       search: '1234',
       status: 'activo',
-      tipo_vehiculo: 'tractora',
+      categoria_ue: 'N3',
+      tipo_carroceria: 'lona',
       distintivo_ambiental: 'eco',
     })
     expect(result.success).toBe(true)

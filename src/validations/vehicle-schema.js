@@ -5,11 +5,14 @@
  * Spanish plate format: 4 digits + 2-3 letters (old) or 1234-LLL (new)
  *
  * Field names match Supabase DB schema (source of truth).
+ * Vehicle types derived from src/constants/vehicle-types.js (DRY).
  */
 
 import { z } from 'zod'
+import { getValidVehicleValues } from '@/constants/vehicle-types.js'
 
 const PLATE_REGEX = /^(\d{4}[A-Z]{3}|\d{4}[A-Z]{2})$/
+const { euCategorias, bodyTypes } = getValidVehicleValues()
 
 export const vehicleSchema = z.object({
   // ── Identificación ──────────────────────────────────────
@@ -102,23 +105,14 @@ export const vehicleSchema = z.object({
   consumo_medio_homologado: z.number().positive().optional().nullable(),
   adblue: z.boolean().default(false),
 
-  // ── Tipo de vehículo ───────────────────────────────────
-  tipo_vehiculo: z.enum(
-    [
-      'tractora',
-      'vehiculo_rigido',
-      'semirremolque',
-      'remolque',
-      'cisterna',
-      'frigorifico',
-      'basculante',
-      'lona',
-      'caja_cerrada',
-      'especial',
-      'portacoches',
-    ],
-    { errorMap: () => ({ message: 'Tipo de vehículo inválido' }) },
-  ),
+  // ── Clasificación UE (3 campos) ─────────────────────────
+  categoria_ue: z.enum(euCategorias, {
+    errorMap: () => ({ message: 'Categoría UE inválida' }),
+  }),
+
+  tipo_carroceria: z.enum(bodyTypes, {
+    errorMap: () => ({ message: 'Tipo de carrocería inválido' }),
+  }),
 
   status: z
     .enum(['activo', 'en_ruta', 'en_mantenimiento', 'inactivo', 'dado_de_baja'], {
@@ -137,6 +131,7 @@ export const vehicleUpdateSchema = vehicleSchema.partial()
 export const vehicleSearchSchema = z.object({
   search: z.string().optional(),
   status: z.string().optional(),
-  tipo_vehiculo: z.string().optional(),
+  categoria_ue: z.string().optional(),
+  tipo_carroceria: z.string().optional(),
   distintivo_ambiental: z.string().optional(),
 })

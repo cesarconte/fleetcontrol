@@ -58,8 +58,12 @@
                 <div class="text-body-1">{{ vehicle.modelo }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
-                <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getTypeLabel(vehicle.tipo_vehiculo) }}</div>
+                <div class="text-caption text-medium-emphasis">Categoría UE</div>
+                <div class="text-body-1">{{ getEUCategoriaLabel(vehicle.categoria_ue) }}</div>
+              </v-col>
+              <v-col cols="6" sm="4" md="3">
+                <div class="text-caption text-medium-emphasis">Carrocería</div>
+                <div class="text-body-1">{{ getBodyLabel(vehicle.tipo_carroceria) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Combustible</div>
@@ -174,6 +178,7 @@ import { useRouter } from 'vue-router'
 import { useVehicles } from '@/composables/use-vehicles.js'
 import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers.js'
 import { formatKg } from '@/utils/format-helpers.js'
+import { getEUCategoriaLabel, getBodyLabel } from '@/constants/vehicle-types.js'
 import VehicleDocuments from './VehicleDocuments.vue'
 
 const props = defineProps({
@@ -190,23 +195,6 @@ const isDeleting = ref(false)
 onMounted(() => {
   getById(props.vehicleId)
 })
-
-function getTypeLabel(type) {
-  const map = {
-    tractora: 'Tractora',
-    vehiculo_rigido: 'Rígido',
-    semirremolque: 'Semirremolque',
-    remolque: 'Remolque',
-    cisterna: 'Cisterna',
-    frigorifico: 'Frigorífico',
-    basculante: 'Volquete',
-    lona: 'Lona',
-    caja_cerrada: 'Furgón',
-    especial: 'Especial',
-    portacoches: 'Portacoches',
-  }
-  return map[type] ?? type
-}
 
 function getFuelLabel(fuel) {
   const map = {

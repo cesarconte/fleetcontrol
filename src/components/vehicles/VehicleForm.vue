@@ -101,22 +101,33 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
 
-      <!-- Tipo y Estado -->
-      <v-expansion-panel title="Tipo y Estado" value="type">
+      <!-- Clasificación UE y Estado -->
+      <v-expansion-panel title="Clasificación y Estado" value="type">
         <v-expansion-panel-text>
           <v-row>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="4">
               <v-select
-                v-model="form.tipo_vehiculo"
-                :items="vehicleTypes"
-                label="Tipo de vehículo *"
-                :error-messages="errors.tipo_vehiculo"
+                v-model="form.categoria_ue"
+                :items="euCategoriaOptions"
+                label="Categoría UE *"
+                :error-messages="errors.categoria_ue"
                 variant="outlined"
                 required
-                data-testid="vehicle-type"
+                data-testid="vehicle-eu-category"
               />
             </v-col>
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="4">
+              <v-select
+                v-model="form.tipo_carroceria"
+                :items="bodyTypeOptions"
+                label="Tipo de carrocería *"
+                :error-messages="errors.tipo_carroceria"
+                variant="outlined"
+                required
+                data-testid="vehicle-body-type"
+              />
+            </v-col>
+            <v-col cols="12" sm="4">
               <v-select
                 v-model="form.status"
                 :items="vehicleStatuses"
@@ -354,6 +365,7 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
+import { getEUCategoriaOptions, getBodyOptions } from '@/constants/vehicle-types.js'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -380,7 +392,8 @@ const form = reactive({
   fecha_primera_matriculacion: '',
   distintivo_ambiental: 'sin_etiqueta',
   euro_emisiones: null,
-  tipo_vehiculo: 'tractora',
+  categoria_ue: 'N3',
+  tipo_carroceria: 'lona',
   status: 'activo',
   tipo_combustible: 'diesel',
   matricula_semirremolque: '',
@@ -434,19 +447,8 @@ const euroClasses = [
   { title: 'Euro VI-d temp', value: 'euro_vi_d_temp' },
 ]
 
-const vehicleTypes = [
-  { title: 'Tractora', value: 'tractora' },
-  { title: 'Rígido', value: 'vehiculo_rigido' },
-  { title: 'Semirremolque', value: 'semirremolque' },
-  { title: 'Remolque', value: 'remolque' },
-  { title: 'Cisterna', value: 'cisterna' },
-  { title: 'Frigorífico', value: 'frigorifico' },
-  { title: 'Volquete', value: 'basculante' },
-  { title: 'Lona', value: 'lona' },
-  { title: 'Furgón', value: 'caja_cerrada' },
-  { title: 'Especial', value: 'especial' },
-  { title: 'Portacoches', value: 'portacoches' },
-]
+const euCategoriaOptions = getEUCategoriaOptions()
+const bodyTypeOptions = getBodyOptions()
 
 const vehicleStatuses = [
   { title: 'Activo', value: 'activo' },
