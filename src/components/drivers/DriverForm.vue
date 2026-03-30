@@ -7,42 +7,42 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.full_name"
+                v-model="form.nombre_completo"
                 label="Nombre completo *"
-                :error-messages="errors.full_name"
+                :error-messages="errors.nombre_completo"
                 variant="outlined"
                 required
-                data-testid="driver-full-name"
+                data-testid="driver-nombre-completo"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nif"
+                v-model="form.nif_nie"
                 label="NIF/NIE *"
-                :error-messages="errors.nif"
+                :error-messages="errors.nif_nie"
                 variant="outlined"
                 required
                 maxlength="9"
-                data-testid="driver-nif"
+                data-testid="driver-nif-nie"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.birth_date"
+                v-model="form.fecha_nacimiento"
                 label="Fecha de nacimiento *"
                 type="date"
-                :error-messages="errors.birth_date"
+                :error-messages="errors.fecha_nacimiento"
                 variant="outlined"
                 required
-                data-testid="driver-birth-date"
+                data-testid="driver-fecha-nacimiento"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nationality"
+                v-model="form.nacionalidad"
                 label="Nacionalidad"
                 variant="outlined"
-                data-testid="driver-nationality"
+                data-testid="driver-nacionalidad"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
@@ -57,12 +57,12 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.phone"
+                v-model="form.telefono"
                 label="Teléfono"
-                :error-messages="errors.phone"
+                :error-messages="errors.telefono"
                 variant="outlined"
                 maxlength="9"
-                data-testid="driver-phone"
+                data-testid="driver-telefono"
               />
             </v-col>
           </v-row>
@@ -70,40 +70,40 @@
       </v-expansion-panel>
 
       <!-- Dirección -->
-      <v-expansion-panel title="Dirección" value="address">
+      <v-expansion-panel title="Dirección" value="direccion">
         <v-expansion-panel-text>
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="form.address"
+                v-model="form.direccion"
                 label="Dirección"
                 variant="outlined"
-                data-testid="driver-address"
+                data-testid="driver-direccion"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.city"
+                v-model="form.ciudad"
                 label="Ciudad"
                 variant="outlined"
-                data-testid="driver-city"
+                data-testid="driver-ciudad"
               />
             </v-col>
             <v-col cols="6" sm="3" md="2">
               <v-text-field
-                v-model="form.postal_code"
+                v-model="form.codigo_postal"
                 label="C.P."
                 variant="outlined"
                 maxlength="5"
-                data-testid="driver-postal-code"
+                data-testid="driver-codigo-postal"
               />
             </v-col>
             <v-col cols="6" sm="3" md="2">
               <v-text-field
-                v-model="form.province"
+                v-model="form.provincia"
                 label="Provincia"
                 variant="outlined"
-                data-testid="driver-province"
+                data-testid="driver-provincia"
               />
             </v-col>
           </v-row>
@@ -111,22 +111,22 @@
       </v-expansion-panel>
 
       <!-- Estado laboral -->
-      <v-expansion-panel title="Estado laboral" value="employment">
+      <v-expansion-panel title="Estado laboral" value="laboral">
         <v-expansion-panel-text>
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.hire_date"
+                v-model="form.fecha_incorporacion"
                 label="Fecha de incorporación"
                 type="date"
                 variant="outlined"
-                data-testid="driver-hire-date"
+                data-testid="driver-fecha-incorporacion"
               />
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-select
                 v-model="form.status"
-                :items="driverStatuses"
+                :items="estadosConductor"
                 label="Estado"
                 variant="outlined"
                 data-testid="driver-status"
@@ -135,6 +135,9 @@
           </v-row>
         </v-expansion-panel-text>
       </v-expansion-panel>
+
+      <!-- Carnets y Certificaciones -->
+      <DriverFormCarnets :model-value="form" :errors="errors" @field-change="onFieldChange" />
     </v-expansion-panels>
 
     <!-- Actions -->
@@ -155,6 +158,7 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
+import DriverFormCarnets from './DriverFormCarnets.vue'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -170,19 +174,33 @@ const formRef = ref(null)
 const openPanels = ref(['personal'])
 
 const form = reactive({
-  full_name: '',
-  nif: '',
-  birth_date: '',
-  nationality: '',
-  address: '',
-  city: '',
-  postal_code: '',
-  province: '',
-  phone: '',
+  nombre_completo: '',
+  nif_nie: '',
+  fecha_nacimiento: '',
+  nacionalidad: '',
+  direccion: '',
+  ciudad: '',
+  codigo_postal: '',
+  provincia: '',
+  telefono: '',
   email: '',
-  photo_url: '',
-  hire_date: '',
-  status: 'active',
+  foto_url: '',
+  fecha_incorporacion: '',
+  status: 'activo',
+  carnet_clase: '',
+  carnet_numero: '',
+  carnet_fecha_expedicion: '',
+  carnet_fecha_vencimiento: '',
+  cap_numero: '',
+  cap_fecha_vencimiento: '',
+  cap_horas_formacion: 35,
+  tarjeta_tacografo_numero: '',
+  tarjeta_tacografo_vencimiento: '',
+  reconocimiento_medico_fecha: '',
+  reconocimiento_medico_vencimiento: '',
+  adr_certificado: false,
+  adr_numero: '',
+  adr_fecha_vencimiento: '',
   ...props.initialValues,
 })
 
@@ -194,11 +212,15 @@ watch(
   { deep: true },
 )
 
-const driverStatuses = [
-  { title: 'Activo', value: 'active' },
-  { title: 'Baja temporal', value: 'temporary_leave' },
-  { title: 'Inactivo', value: 'inactive' },
+const estadosConductor = [
+  { title: 'Activo', value: 'activo' },
+  { title: 'Baja temporal', value: 'baja_temporal' },
+  { title: 'Baja definitiva', value: 'baja_definitiva' },
 ]
+
+function onFieldChange({ field, value }) {
+  form[field] = value
+}
 
 async function handleSubmit() {
   emit('submit', { ...form })

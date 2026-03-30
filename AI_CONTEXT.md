@@ -209,17 +209,50 @@ _(Complementa las de AGENTS.md)_
 ## 8. Contexto de la Última Sesión
 
 **Fecha:** 2026-03-30
+**Branch:** feature/conductores-carnets
+
 **Trabajo realizado:**
 
-- Code review fixes aplicados a los 5 módulos CRUD (Conductores, Rutas, Mantenimiento, Combustible, Cargas)
-- Correcciones: persistent dialogs, data-testid, error handling, CTA mobile empty state, ESLint v-slot
-- 5 branches con tests pasando (126 + 146 + 116 + 119 + 119 = 626 tests totales)
-- Todos los branches listos para PR → dev
+- Módulo Conductores: añadida sección completa de Carnets y Certificaciones (form + detail)
+- Carnets soportados: Carnet de conducir (C, C+E, D, D+E...), CAP, Tarjeta tacógrafo, Reconocimiento médico, ADR
+- Renombrado de todos los campos del frontend a español para coincidir con la BD (nombre_completo, nif_nie, etc.)
+- Valores de status en español: activo, baja_temporal, baja_definitiva
+- Subida de documentos adjuntos via Supabase Storage (PDF/JPEG/PNG, max 10MB)
+- Nuevo composable `use-driver-documents.js` con cálculo de estado de vencimiento
+- Nuevas constantes `driver-document-types.js` (tipos de doc + clases de carnet)
+- Migración SQL para bucket `documentos-conductores` con RLS
+- Componentes extraídos para mantener <200 líneas/archivo
+- 298 tests pasando, lint y typecheck limpios
+
+**Archivos creados (6):**
+
+- `src/constants/driver-document-types.js` + `.spec.js`
+- `src/composables/use-driver-documents.js`
+- `src/components/drivers/DriverFormCarnets.vue`
+- `src/components/drivers/DriverDetailCarnets.vue`
+- `src/components/drivers/DriverDocumentUploader.vue`
+- `supabase/migrations/20260330_014_driver_storage.sql`
+
+**Archivos modificados (8):**
+
+- `src/validations/driver-schema.js` + `.spec.js`
+- `src/services/api-drivers.js` + `.spec.js`
+- `src/components/drivers/DriverForm.vue`
+- `src/components/drivers/DriverDetail.vue`
+- `src/components/drivers/DriverList.vue`
+- `src/components/drivers/DriverCard.vue`
+
+**Convención establecida:**
+
+- Nombres de archivo: inglés
+- Texto UI: español (España)
+- Columnas BD: español (snake_case)
+- Campos de formulario que mapean a BD: español
 
 **Próximos pasos:**
 
-1. Crear PRs para los 5 branches → dev
-2. Merge de los 5 branches a dev
+1. Crear PR → dev y merge
+2. Revisar si otros módulos (vehículos, rutas, etc.) tienen el mismo problema de nombres EN vs ES
 3. (Futuro) Extraer helpers compartidos (DRY) como `src/utils/*-helpers.js`
 
 **Bloqueos activos:**
@@ -230,21 +263,22 @@ _(Complementa las de AGENTS.md)_
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                            |
-| ------------------------------- | ------------ | ------------------------------------ |
-| PRD completo                    | Documento    | `PRD.md`                             |
-| Reglas del agente               | Documento    | `AGENTS.md`                          |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos) |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`        |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`      |
-| Tipos de documentos             | Código       | `src/constants/document-types.js`    |
-| Schema BD                       | SQL          | `supabase/migrations/`               |
-| Material Design 3               | Docs         | https://m3.material.io               |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu            |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                  |
-| ADR 2025                        | Normativa    | UNECE                                |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                       |
+| Recurso                         | Tipo         | Ubicación                                |
+| ------------------------------- | ------------ | ---------------------------------------- |
+| PRD completo                    | Documento    | `PRD.md`                                 |
+| Reglas del agente               | Documento    | `AGENTS.md`                              |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)     |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`            |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`          |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js` |
+| Tipos de documentos             | Código       | `src/constants/document-types.js`        |
+| Schema BD                       | SQL          | `supabase/migrations/`                   |
+| Material Design 3               | Docs         | https://m3.material.io                   |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                    |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                      |
+| ADR 2025                        | Normativa    | UNECE                                    |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                           |
 
 ---
 
