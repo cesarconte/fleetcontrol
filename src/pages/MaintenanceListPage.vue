@@ -1,12 +1,20 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Mantenimiento</h1>
-    <v-card>
-      <v-card-text>
-        <p class="text-body-1 text-medium-emphasis">Página en construcción</p>
-      </v-card-text>
-    </v-card>
+    <div class="d-flex justify-space-between align-center mb-4">
+      <h1 class="text-h4">Mantenimiento</h1>
+      <v-btn
+        color="primary"
+        :to="{ name: 'MaintenanceCreate' }"
+        data-testid="maintenance-create-btn"
+      >
+        <v-icon start>mdi-plus</v-icon>
+        Nuevo registro
+      </v-btn>
+    </div>
+    <MaintenanceList />
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import MaintenanceList from '@/components/maintenance/MaintenanceList.vue'
+</script>
