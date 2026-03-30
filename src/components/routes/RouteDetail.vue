@@ -198,7 +198,7 @@
     </div>
 
     <!-- Delete confirmation dialog -->
-    <v-dialog v-model="confirmDelete" max-width="400">
+    <v-dialog v-model="confirmDelete" max-width="400" persistent>
       <v-card>
         <v-card-title>¿Eliminar ruta?</v-card-title>
         <v-card-text>
@@ -206,8 +206,17 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">Cancelar</v-btn>
-          <v-btn color="error" :loading="isDeleting" @click="handleDelete">Eliminar</v-btn>
+          <v-btn variant="text" data-testid="delete-cancel" @click="confirmDelete = false">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="error"
+            :loading="isDeleting"
+            data-testid="delete-confirm"
+            @click="handleDelete"
+          >
+            Eliminar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -218,6 +227,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoutes } from '@/composables/use-routes.js'
+import { useNotificationStore } from '@/stores/notifications.js'
 
 const props = defineProps({
   routeId: { type: String, required: true },
@@ -225,6 +235,7 @@ const props = defineProps({
 
 const router = useRouter()
 const { getById, remove, isLoading, currentRoute: route } = useRoutes()
+const notifications = useNotificationStore()
 
 const openPanels = ref(['planning', 'cargo'])
 const confirmDelete = ref(false)
@@ -279,6 +290,8 @@ async function handleDelete() {
   try {
     await remove(props.routeId)
     router.push('/rutas')
+  } catch (err) {
+    notifications.error(err.message || 'Error al eliminar la ruta')
   } finally {
     isDeleting.value = false
     confirmDelete.value = false

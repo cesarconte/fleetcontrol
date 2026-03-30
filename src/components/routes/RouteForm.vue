@@ -325,6 +325,7 @@
 import { ref, reactive, watch, onMounted } from 'vue'
 import { apiVehicles } from '@/services/api-vehicles.js'
 import { apiDrivers } from '@/services/api-drivers.js'
+import { useNotificationStore } from '@/stores/notifications.js'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -336,6 +337,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit'])
+const notifications = useNotificationStore()
 
 const formRef = ref(null)
 const openPanels = ref(['planning', 'location'])
@@ -412,7 +414,7 @@ onMounted(async () => {
       value: d.id,
     }))
   } catch {
-    // Silently fail — selects will be empty
+    notifications.error('Error al cargar vehículos y conductores')
   } finally {
     loadingRefs.value = false
   }
