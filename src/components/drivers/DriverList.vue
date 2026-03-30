@@ -59,8 +59,8 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template #item.full_name="{ item }">
-          <span class="font-weight-medium">{{ item.full_name }}</span>
+        <template #item.nombre_completo="{ item }">
+          <span class="font-weight-medium">{{ item.nombre_completo }}</span>
         </template>
 
         <template #item.status="{ item }">
@@ -69,8 +69,8 @@
           </v-chip>
         </template>
 
-        <template #item.birth_date="{ item }">
-          {{ formatDate(item.birth_date) }}
+        <template #item.fecha_nacimiento="{ item }">
+          {{ formatDate(item.fecha_nacimiento) }}
         </template>
 
         <template #item.actions="{ item }">
@@ -155,38 +155,38 @@ const {
 const searchQuery = ref('')
 const filterStatus = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'full_name', order: 'asc' }])
+const sortBy = ref([{ key: 'nombre_completo', order: 'asc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Nombre', key: 'full_name', sortable: true },
-  { title: 'NIF/NIE', key: 'nif', sortable: true },
-  { title: 'Teléfono', key: 'phone', sortable: false },
+  { title: 'Nombre', key: 'nombre_completo', sortable: true },
+  { title: 'NIF/NIE', key: 'nif_nie', sortable: true },
+  { title: 'Teléfono', key: 'telefono', sortable: false },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const statusOptions = [
-  { title: 'Activo', value: 'active' },
-  { title: 'Baja temporal', value: 'temporary_leave' },
-  { title: 'Inactivo', value: 'inactive' },
+  { title: 'Activo', value: 'activo' },
+  { title: 'Baja temporal', value: 'baja_temporal' },
+  { title: 'Baja definitiva', value: 'baja_definitiva' },
 ]
 
 function getStatusColor(status) {
   const map = {
-    active: 'success',
-    temporary_leave: 'warning',
-    inactive: 'grey',
+    activo: 'success',
+    baja_temporal: 'warning',
+    baja_definitiva: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    active: 'Activo',
-    temporary_leave: 'Baja temporal',
-    inactive: 'Inactivo',
+    activo: 'Activo',
+    baja_temporal: 'Baja temporal',
+    baja_definitiva: 'Baja definitiva',
   }
   return map[status] ?? status
 }
@@ -222,12 +222,6 @@ function handleRowClick(_event, { item }) {
 watch(tablePage, newPage => {
   page.value = newPage
   fetch()
-})
-
-watch(sortBy, newSort => {
-  if (newSort.length) {
-    setFilters({ ...filters.value })
-  }
 })
 
 onMounted(() => {
