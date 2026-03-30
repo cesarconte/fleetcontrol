@@ -135,7 +135,7 @@
     </div>
 
     <!-- Delete confirmation dialog -->
-    <v-dialog v-model="confirmDelete" max-width="400">
+    <v-dialog v-model="confirmDelete" max-width="400" persistent>
       <v-card>
         <v-card-title>¿Eliminar conductor?</v-card-title>
         <v-card-text>
@@ -144,8 +144,17 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">Cancelar</v-btn>
-          <v-btn color="error" :loading="isDeleting" @click="handleDelete">Eliminar</v-btn>
+          <v-btn variant="text" data-testid="delete-cancel" @click="confirmDelete = false">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="error"
+            :loading="isDeleting"
+            data-testid="delete-confirm"
+            @click="handleDelete"
+          >
+            Eliminar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -156,6 +165,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDrivers } from '@/composables/use-drivers.js'
+import { useNotificationStore } from '@/stores/notifications.js'
 
 const props = defineProps({
   driverId: { type: String, required: true },
@@ -163,6 +173,7 @@ const props = defineProps({
 
 const router = useRouter()
 const { getById, remove, isLoading, currentDriver: driver } = useDrivers()
+const notifications = useNotificationStore()
 
 const openPanels = ref(['personal', 'employment'])
 const confirmDelete = ref(false)
@@ -201,6 +212,8 @@ async function handleDelete() {
   try {
     await remove(props.driverId)
     router.push('/conductores')
+  } catch (err) {
+    notifications.error(err.message || 'Error al eliminar el conductor')
   } finally {
     isDeleting.value = false
     confirmDelete.value = false

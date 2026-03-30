@@ -26,6 +26,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDrivers } from '@/composables/use-drivers.js'
 import { driverUpdateSchema } from '@/validations/driver-schema.js'
+import { useNotificationStore } from '@/stores/notifications.js'
 import DriverForm from '@/components/drivers/DriverForm.vue'
 
 const route = useRoute()
@@ -33,9 +34,14 @@ const router = useRouter()
 const { getById, update, isLoading, currentDriver: driver } = useDrivers()
 const isSubmitting = ref(false)
 const serverErrors = ref({})
+const notifications = useNotificationStore()
 
 onMounted(async () => {
-  await getById(route.params.id)
+  try {
+    await getById(route.params.id)
+  } catch {
+    notifications.error('Error al cargar los datos del conductor')
+  }
 })
 
 async function handleUpdate(formData) {
