@@ -7,14 +7,14 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
-          <div class="text-body-2 font-weight-medium">{{ record.description }}</div>
+          <div class="text-body-2 font-weight-medium">{{ record.descripcion }}</div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(record.scheduled_date) }}
+            {{ formatDate(record.fecha_programada) }}
           </div>
         </div>
         <div class="d-flex ga-1">
-          <v-chip :color="getTypeColor(record.type)" size="x-small" variant="outlined">
-            {{ getTypeLabel(record.type) }}
+          <v-chip :color="getTipoColor(record.tipo)" size="x-small" variant="outlined">
+            {{ getTipoLabel(record.tipo) }}
           </v-chip>
           <v-chip :color="getStatusColor(record.status)" size="x-small" variant="tonal">
             {{ getStatusLabel(record.status) }}
@@ -25,8 +25,8 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ record.workshop || '—' }}</span>
-        <span>{{ record.total_cost_eur ? `${record.total_cost_eur.toFixed(2)} €` : '—' }}</span>
+        <span>{{ record.taller_nombre || '—' }}</span>
+        <span>{{ record.coste_total_eur ? `${record.coste_total_eur.toFixed(2)} €` : '—' }}</span>
       </div>
     </v-card-text>
   </v-card>
@@ -37,30 +37,30 @@ defineProps({
   record: { type: Object, required: true },
 })
 
-function getTypeColor(type) {
-  return type === 'preventive' ? 'info' : 'warning'
+function getTipoColor(tipo) {
+  return tipo === 'preventivo' ? 'info' : 'warning'
 }
 
-function getTypeLabel(type) {
-  return type === 'preventive' ? 'Preventivo' : 'Correctivo'
+function getTipoLabel(tipo) {
+  return tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'
 }
 
 function getStatusColor(status) {
   const map = {
-    pending: 'info',
-    in_progress: 'warning',
-    completed: 'success',
-    cancelled: 'grey',
+    pendiente: 'info',
+    en_curso: 'warning',
+    completada: 'success',
+    cancelada: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pending: 'Pendiente',
-    in_progress: 'En curso',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
+    pendiente: 'Pendiente',
+    en_curso: 'En curso',
+    completada: 'Completada',
+    cancelada: 'Cancelada',
   }
   return map[status] ?? status
 }

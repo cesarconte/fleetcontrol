@@ -28,9 +28,9 @@ export const apiCargo = {
       .range(from, to)
       .order(sort.col, { ascending: sort.asc })
 
-    if (filters.type) query = query.eq('type', filters.type)
+    if (filters.tipo) query = query.eq('tipo', filters.tipo)
     if (filters.route_id) query = query.eq('route_id', filters.route_id)
-    if (filters.search) query = query.ilike('description', `%${filters.search}%`)
+    if (filters.search) query = query.ilike('descripcion', `%${filters.search}%`)
 
     const { data, error, count } = await query
     if (error) throw mapSupabaseError(error)

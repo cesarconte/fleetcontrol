@@ -4,22 +4,21 @@
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
           <div class="text-body-2 font-weight-medium">
-            {{ record.liters }} L · {{ formatPrice(record.price_per_liter) }}/L
+            {{ record.litros_kg }} L · {{ formatPrice(record.precio_por_litro_eur) }}/L
           </div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(record.date) }} · {{ formatKm(record.mileage_km) }}
+            {{ formatDate(record.fecha) }} · {{ formatKm(record.km_al_momento) }}
           </div>
         </div>
         <div class="text-body-1 font-weight-bold">
-          {{ record.total_cost_eur ? `${record.total_cost_eur.toFixed(2)} €` : '—' }}
+          {{ record.importe_total_eur ? `${record.importe_total_eur.toFixed(2)} €` : '—' }}
         </div>
       </div>
 
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ record.station || '—' }}</span>
-        <span>{{ getFuelLabel(record.fuel_type) }}</span>
+        <span>{{ record.estacion_servicio || '—' }}</span>
       </div>
     </v-card-text>
   </v-card>
@@ -43,17 +42,5 @@ function formatKm(km) {
 function formatPrice(p) {
   if (!p) return '—'
   return p.toFixed(3)
-}
-
-function getFuelLabel(type) {
-  const map = {
-    diesel: 'Diésel',
-    cng: 'GNC',
-    lng: 'GNL',
-    hydrogen: 'Hidrógeno',
-    electric: 'Eléctrico',
-    hybrid: 'Híbrido',
-  }
-  return map[type] ?? type
 }
 </script>

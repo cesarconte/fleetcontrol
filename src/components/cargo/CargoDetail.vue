@@ -13,14 +13,14 @@
     <div v-else>
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ record.description }}</h1>
+          <h1 class="text-h5">{{ record.descripcion }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ formatKg(record.weight_kg) }} · {{ getCargoTypeLabel(record.type) }}
+            {{ formatKg(record.peso_kg) }} · {{ getCargoTypeLabel(record.tipo) }}
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip :color="getCargoTypeColor(record.type)" variant="tonal">
-            {{ getCargoTypeLabel(record.type) }}
+          <v-chip :color="getCargoTypeColor(record.tipo)" variant="tonal">
+            {{ getCargoTypeLabel(record.tipo) }}
           </v-chip>
           <v-btn
             icon="mdi-pencil"
@@ -38,40 +38,40 @@
             <v-row>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Descripción</div>
-                <div class="text-body-1">{{ record.description }}</div>
+                <div class="text-body-1">{{ record.descripcion }}</div>
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Peso</div>
-                <div class="text-body-1">{{ formatKg(record.weight_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(record.peso_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Volumen</div>
                 <div class="text-body-1">
-                  {{ record.volume_m3 ? `${record.volume_m3} m³` : '—' }}
+                  {{ record.volumen_m3 ? `${record.volumen_m3} m³` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getCargoTypeLabel(record.type) }}</div>
+                <div class="text-body-1">{{ getCargoTypeLabel(record.tipo) }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
         </v-expansion-panel>
 
-        <v-expansion-panel v-if="record.type === 'dangerous'" title="ADR" value="adr">
+        <v-expansion-panel v-if="record.tipo === 'peligrosa'" title="ADR" value="adr">
           <v-expansion-panel-text>
             <v-row>
               <v-col cols="4">
                 <div class="text-caption text-medium-emphasis">Clase</div>
-                <div class="text-body-1">{{ record.adr_class || '—' }}</div>
+                <div class="text-body-1">{{ record.adr_clase || '—' }}</div>
               </v-col>
               <v-col cols="4">
                 <div class="text-caption text-medium-emphasis">Número ONU</div>
-                <div class="text-body-1">{{ record.un_number || '—' }}</div>
+                <div class="text-body-1">{{ record.adr_numero_onu || '—' }}</div>
               </v-col>
               <v-col cols="4">
                 <div class="text-caption text-medium-emphasis">Grupo embalaje</div>
-                <div class="text-body-1">{{ record.packing_group || '—' }}</div>
+                <div class="text-body-1">{{ record.adr_grupo_embalaje || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -82,19 +82,15 @@
             <v-row>
               <v-col cols="6">
                 <div class="text-caption text-medium-emphasis">Remitente</div>
-                <div class="text-body-1">{{ record.sender_name || '—' }}</div>
+                <div class="text-body-1">{{ record.cmr_remitente || '—' }}</div>
               </v-col>
               <v-col cols="6">
                 <div class="text-caption text-medium-emphasis">Destinatario</div>
-                <div class="text-body-1">{{ record.receiver_name || '—' }}</div>
+                <div class="text-body-1">{{ record.cmr_destinatario || '—' }}</div>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="12">
                 <div class="text-caption text-medium-emphasis">Lugar carga</div>
-                <div class="text-body-1">{{ record.loading_place || '—' }}</div>
-              </v-col>
-              <v-col cols="6">
-                <div class="text-caption text-medium-emphasis">Lugar descarga</div>
-                <div class="text-body-1">{{ record.unloading_place || '—' }}</div>
+                <div class="text-body-1">{{ record.cmr_lugar_entrega || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>

@@ -9,7 +9,7 @@ import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
 const base = createCrudService('maintenance_records', {
-  orderBy: 'scheduled_date',
+  orderBy: 'fecha_programada',
   ascending: false,
 })
 
@@ -20,7 +20,7 @@ export const apiMaintenance = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'scheduled_date', asc: false },
+    sort = { col: 'fecha_programada', asc: false },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -31,11 +31,11 @@ export const apiMaintenance = {
       .range(from, to)
       .order(sort.col, { ascending: sort.asc })
 
-    if (filters.type) query = query.eq('type', filters.type)
+    if (filters.tipo) query = query.eq('tipo', filters.tipo)
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id)
     if (filters.search) {
-      query = query.ilike('description', `%${filters.search}%`)
+      query = query.ilike('descripcion', `%${filters.search}%`)
     }
 
     const { data, error, count } = await query
@@ -48,7 +48,7 @@ export const apiMaintenance = {
       .from('maintenance_records')
       .select('*')
       .eq('vehicle_id', vehicleId)
-      .order('scheduled_date', { ascending: false })
+      .order('fecha_programada', { ascending: false })
 
     if (error) throw mapSupabaseError(error)
     return data
@@ -62,9 +62,9 @@ export const apiMaintenance = {
     const { data, error } = await supabase
       .from('maintenance_records')
       .select('*')
-      .eq('status', 'pending')
-      .lte('scheduled_date', dateStr)
-      .order('scheduled_date', { ascending: true })
+      .eq('status', 'pendiente')
+      .lte('fecha_programada', dateStr)
+      .order('fecha_programada', { ascending: true })
 
     if (error) throw mapSupabaseError(error)
     return data

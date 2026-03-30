@@ -3,13 +3,15 @@
  *
  * Extends base CRUD with vehicle-specific queries.
  * Template for all other CRUD services.
+ *
+ * Column names match Supabase DB schema (source of truth).
  */
 
 import { createCrudService } from './create-crud-service.js'
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
-const base = createCrudService('vehicles', { orderBy: 'plate', ascending: true })
+const base = createCrudService('vehicles', { orderBy: 'matricula', ascending: true })
 
 export const apiVehicles = {
   ...base,
@@ -18,7 +20,7 @@ export const apiVehicles = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'plate', asc: true },
+    sort = { col: 'matricula', asc: true },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -30,21 +32,22 @@ export const apiVehicles = {
       .order(sort.col, { ascending: sort.asc })
 
     if (filters.status) query = query.eq('status', filters.status)
-    if (filters.vehicle_type) query = query.eq('vehicle_type', filters.vehicle_type)
-    if (filters.dgt_badge) query = query.eq('dgt_badge', filters.dgt_badge)
-    if (filters.search) query = query.ilike('plate', `%${filters.search}%`)
+    if (filters.tipo_vehiculo) query = query.eq('tipo_vehiculo', filters.tipo_vehiculo)
+    if (filters.distintivo_ambiental)
+      query = query.eq('distintivo_ambiental', filters.distintivo_ambiental)
+    if (filters.search) query = query.ilike('matricula', `%${filters.search}%`)
 
     const { data, error, count } = await query
     if (error) throw mapSupabaseError(error)
     return { data, total: count, page, pageSize }
   },
 
-  async search(plate) {
+  async search(matricula) {
     const { data, error } = await supabase
       .from('vehicles')
       .select('*')
-      .ilike('plate', `%${plate}%`)
-      .order('plate')
+      .ilike('matricula', `%${matricula}%`)
+      .order('matricula')
 
     if (error) throw mapSupabaseError(error)
     return data

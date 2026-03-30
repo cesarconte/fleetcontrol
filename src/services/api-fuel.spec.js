@@ -23,11 +23,10 @@ import { supabase } from '@/services/supabase-client.js'
 const mockRecord = {
   id: '1',
   vehicle_id: 'v1',
-  date: '2026-03-15',
-  mileage_km: 100000,
-  liters: 150,
-  price_per_liter: 1.45,
-  fuel_type: 'diesel',
+  fecha: '2026-03-15',
+  km_al_momento: 100000,
+  litros_kg: 150,
+  precio_por_litro_eur: 1.45,
 }
 
 describe('apiFuel', () => {
@@ -65,21 +64,23 @@ describe('apiFuel', () => {
 describe('calculateConsumption', () => {
   it('debería calcular consumo L/100km correctamente', () => {
     const records = [
-      { date: '2026-03-01', mileage_km: 100000, liters: 0 },
-      { date: '2026-03-10', mileage_km: 101000, liters: 120 },
-      { date: '2026-03-20', mileage_km: 102500, liters: 180 },
+      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 0 },
+      { fecha: '2026-03-10', km_al_momento: 101000, litros_kg: 120 },
+      { fecha: '2026-03-20', km_al_momento: 102500, litros_kg: 180 },
     ]
     const result = calculateConsumption(records)
     expect(result.entries).toHaveLength(2)
     expect(result.entries[0].consumption).toBe(12)
     expect(result.entries[1].consumption).toBe(12)
     expect(result.avgConsumption).toBe(12)
-    expect(result.totalLiters).toBe(300)
+    expect(result.totalLitros).toBe(300)
     expect(result.totalKm).toBe(2500)
   })
 
   it('debería retornar null con menos de 2 registros', () => {
-    const result = calculateConsumption([{ date: '2026-03-01', mileage_km: 100000, liters: 150 }])
+    const result = calculateConsumption([
+      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 150 },
+    ])
     expect(result.avgConsumption).toBeNull()
     expect(result.entries).toHaveLength(0)
   })
@@ -96,9 +97,9 @@ describe('calculateConsumption', () => {
 
   it('debería saltar registros donde km no aumenta', () => {
     const records = [
-      { date: '2026-03-01', mileage_km: 100000, liters: 0 },
-      { date: '2026-03-05', mileage_km: 100000, liters: 50 },
-      { date: '2026-03-10', mileage_km: 101000, liters: 120 },
+      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 0 },
+      { fecha: '2026-03-05', km_al_momento: 100000, litros_kg: 50 },
+      { fecha: '2026-03-10', km_al_momento: 101000, litros_kg: 120 },
     ]
     const result = calculateConsumption(records)
     expect(result.entries).toHaveLength(1)

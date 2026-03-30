@@ -64,8 +64,8 @@
         </template>
 
         <template #item.status="{ item }">
-          <v-chip :color="getStatusColor(item.status)" size="small" variant="tonal">
-            {{ getStatusLabel(item.status) }}
+          <v-chip :color="getStatusColor(item.status, 'conductor')" size="small" variant="tonal">
+            {{ getStatusLabel(item.status, 'conductor') }}
           </v-chip>
         </template>
 
@@ -137,6 +137,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDrivers } from '@/composables/use-drivers.js'
+import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
+import { formatDate } from '@/utils/format-helpers.js'
 import DriverCard from './DriverCard.vue'
 
 const router = useRouter()
@@ -172,30 +174,6 @@ const statusOptions = [
   { title: 'Baja temporal', value: 'baja_temporal' },
   { title: 'Baja definitiva', value: 'baja_definitiva' },
 ]
-
-function getStatusColor(status) {
-  const map = {
-    activo: 'success',
-    baja_temporal: 'warning',
-    baja_definitiva: 'grey',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    activo: 'Activo',
-    baja_temporal: 'Baja temporal',
-    baja_definitiva: 'Baja definitiva',
-  }
-  return map[status] ?? status
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-ES')
-}
 
 function debouncedSearch() {
   clearTimeout(searchTimer)

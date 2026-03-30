@@ -8,8 +8,8 @@
             {{ driver.nif_nie }}
           </div>
         </div>
-        <v-chip :color="getStatusColor(driver.status)" size="small" variant="tonal">
-          {{ getStatusLabel(driver.status) }}
+        <v-chip :color="getStatusColor(driver.status, 'conductor')" size="small" variant="tonal">
+          {{ getStatusLabel(driver.status, 'conductor') }}
         </v-chip>
       </div>
 
@@ -24,25 +24,9 @@
 </template>
 
 <script setup>
+import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
+
 defineProps({
   driver: { type: Object, required: true },
 })
-
-function getStatusColor(status) {
-  const map = {
-    activo: 'success',
-    baja_temporal: 'warning',
-    baja_definitiva: 'grey',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    activo: 'Activo',
-    baja_temporal: 'Baja temporal',
-    baja_definitiva: 'Baja definitiva',
-  }
-  return map[status] ?? status
-}
 </script>

@@ -22,8 +22,8 @@
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip :color="getStatusColor(driver.status)" variant="tonal">
-            {{ getStatusLabel(driver.status) }}
+          <v-chip :color="getStatusColor(driver.status, 'conductor')" variant="tonal">
+            {{ getStatusLabel(driver.status, 'conductor') }}
           </v-chip>
           <v-btn
             icon="mdi-pencil"
@@ -103,8 +103,12 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Estado</div>
-                <v-chip :color="getStatusColor(driver.status)" size="small" variant="tonal">
-                  {{ getStatusLabel(driver.status) }}
+                <v-chip
+                  :color="getStatusColor(driver.status, 'conductor')"
+                  size="small"
+                  variant="tonal"
+                >
+                  {{ getStatusLabel(driver.status, 'conductor') }}
                 </v-chip>
               </v-col>
             </v-row>
@@ -176,6 +180,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDrivers } from '@/composables/use-drivers.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
+import { formatDate } from '@/utils/format-helpers.js'
 import DriverDetailCarnets from './DriverDetailCarnets.vue'
 import DriverDocumentUploader from './DriverDocumentUploader.vue'
 
@@ -194,30 +200,6 @@ const isDeleting = ref(false)
 onMounted(() => {
   getById(props.driverId)
 })
-
-function getStatusColor(status) {
-  const map = {
-    activo: 'success',
-    baja_temporal: 'warning',
-    baja_definitiva: 'grey',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    activo: 'Activo',
-    baja_temporal: 'Baja temporal',
-    baja_definitiva: 'Baja definitiva',
-  }
-  return map[status] ?? status
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-ES')
-}
 
 async function handleDelete() {
   isDeleting.value = true

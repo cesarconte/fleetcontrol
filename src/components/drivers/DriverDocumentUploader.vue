@@ -187,6 +187,7 @@ import {
   DRIVER_DOCUMENT_TYPES,
   getDriverDocumentTypeLabel,
 } from '@/constants/driver-document-types.js'
+import { formatDate } from '@/utils/format-helpers.js'
 
 const props = defineProps({
   driverId: { type: String, required: true },
@@ -234,11 +235,6 @@ function getFileIcon(mimeType) {
   if (mimeType?.includes('pdf')) return 'mdi-file-pdf-box'
   if (mimeType?.includes('image')) return 'mdi-file-image-outline'
   return 'mdi-file-document-outline'
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('es-ES')
 }
 
 function confirmDelete(doc) {

@@ -7,10 +7,10 @@
           <v-row>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.departure_date"
+                v-model="form.fecha_salida"
                 label="Fecha salida *"
                 type="date"
-                :error-messages="errors.departure_date"
+                :error-messages="errors.fecha_salida"
                 variant="outlined"
                 required
                 data-testid="route-departure-date"
@@ -27,7 +27,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.arrival_date"
+                v-model="form.fecha_llegada_prevista"
                 label="Fecha llegada"
                 type="date"
                 variant="outlined"
@@ -62,9 +62,9 @@
           <v-row>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.origin"
+                v-model="form.origen_municipio"
                 label="Origen *"
-                :error-messages="errors.origin"
+                :error-messages="errors.origen_municipio"
                 variant="outlined"
                 required
                 data-testid="route-origin"
@@ -72,9 +72,9 @@
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.destination"
+                v-model="form.destino_municipio"
                 label="Destino *"
-                :error-messages="errors.destination"
+                :error-messages="errors.destino_municipio"
                 variant="outlined"
                 required
                 data-testid="route-destination"
@@ -82,7 +82,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model="form.origin_province"
+                v-model="form.origen_provincia"
                 label="Provincia origen"
                 variant="outlined"
                 data-testid="route-origin-province"
@@ -90,7 +90,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model="form.destination_province"
+                v-model="form.destino_provincia"
                 label="Provincia destino"
                 variant="outlined"
                 data-testid="route-dest-province"
@@ -98,7 +98,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-text-field
-                v-model.number="form.planned_distance_km"
+                v-model.number="form.distancia_total_km"
                 label="Distancia planificada (km)"
                 type="number"
                 variant="outlined"
@@ -107,10 +107,10 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-text-field
-                v-model.number="form.planned_duration_hours"
-                label="Duración estimada (h)"
+                v-model.number="form.duracion_prevista_min"
+                label="Duración estimada (min)"
                 type="number"
-                step="0.5"
+                step="5"
                 variant="outlined"
                 data-testid="route-duration"
               />
@@ -155,7 +155,7 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="form.cargo_description"
+                v-model="form.descripcion_carga"
                 label="Descripción de la carga"
                 variant="outlined"
                 data-testid="route-cargo-desc"
@@ -163,7 +163,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.cargo_weight_kg"
+                v-model.number="form.peso_carga_kg"
                 label="Peso (kg)"
                 type="number"
                 variant="outlined"
@@ -172,7 +172,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.cargo_volume_m3"
+                v-model.number="form.volumen_carga_m3"
                 label="Volumen (m³)"
                 type="number"
                 step="0.1"
@@ -182,7 +182,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-select
-                v-model="form.cargo_type"
+                v-model="form.tipo_carga"
                 :items="cargoTypes"
                 label="Tipo de carga"
                 variant="outlined"
@@ -199,7 +199,7 @@
           <v-row>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.real_distance_km"
+                v-model.number="form.distancia_recorrida_km"
                 label="Distancia real (km)"
                 type="number"
                 variant="outlined"
@@ -208,17 +208,17 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.real_duration_hours"
-                label="Duración real (h)"
+                v-model.number="form.duracion_real_min"
+                label="Duración real (min)"
                 type="number"
-                step="0.5"
+                step="5"
                 variant="outlined"
                 data-testid="route-real-duration"
               />
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.fuel_consumed_liters"
+                v-model.number="form.consumo_combustible_l"
                 label="Combustible (L)"
                 type="number"
                 step="0.1"
@@ -228,7 +228,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.fuel_cost_eur"
+                v-model.number="form.coste_combustible_eur"
                 label="Coste combustible (€)"
                 type="number"
                 step="0.01"
@@ -238,7 +238,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.toll_cost_eur"
+                v-model.number="form.coste_peajes_eur"
                 label="Peajes (€)"
                 type="number"
                 step="0.01"
@@ -248,7 +248,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.total_cost_eur"
+                v-model.number="form.coste_total_eur"
                 label="Coste total (€)"
                 type="number"
                 step="0.01"
@@ -258,7 +258,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.delay_minutes"
+                v-model.number="form.retraso_minutos"
                 label="Retraso (min)"
                 type="number"
                 variant="outlined"
@@ -275,7 +275,7 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.cmr_number"
+                v-model="form.cmr_numero"
                 label="Nº CMR"
                 variant="outlined"
                 data-testid="route-cmr"
@@ -283,7 +283,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.albaran_number"
+                v-model="form.albaran_numero"
                 label="Nº Albarán"
                 variant="outlined"
                 data-testid="route-albaran"
@@ -293,7 +293,7 @@
           <v-row>
             <v-col cols="12">
               <v-textarea
-                v-model="form.observations"
+                v-model="form.observaciones"
                 label="Observaciones"
                 variant="outlined"
                 rows="3"
@@ -346,35 +346,35 @@ const vehicleOptions = ref([])
 const driverOptions = ref([])
 
 const form = reactive({
-  departure_date: '',
+  fecha_salida: '',
   departure_time: '',
-  arrival_date: '',
+  fecha_llegada_prevista: '',
   arrival_time: '',
-  origin: '',
-  origin_province: '',
-  origin_country: 'España',
-  destination: '',
-  destination_province: '',
-  destination_country: 'España',
+  origen_municipio: '',
+  origen_provincia: '',
+  origen_pais: 'España',
+  destino_municipio: '',
+  destino_provincia: '',
+  destino_pais: 'España',
   vehicle_id: '',
   driver_id: '',
-  planned_distance_km: null,
-  real_distance_km: null,
-  planned_duration_hours: null,
-  real_duration_hours: null,
-  cargo_description: '',
-  cargo_weight_kg: null,
-  cargo_volume_m3: null,
-  cargo_type: 'general',
-  fuel_consumed_liters: null,
-  fuel_cost_eur: null,
-  toll_cost_eur: null,
-  total_cost_eur: null,
-  status: 'planned',
-  delay_minutes: null,
-  observations: '',
-  cmr_number: '',
-  albaran_number: '',
+  distancia_total_km: null,
+  distancia_recorrida_km: null,
+  duracion_prevista_min: null,
+  duracion_real_min: null,
+  descripcion_carga: '',
+  peso_carga_kg: null,
+  volumen_carga_m3: null,
+  tipo_carga: 'general',
+  consumo_combustible_l: null,
+  coste_combustible_eur: null,
+  coste_peajes_eur: null,
+  coste_total_eur: null,
+  status: 'planificada',
+  retraso_minutos: null,
+  observaciones: '',
+  cmr_numero: '',
+  albaran_numero: '',
   ...props.initialValues,
 })
 
@@ -387,19 +387,18 @@ watch(
 )
 
 const routeStatuses = [
-  { title: 'Planificada', value: 'planned' },
-  { title: 'En curso', value: 'active' },
-  { title: 'Completada', value: 'completed' },
-  { title: 'Retrasada', value: 'delayed' },
-  { title: 'Incidencia', value: 'incident' },
-  { title: 'Cancelada', value: 'cancelled' },
+  { title: 'Planificada', value: 'planificada' },
+  { title: 'En curso', value: 'en_curso' },
+  { title: 'Completada', value: 'completada' },
+  { title: 'Retrasada', value: 'retrasada' },
+  { title: 'Cancelada', value: 'cancelada' },
 ]
 
 const cargoTypes = [
   { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'refrigerated' },
-  { title: 'Peligrosa (ADR)', value: 'dangerous' },
-  { title: 'Especial', value: 'special' },
+  { title: 'Frigorífica', value: 'frigorifica' },
+  { title: 'Peligrosa (ADR)', value: 'peligrosa' },
+  { title: 'Especial', value: 'especial' },
 ]
 
 onMounted(async () => {

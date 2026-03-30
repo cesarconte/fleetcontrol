@@ -16,14 +16,14 @@
       <!-- Header -->
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ vehicle.plate }}</h1>
+          <h1 class="text-h5">{{ vehicle.matricula }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ vehicle.brand }} {{ vehicle.model }} {{ vehicle.variant }}
+            {{ vehicle.marca }} {{ vehicle.modelo }} {{ vehicle.variante }}
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip :color="getStatusColor(vehicle.status)" variant="tonal">
-            {{ getStatusLabel(vehicle.status) }}
+          <v-chip :color="getStatusColor(vehicle.status, 'vehiculo')" variant="tonal">
+            {{ getStatusLabel(vehicle.status, 'vehiculo') }}
           </v-chip>
           <v-btn
             icon="mdi-pencil"
@@ -43,7 +43,7 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Matrícula</div>
-                <div class="text-body-1 font-weight-medium">{{ vehicle.plate }}</div>
+                <div class="text-body-1 font-weight-medium">{{ vehicle.matricula }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">VIN</div>
@@ -51,29 +51,35 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Marca</div>
-                <div class="text-body-1">{{ vehicle.brand }}</div>
+                <div class="text-body-1">{{ vehicle.marca }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Modelo</div>
-                <div class="text-body-1">{{ vehicle.model }}</div>
+                <div class="text-body-1">{{ vehicle.modelo }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getTypeLabel(vehicle.vehicle_type) }}</div>
+                <div class="text-body-1">{{ getTypeLabel(vehicle.tipo_vehiculo) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Combustible</div>
-                <div class="text-body-1">{{ getFuelLabel(vehicle.fuel_type) }}</div>
+                <div class="text-body-1">{{ getFuelLabel(vehicle.tipo_combustible) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">DGT</div>
-                <v-chip :color="getDgtColor(vehicle.dgt_badge)" size="small" variant="flat">
-                  {{ getDgtLabel(vehicle.dgt_badge) }}
+                <v-chip
+                  :color="getDgtColor(vehicle.distintivo_ambiental)"
+                  size="small"
+                  variant="flat"
+                >
+                  {{ getDgtLabel(vehicle.distintivo_ambiental) }}
                 </v-chip>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Euro</div>
-                <div class="text-body-1">{{ vehicle.euro_class?.replace('_', ' ') || '—' }}</div>
+                <div class="text-body-1">
+                  {{ vehicle.euro_emisiones?.replace('_', ' ') || '—' }}
+                </div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -85,30 +91,30 @@
             <v-row>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">MMA</div>
-                <div class="text-body-1">{{ formatKg(vehicle.gross_weight_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.mma_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Tara</div>
-                <div class="text-body-1">{{ formatKg(vehicle.tare_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.tara_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Carga útil</div>
-                <div class="text-body-1">{{ formatKg(vehicle.max_payload_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.carga_util_max_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">MMA conjunto</div>
-                <div class="text-body-1">{{ formatKg(vehicle.combined_gross_weight_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.mma_conjunto_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Dimensiones (A×H×L)</div>
                 <div class="text-body-1">
-                  {{ formatM(vehicle.width_m) }} × {{ formatM(vehicle.height_m) }} ×
-                  {{ formatM(vehicle.length_m) }}
+                  {{ formatM(vehicle.anchura_max_m) }} × {{ formatM(vehicle.altura_max_m) }} ×
+                  {{ formatM(vehicle.longitud_total_m) }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Nº ejes</div>
-                <div class="text-body-1">{{ vehicle.axle_count ?? '—' }}</div>
+                <div class="text-body-1">{{ vehicle.numero_ejes ?? '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -149,7 +155,7 @@
       <v-card>
         <v-card-title>¿Eliminar vehículo?</v-card-title>
         <v-card-text>
-          Se eliminará el vehículo {{ vehicle?.plate }} permanentemente. Esta acción no se puede
+          Se eliminará el vehículo {{ vehicle?.matricula }} permanentemente. Esta acción no se puede
           deshacer.
         </v-card-text>
         <v-card-actions>
@@ -166,6 +172,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVehicles } from '@/composables/use-vehicles.js'
+import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers.js'
+import { formatKg } from '@/utils/format-helpers.js'
 import VehicleDocuments from './VehicleDocuments.vue'
 
 const props = defineProps({
@@ -183,40 +191,19 @@ onMounted(() => {
   getById(props.vehicleId)
 })
 
-function getStatusColor(status) {
-  const map = {
-    active: 'success',
-    in_route: 'info',
-    in_maintenance: 'warning',
-    inactive: 'grey',
-    archived: 'grey-darken-2',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    active: 'Activo',
-    in_route: 'En ruta',
-    in_maintenance: 'Mantenimiento',
-    inactive: 'Inactivo',
-    archived: 'Archivado',
-  }
-  return map[status] ?? status
-}
-
 function getTypeLabel(type) {
   const map = {
-    tractor: 'Tractor',
-    rigid: 'Rígido',
-    semitrailer: 'Semirremolque',
-    trailer: 'Remolque',
-    tanker: 'Cisterna',
-    refrigerated: 'Frigorífico',
-    dump: 'Volquete',
-    curtain: 'Lona',
-    box: 'Furgón',
-    special: 'Especial',
+    tractora: 'Tractora',
+    vehiculo_rigido: 'Rígido',
+    semirremolque: 'Semirremolque',
+    remolque: 'Remolque',
+    cisterna: 'Cisterna',
+    frigorifico: 'Frigorífico',
+    basculante: 'Volquete',
+    lona: 'Lona',
+    caja_cerrada: 'Furgón',
+    especial: 'Especial',
+    portacoches: 'Portacoches',
   }
   return map[type] ?? type
 }
@@ -224,34 +211,13 @@ function getTypeLabel(type) {
 function getFuelLabel(fuel) {
   const map = {
     diesel: 'Diésel',
-    cng: 'GNC',
-    lng: 'GNL',
-    hydrogen: 'Hidrógeno',
-    electric: 'Eléctrico',
-    hybrid: 'Híbrido',
+    gnc: 'GNC',
+    gnl: 'GNL',
+    hidrogeno: 'Hidrógeno',
+    electrico: 'Eléctrico',
+    hibrido: 'Híbrido',
   }
   return map[fuel] ?? fuel
-}
-
-function getDgtColor(badge) {
-  const map = {
-    zero: 'green-darken-2',
-    eco: 'green',
-    c: 'yellow-darken-2',
-    b: 'orange',
-    none: 'grey',
-  }
-  return map[badge] ?? 'grey'
-}
-
-function getDgtLabel(badge) {
-  const map = { zero: '0', eco: 'ECO', c: 'C', b: 'B', none: '—' }
-  return map[badge] ?? badge
-}
-
-function formatKg(val) {
-  if (!val) return '—'
-  return `${val.toLocaleString('es-ES')} kg`
 }
 
 function formatM(val) {

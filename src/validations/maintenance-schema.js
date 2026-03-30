@@ -11,44 +11,44 @@ export const maintenanceSchema = z.object({
     .string({ required_error: 'Debe seleccionar un vehículo' })
     .uuid('Vehículo inválido'),
 
-  type: z
-    .enum(['preventive', 'corrective'], {
+  tipo: z
+    .enum(['preventivo', 'correctivo'], {
       errorMap: () => ({ message: 'Tipo de mantenimiento inválido' }),
     })
-    .default('preventive'),
+    .default('preventivo'),
 
   status: z
-    .enum(['pending', 'in_progress', 'completed', 'cancelled'], {
+    .enum(['pendiente', 'en_curso', 'completada', 'cancelada'], {
       errorMap: () => ({ message: 'Estado inválido' }),
     })
-    .default('pending'),
+    .default('pendiente'),
 
-  scheduled_date: z.string().optional().or(z.literal('')),
-  completed_date: z.string().optional().or(z.literal('')),
+  fecha_programada: z.string().optional().or(z.literal('')),
+  fecha_fin: z.string().optional().or(z.literal('')),
 
-  mileage_km: z
+  km_al_momento: z
     .number({ invalid_type_error: 'Kilometraje inválido' })
     .int()
     .positive('El kilometraje debe ser mayor que 0')
     .optional()
     .nullable(),
 
-  description: z
+  descripcion: z
     .string({ required_error: 'La descripción es obligatoria' })
     .min(3, 'La descripción debe tener al menos 3 caracteres'),
 
-  diagnosis: z.string().optional().or(z.literal('')),
-  intervention: z.string().optional().or(z.literal('')),
+  diagnostico: z.string().optional().or(z.literal('')),
+  intervencion_realizada: z.string().optional().or(z.literal('')),
 
-  parts_used: z.string().optional().or(z.literal('')),
-  parts_cost_eur: z.number().min(0).optional().nullable(),
+  recambios: z.string().optional().or(z.literal('')),
+  coste_recambios_eur: z.number().min(0).optional().nullable(),
 
-  workshop: z.string().optional().or(z.literal('')),
-  responsible: z.string().optional().or(z.literal('')),
+  taller_nombre: z.string().optional().or(z.literal('')),
+  taller_responsable: z.string().optional().or(z.literal('')),
 
-  downtime_hours: z.number().min(0).optional().nullable(),
+  inmovilizacion_horas: z.number().min(0).optional().nullable(),
 
-  total_cost_eur: z.number().min(0).optional().nullable(),
+  coste_total_eur: z.number().min(0).optional().nullable(),
 
   observations: z.string().optional().or(z.literal('')),
 })
@@ -57,7 +57,7 @@ export const maintenanceUpdateSchema = maintenanceSchema.partial()
 
 export const maintenanceSearchSchema = z.object({
   search: z.string().optional(),
-  type: z.string().optional(),
+  tipo: z.string().optional(),
   status: z.string().optional(),
   vehicle_id: z.string().optional(),
 })

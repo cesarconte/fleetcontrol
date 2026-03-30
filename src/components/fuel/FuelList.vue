@@ -66,26 +66,22 @@
         hover
         data-testid="fuel-table"
       >
-        <template #item.date="{ item }">
-          {{ formatDate(item.date) }}
+        <template #item.fecha="{ item }">
+          {{ formatDate(item.fecha) }}
         </template>
 
-        <template #item.mileage_km="{ item }">
-          {{ item.mileage_km?.toLocaleString('es-ES') }} km
+        <template #item.km_al_momento="{ item }">
+          {{ item.km_al_momento?.toLocaleString('es-ES') }} km
         </template>
 
-        <template #item.liters="{ item }">{{ item.liters?.toFixed(1) }} L</template>
+        <template #item.litros_kg="{ item }">{{ item.litros_kg?.toFixed(1) }} L</template>
 
-        <template #item.price_per_liter="{ item }">
-          {{ item.price_per_liter?.toFixed(3) }} €/L
+        <template #item.precio_por_litro_eur="{ item }">
+          {{ item.precio_por_litro_eur?.toFixed(3) }} €/L
         </template>
 
-        <template #item.total_cost_eur="{ item }">
-          <span class="font-weight-medium">{{ item.total_cost_eur?.toFixed(2) }} €</span>
-        </template>
-
-        <template #item.fuel_type="{ item }">
-          {{ getFuelLabel(item.fuel_type) }}
+        <template #item.importe_total_eur="{ item }">
+          <span class="font-weight-medium">{{ item.importe_total_eur?.toFixed(2) }} €</span>
         </template>
 
         <template #item.actions="{ item }">
@@ -170,31 +166,19 @@ const filterVehicle = ref(null)
 const filterDateFrom = ref(null)
 const filterDateTo = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'date', order: 'desc' }])
+const sortBy = ref([{ key: 'fecha', order: 'desc' }])
 const vehicleOptions = ref([])
 const loadingVehicles = ref(true)
 
 const headers = [
-  { title: 'Fecha', key: 'date', sortable: true },
+  { title: 'Fecha', key: 'fecha', sortable: true },
   { title: 'Vehículo', key: 'vehicle_id', sortable: false },
-  { title: 'Km', key: 'mileage_km', sortable: true },
-  { title: 'Litros', key: 'liters', sortable: true },
-  { title: 'Precio/L', key: 'price_per_liter', sortable: true },
-  { title: 'Total', key: 'total_cost_eur', sortable: true },
+  { title: 'Km', key: 'km_al_momento', sortable: true },
+  { title: 'Litros', key: 'litros_kg', sortable: true },
+  { title: 'Precio/L', key: 'precio_por_litro_eur', sortable: true },
+  { title: 'Total', key: 'importe_total_eur', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
-
-function getFuelLabel(type) {
-  const map = {
-    diesel: 'Diésel',
-    cng: 'GNC',
-    lng: 'GNL',
-    hydrogen: 'Hidrógeno',
-    electric: 'Eléctrico',
-    hybrid: 'Híbrido',
-  }
-  return map[type] ?? type
-}
 
 function formatDate(d) {
   if (!d) return '—'

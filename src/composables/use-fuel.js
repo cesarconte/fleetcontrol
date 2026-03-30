@@ -18,7 +18,7 @@ export function useFuel(initialFilters = {}) {
   const page = ref(1)
   const pageSize = ref(25)
   const filters = ref({ ...initialFilters })
-  const sort = ref({ col: 'date', asc: false })
+  const sort = ref({ col: 'fecha', asc: false })
 
   const notifications = useNotificationStore()
 

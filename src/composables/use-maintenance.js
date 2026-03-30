@@ -18,7 +18,7 @@ export function useMaintenance(initialFilters = {}) {
   const page = ref(1)
   const pageSize = ref(25)
   const filters = ref({ ...initialFilters })
-  const sort = ref({ col: 'scheduled_date', asc: false })
+  const sort = ref({ col: 'fecha_programada', asc: false })
 
   const notifications = useNotificationStore()
 

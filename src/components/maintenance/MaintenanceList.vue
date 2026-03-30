@@ -71,18 +71,18 @@
         data-testid="maintenance-table"
         @click:row="handleRowClick"
       >
-        <template #item.type="{ item }">
+        <template #item.tipo="{ item }">
           <v-chip
-            :color="item.type === 'preventive' ? 'info' : 'warning'"
+            :color="item.tipo === 'preventivo' ? 'info' : 'warning'"
             size="small"
             variant="outlined"
           >
-            {{ item.type === 'preventive' ? 'Preventivo' : 'Correctivo' }}
+            {{ item.tipo === 'preventivo' ? 'Preventivo' : 'Correctivo' }}
           </v-chip>
         </template>
 
-        <template #item.scheduled_date="{ item }">
-          {{ formatDate(item.scheduled_date) }}
+        <template #item.fecha_programada="{ item }">
+          {{ formatDate(item.fecha_programada) }}
         </template>
 
         <template #item.status="{ item }">
@@ -91,8 +91,8 @@
           </v-chip>
         </template>
 
-        <template #item.total_cost_eur="{ item }">
-          {{ item.total_cost_eur ? `${item.total_cost_eur.toFixed(2)} €` : '—' }}
+        <template #item.coste_total_eur="{ item }">
+          {{ item.coste_total_eur ? `${item.coste_total_eur.toFixed(2)} €` : '—' }}
         </template>
 
         <template #item.actions="{ item }">
@@ -178,48 +178,48 @@ const searchQuery = ref('')
 const filterType = ref(null)
 const filterStatus = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'scheduled_date', order: 'desc' }])
+const sortBy = ref([{ key: 'fecha_programada', order: 'desc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Tipo', key: 'type', sortable: true },
-  { title: 'Descripción', key: 'description', sortable: false },
-  { title: 'Fecha prevista', key: 'scheduled_date', sortable: true },
-  { title: 'Taller', key: 'workshop', sortable: false },
+  { title: 'Tipo', key: 'tipo', sortable: true },
+  { title: 'Descripción', key: 'descripcion', sortable: false },
+  { title: 'Fecha prevista', key: 'fecha_programada', sortable: true },
+  { title: 'Taller', key: 'taller_nombre', sortable: false },
   { title: 'Estado', key: 'status', sortable: true },
-  { title: 'Coste', key: 'total_cost_eur', sortable: true },
+  { title: 'Coste', key: 'coste_total_eur', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const typeOptions = [
-  { title: 'Preventivo', value: 'preventive' },
-  { title: 'Correctivo', value: 'corrective' },
+  { title: 'Preventivo', value: 'preventivo' },
+  { title: 'Correctivo', value: 'correctivo' },
 ]
 
 const statusOptions = [
-  { title: 'Pendiente', value: 'pending' },
-  { title: 'En curso', value: 'in_progress' },
-  { title: 'Completado', value: 'completed' },
-  { title: 'Cancelado', value: 'cancelled' },
+  { title: 'Pendiente', value: 'pendiente' },
+  { title: 'En curso', value: 'en_curso' },
+  { title: 'Completada', value: 'completada' },
+  { title: 'Cancelada', value: 'cancelada' },
 ]
 
 function getStatusColor(status) {
   const map = {
-    pending: 'info',
-    in_progress: 'warning',
-    completed: 'success',
-    cancelled: 'grey',
+    pendiente: 'info',
+    en_curso: 'warning',
+    completada: 'success',
+    cancelada: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pending: 'Pendiente',
-    in_progress: 'En curso',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
+    pendiente: 'Pendiente',
+    en_curso: 'En curso',
+    completada: 'Completada',
+    cancelada: 'Cancelada',
   }
   return map[status] ?? status
 }
@@ -237,7 +237,7 @@ function debouncedSearch() {
 function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
-  if (filterType.value) f.type = filterType.value
+  if (filterType.value) f.tipo = filterType.value
   if (filterStatus.value) f.status = filterStatus.value
   setFilters(f)
 }

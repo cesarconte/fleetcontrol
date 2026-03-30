@@ -2,7 +2,7 @@
  * FleetControl — useVehicles Composable
  *
  * Reactive vehicle list with pagination, filtering, and CRUD operations.
- * Template for all other CRUD composables.
+ * Template for all other CRUD composites.
  */
 
 import { ref, computed } from 'vue'
@@ -19,7 +19,7 @@ export function useVehicles(initialFilters = {}) {
   const page = ref(1)
   const pageSize = ref(25)
   const filters = ref({ ...initialFilters })
-  const sort = ref({ col: 'plate', asc: true })
+  const sort = ref({ col: 'matricula', asc: true })
 
   const notifications = useNotificationStore()
 

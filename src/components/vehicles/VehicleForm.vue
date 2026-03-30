@@ -7,9 +7,9 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.plate"
+                v-model="form.matricula"
                 label="Matrícula *"
-                :error-messages="errors.plate"
+                :error-messages="errors.matricula"
                 variant="outlined"
                 required
                 data-testid="vehicle-plate"
@@ -35,9 +35,9 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.brand"
+                v-model="form.marca"
                 label="Marca *"
-                :error-messages="errors.brand"
+                :error-messages="errors.marca"
                 variant="outlined"
                 required
                 data-testid="vehicle-brand"
@@ -45,9 +45,9 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.model"
+                v-model="form.modelo"
                 label="Modelo *"
-                :error-messages="errors.model"
+                :error-messages="errors.modelo"
                 variant="outlined"
                 required
                 data-testid="vehicle-model"
@@ -55,7 +55,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.variant"
+                v-model="form.variante"
                 label="Variante"
                 variant="outlined"
                 data-testid="vehicle-variant"
@@ -63,7 +63,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="2">
               <v-text-field
-                v-model.number="form.year"
+                v-model.number="form.anio_fabricacion"
                 label="Año"
                 type="number"
                 variant="outlined"
@@ -80,7 +80,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-select
-                v-model="form.dgt_badge"
+                v-model="form.distintivo_ambiental"
                 :items="dgtBadges"
                 label="Distintivo DGT"
                 variant="outlined"
@@ -89,7 +89,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="3">
               <v-select
-                v-model="form.euro_class"
+                v-model="form.euro_emisiones"
                 :items="euroClasses"
                 label="Euro"
                 variant="outlined"
@@ -107,10 +107,10 @@
           <v-row>
             <v-col cols="12" sm="6">
               <v-select
-                v-model="form.vehicle_type"
+                v-model="form.tipo_vehiculo"
                 :items="vehicleTypes"
                 label="Tipo de vehículo *"
-                :error-messages="errors.vehicle_type"
+                :error-messages="errors.tipo_vehiculo"
                 variant="outlined"
                 required
                 data-testid="vehicle-type"
@@ -127,7 +127,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-select
-                v-model="form.fuel_type"
+                v-model="form.tipo_combustible"
                 :items="fuelTypes"
                 label="Combustible"
                 variant="outlined"
@@ -136,7 +136,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.associated_semitrailer_plate"
+                v-model="form.matricula_semirremolque"
                 label="Matrícula semirremolque"
                 variant="outlined"
                 data-testid="vehicle-semitrailer"
@@ -144,7 +144,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.hitch_type"
+                v-model="form.tipo_enganche"
                 label="Tipo de enganche"
                 variant="outlined"
                 data-testid="vehicle-hitch"
@@ -160,17 +160,17 @@
           <v-row>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.gross_weight_kg"
+                v-model.number="form.mma_kg"
                 label="MMA (kg)"
                 type="number"
-                :error-messages="errors.gross_weight_kg"
+                :error-messages="errors.mma_kg"
                 variant="outlined"
                 data-testid="vehicle-gross-weight"
               />
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.tare_kg"
+                v-model.number="form.tara_kg"
                 label="Tara (kg)"
                 type="number"
                 variant="outlined"
@@ -179,7 +179,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.max_payload_kg"
+                v-model.number="form.carga_util_max_kg"
                 label="Carga útil (kg)"
                 type="number"
                 variant="outlined"
@@ -188,7 +188,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.combined_gross_weight_kg"
+                v-model.number="form.mma_conjunto_kg"
                 label="MMA conjunto (kg)"
                 type="number"
                 variant="outlined"
@@ -197,40 +197,40 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.width_m"
+                v-model.number="form.anchura_max_m"
                 label="Ancho (m)"
                 type="number"
                 step="0.01"
-                :error-messages="errors.width_m"
+                :error-messages="errors.anchura_max_m"
                 variant="outlined"
                 data-testid="vehicle-width"
               />
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.height_m"
+                v-model.number="form.altura_max_m"
                 label="Alto (m)"
                 type="number"
                 step="0.01"
-                :error-messages="errors.height_m"
+                :error-messages="errors.altura_max_m"
                 variant="outlined"
                 data-testid="vehicle-height"
               />
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.length_m"
+                v-model.number="form.longitud_total_m"
                 label="Largo (m)"
                 type="number"
                 step="0.01"
-                :error-messages="errors.length_m"
+                :error-messages="errors.longitud_total_m"
                 variant="outlined"
                 data-testid="vehicle-length"
               />
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.axle_count"
+                v-model.number="form.numero_ejes"
                 label="Nº ejes"
                 type="number"
                 variant="outlined"
@@ -239,7 +239,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.box_length_m"
+                v-model.number="form.longitud_caja_m"
                 label="Largo caja (m)"
                 type="number"
                 step="0.01"
@@ -249,7 +249,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.cargo_volume_m3"
+                v-model.number="form.volumen_carga_m3"
                 label="Volumen carga (m³)"
                 type="number"
                 step="0.01"
@@ -267,7 +267,7 @@
           <v-row>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.engine_cc"
+                v-model.number="form.cilindrada_cc"
                 label="Cilindrada (cc)"
                 type="number"
                 variant="outlined"
@@ -276,7 +276,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.power_cv"
+                v-model.number="form.potencia_cv"
                 label="Potencia (CV)"
                 type="number"
                 variant="outlined"
@@ -285,7 +285,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.power_kw"
+                v-model.number="form.potencia_kw"
                 label="Potencia (kW)"
                 type="number"
                 variant="outlined"
@@ -294,7 +294,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.torque_nm"
+                v-model.number="form.par_motor_nm"
                 label="Par (Nm)"
                 type="number"
                 variant="outlined"
@@ -303,7 +303,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model="form.transmission"
+                v-model="form.caja_cambios"
                 label="Transmisión"
                 variant="outlined"
                 data-testid="vehicle-transmission"
@@ -311,7 +311,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.max_speed_kmh"
+                v-model.number="form.velocidad_max_autorizada_kmh"
                 label="Vel. máx (km/h)"
                 type="number"
                 variant="outlined"
@@ -320,7 +320,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.consumption_homologated"
+                v-model.number="form.consumo_medio_homologado"
                 label="Consumo homologado (L/100km)"
                 type="number"
                 step="0.01"
@@ -369,39 +369,39 @@ const formRef = ref(null)
 const openPanels = ref(['id', 'type'])
 
 const form = reactive({
-  plate: '',
+  matricula: '',
   vin: '',
-  brand: '',
-  model: '',
-  variant: '',
+  marca: '',
+  modelo: '',
+  variante: '',
   color: '',
-  year: null,
+  anio_fabricacion: null,
   transport_card_number: '',
-  first_registration_date: '',
-  dgt_badge: 'none',
-  euro_class: null,
-  vehicle_type: 'tractor',
-  status: 'active',
-  fuel_type: 'diesel',
-  associated_semitrailer_plate: '',
-  hitch_type: '',
-  gross_weight_kg: null,
-  tare_kg: null,
-  combined_gross_weight_kg: null,
-  max_payload_kg: null,
-  width_m: null,
-  height_m: null,
-  length_m: null,
-  axle_count: null,
-  box_length_m: null,
-  cargo_volume_m3: null,
-  engine_cc: null,
-  power_cv: null,
-  power_kw: null,
-  torque_nm: null,
-  transmission: '',
-  max_speed_kmh: null,
-  consumption_homologated: null,
+  fecha_primera_matriculacion: '',
+  distintivo_ambiental: 'sin_etiqueta',
+  euro_emisiones: null,
+  tipo_vehiculo: 'tractora',
+  status: 'activo',
+  tipo_combustible: 'diesel',
+  matricula_semirremolque: '',
+  tipo_enganche: '',
+  mma_kg: null,
+  tara_kg: null,
+  mma_conjunto_kg: null,
+  carga_util_max_kg: null,
+  anchura_max_m: null,
+  altura_max_m: null,
+  longitud_total_m: null,
+  numero_ejes: null,
+  longitud_caja_m: null,
+  volumen_carga_m3: null,
+  cilindrada_cc: null,
+  potencia_cv: null,
+  potencia_kw: null,
+  par_motor_nm: null,
+  caja_cambios: '',
+  velocidad_max_autorizada_kmh: null,
+  consumo_medio_homologado: null,
   adblue: false,
   ...props.initialValues,
 })
@@ -415,53 +415,54 @@ watch(
 )
 
 const dgtBadges = [
-  { title: '0 — Cero emisiones', value: 'zero' },
+  { title: '0 — Cero emisiones', value: '0' },
   { title: 'ECO', value: 'eco' },
   { title: 'C', value: 'c' },
   { title: 'B', value: 'b' },
-  { title: 'Sin distintivo', value: 'none' },
+  { title: 'Sin distintivo', value: 'sin_etiqueta' },
 ]
 
 const euroClasses = [
-  { title: 'Euro 1', value: 'euro_1' },
-  { title: 'Euro 2', value: 'euro_2' },
-  { title: 'Euro 3', value: 'euro_3' },
-  { title: 'Euro 4', value: 'euro_4' },
-  { title: 'Euro 5', value: 'euro_5' },
-  { title: 'Euro 6', value: 'euro_6' },
-  { title: 'Euro 6d', value: 'euro_6d' },
-  { title: 'Euro 6e', value: 'euro_6e' },
-  { title: 'Euro 6d-temp', value: 'euro_6d_temp' },
+  { title: 'Euro I', value: 'euro_i' },
+  { title: 'Euro II', value: 'euro_ii' },
+  { title: 'Euro III', value: 'euro_iii' },
+  { title: 'Euro IV', value: 'euro_iv' },
+  { title: 'Euro V', value: 'euro_v' },
+  { title: 'Euro VI', value: 'euro_vi' },
+  { title: 'Euro VI-d', value: 'euro_vi_d' },
+  { title: 'Euro VI-e', value: 'euro_vi_e' },
+  { title: 'Euro VI-d temp', value: 'euro_vi_d_temp' },
 ]
 
 const vehicleTypes = [
-  { title: 'Tractor', value: 'tractor' },
-  { title: 'Rígido', value: 'rigid' },
-  { title: 'Semirremolque', value: 'semitrailer' },
-  { title: 'Remolque', value: 'trailer' },
-  { title: 'Cisterna', value: 'tanker' },
-  { title: 'Frigorífico', value: 'refrigerated' },
-  { title: 'Volquete', value: 'dump' },
-  { title: 'Lona', value: 'curtain' },
-  { title: 'Furgón', value: 'box' },
-  { title: 'Especial', value: 'special' },
+  { title: 'Tractora', value: 'tractora' },
+  { title: 'Rígido', value: 'vehiculo_rigido' },
+  { title: 'Semirremolque', value: 'semirremolque' },
+  { title: 'Remolque', value: 'remolque' },
+  { title: 'Cisterna', value: 'cisterna' },
+  { title: 'Frigorífico', value: 'frigorifico' },
+  { title: 'Volquete', value: 'basculante' },
+  { title: 'Lona', value: 'lona' },
+  { title: 'Furgón', value: 'caja_cerrada' },
+  { title: 'Especial', value: 'especial' },
+  { title: 'Portacoches', value: 'portacoches' },
 ]
 
 const vehicleStatuses = [
-  { title: 'Activo', value: 'active' },
-  { title: 'En ruta', value: 'in_route' },
-  { title: 'En mantenimiento', value: 'in_maintenance' },
-  { title: 'Inactivo', value: 'inactive' },
-  { title: 'Archivado', value: 'archived' },
+  { title: 'Activo', value: 'activo' },
+  { title: 'En ruta', value: 'en_ruta' },
+  { title: 'En mantenimiento', value: 'en_mantenimiento' },
+  { title: 'Inactivo', value: 'inactivo' },
+  { title: 'Dado de baja', value: 'dado_de_baja' },
 ]
 
 const fuelTypes = [
   { title: 'Diésel', value: 'diesel' },
-  { title: 'GNC', value: 'cng' },
-  { title: 'GNL', value: 'lng' },
-  { title: 'Hidrógeno', value: 'hydrogen' },
-  { title: 'Eléctrico', value: 'electric' },
-  { title: 'Híbrido', value: 'hybrid' },
+  { title: 'GNC', value: 'gnc' },
+  { title: 'GNL', value: 'gnl' },
+  { title: 'Hidrógeno', value: 'hidrogeno' },
+  { title: 'Eléctrico', value: 'electrico' },
+  { title: 'Híbrido', value: 'hibrido' },
 ]
 
 async function handleSubmit() {

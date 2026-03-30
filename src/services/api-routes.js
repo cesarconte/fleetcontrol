@@ -2,13 +2,14 @@
  * FleetControl — Routes Service
  *
  * Extends base CRUD with route-specific queries.
+ * All column names match Supabase DB schema (source of truth).
  */
 
 import { createCrudService } from './create-crud-service.js'
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
-const base = createCrudService('routes', { orderBy: 'departure_date', ascending: false })
+const base = createCrudService('routes', { orderBy: 'fecha_salida', ascending: false })
 
 export const apiRoutes = {
   ...base,
@@ -17,7 +18,7 @@ export const apiRoutes = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'departure_date', asc: false },
+    sort = { col: 'fecha_salida', asc: false },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -31,10 +32,12 @@ export const apiRoutes = {
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.driver_id) query = query.eq('driver_id', filters.driver_id)
     if (filters.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id)
-    if (filters.date_from) query = query.gte('departure_date', filters.date_from)
-    if (filters.date_to) query = query.lte('departure_date', filters.date_to)
+    if (filters.date_from) query = query.gte('fecha_salida', filters.date_from)
+    if (filters.date_to) query = query.lte('fecha_salida', filters.date_to)
     if (filters.search) {
-      query = query.or(`origin.ilike.%${filters.search}%,destination.ilike.%${filters.search}%`)
+      query = query.or(
+        `origen_municipio.ilike.%${filters.search}%,destino_municipio.ilike.%${filters.search}%`,
+      )
     }
 
     const { data, error, count } = await query
@@ -46,8 +49,8 @@ export const apiRoutes = {
     const { data, error } = await supabase
       .from('routes')
       .select('*')
-      .in('status', ['planned', 'active'])
-      .order('departure_date', { ascending: true })
+      .in('status', ['planificada', 'en_curso'])
+      .order('fecha_salida', { ascending: true })
 
     if (error) throw mapSupabaseError(error)
     return data
@@ -58,10 +61,10 @@ export const apiRoutes = {
       .from('routes')
       .select('*')
       .eq('driver_id', driverId)
-      .order('departure_date', { ascending: false })
+      .order('fecha_salida', { ascending: false })
 
-    if (dateFrom) query = query.gte('departure_date', dateFrom)
-    if (dateTo) query = query.lte('departure_date', dateTo)
+    if (dateFrom) query = query.gte('fecha_salida', dateFrom)
+    if (dateTo) query = query.lte('fecha_salida', dateTo)
 
     const { data, error } = await query
     if (error) throw mapSupabaseError(error)
@@ -73,10 +76,10 @@ export const apiRoutes = {
       .from('routes')
       .select('*')
       .eq('vehicle_id', vehicleId)
-      .order('departure_date', { ascending: false })
+      .order('fecha_salida', { ascending: false })
 
-    if (dateFrom) query = query.gte('departure_date', dateFrom)
-    if (dateTo) query = query.lte('departure_date', dateTo)
+    if (dateFrom) query = query.gte('fecha_salida', dateFrom)
+    if (dateTo) query = query.lte('fecha_salida', dateTo)
 
     const { data, error } = await query
     if (error) throw mapSupabaseError(error)

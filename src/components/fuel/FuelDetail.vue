@@ -15,13 +15,15 @@
     <div v-else>
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">Repostaje — {{ formatDate(record.date) }}</h1>
+          <h1 class="text-h5">Repostaje — {{ formatDate(record.fecha) }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ record.liters }} L a {{ record.price_per_liter?.toFixed(3) }} €/L
+            {{ record.litros_kg }} L a {{ record.precio_por_litro_eur?.toFixed(3) }} €/L
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip color="primary" variant="tonal">{{ record.total_cost_eur?.toFixed(2) }} €</v-chip>
+          <v-chip color="primary" variant="tonal">
+            {{ record.importe_total_eur?.toFixed(2) }} €
+          </v-chip>
           <v-btn
             icon="mdi-pencil"
             variant="outlined"
@@ -38,33 +40,29 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha</div>
-                <div class="text-body-1">{{ formatDate(record.date) }}</div>
+                <div class="text-body-1">{{ formatDate(record.fecha) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Km</div>
-                <div class="text-body-1">{{ record.mileage_km?.toLocaleString('es-ES') }}</div>
+                <div class="text-body-1">{{ record.km_al_momento?.toLocaleString('es-ES') }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Litros</div>
-                <div class="text-body-1">{{ record.liters?.toFixed(1) }} L</div>
+                <div class="text-body-1">{{ record.litros_kg?.toFixed(1) }} L</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Precio/L</div>
-                <div class="text-body-1">{{ record.price_per_liter?.toFixed(3) }} €</div>
+                <div class="text-body-1">{{ record.precio_por_litro_eur?.toFixed(3) }} €</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Total</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ record.total_cost_eur?.toFixed(2) }} €
+                  {{ record.importe_total_eur?.toFixed(2) }} €
                 </div>
-              </v-col>
-              <v-col cols="6" sm="4" md="3">
-                <div class="text-caption text-medium-emphasis">Combustible</div>
-                <div class="text-body-1">{{ getFuelLabel(record.fuel_type) }}</div>
               </v-col>
               <v-col cols="12" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Estación</div>
-                <div class="text-body-1">{{ record.station || '—' }}</div>
+                <div class="text-body-1">{{ record.estacion_servicio || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -132,18 +130,6 @@ const isDeleting = ref(false)
 onMounted(() => {
   getById(props.recordId)
 })
-
-function getFuelLabel(type) {
-  const map = {
-    diesel: 'Diésel',
-    cng: 'GNC',
-    lng: 'GNL',
-    hydrogen: 'Hidrógeno',
-    electric: 'Eléctrico',
-    hybrid: 'Híbrido',
-  }
-  return map[type] ?? type
-}
 
 function formatDate(d) {
   if (!d) return '—'

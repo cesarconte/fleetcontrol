@@ -6,24 +6,24 @@
 
 export const CARGO_TYPE_OPTIONS = [
   { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'refrigerated' },
-  { title: 'Peligrosa (ADR)', value: 'dangerous' },
-  { title: 'Especial', value: 'special' },
+  { title: 'Frigorífica', value: 'frigorifica' },
+  { title: 'Peligrosa (ADR)', value: 'peligrosa' },
+  { title: 'Especial', value: 'especial' },
 ]
 
-export function getCargoTypeColor(type) {
-  const map = { general: 'info', refrigerated: 'teal', dangerous: 'error', special: 'warning' }
-  return map[type] ?? 'grey'
+export function getCargoTypeColor(tipo) {
+  const map = { general: 'info', frigorifica: 'teal', peligrosa: 'error', especial: 'warning' }
+  return map[tipo] ?? 'grey'
 }
 
-export function getCargoTypeLabel(type) {
+export function getCargoTypeLabel(tipo) {
   const map = {
     general: 'General',
-    refrigerated: 'Frigorífica',
-    dangerous: 'Peligrosa',
-    special: 'Especial',
+    frigorifica: 'Frigorífica',
+    peligrosa: 'Peligrosa',
+    especial: 'Especial',
   }
-  return map[type] ?? type
+  return map[tipo] ?? tipo
 }
 
 export function formatKg(kg) {

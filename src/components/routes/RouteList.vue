@@ -72,28 +72,28 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template #item.departure_date="{ item }">
-          {{ formatDate(item.departure_date) }}
+        <template #item.fecha_salida="{ item }">
+          {{ formatDate(item.fecha_salida) }}
         </template>
 
-        <template #item.route="{ item }">
-          <span class="font-weight-medium">{{ item.origin }} → {{ item.destination }}</span>
+        <template #item.ruta="{ item }">
+          <span class="font-weight-medium">
+            {{ item.origen_municipio }} → {{ item.destino_municipio }}
+          </span>
         </template>
 
-        <template #item.planned_distance_km="{ item }">
+        <template #item.distancia_total_km="{ item }">
           {{
-            item.planned_distance_km
-              ? `${item.planned_distance_km.toLocaleString('es-ES')} km`
-              : '—'
+            item.distancia_total_km ? `${item.distancia_total_km.toLocaleString('es-ES')} km` : '—'
           }}
         </template>
 
-        <template #item.cargo_weight_kg="{ item }">
-          {{ item.cargo_weight_kg ? `${item.cargo_weight_kg.toLocaleString('es-ES')} kg` : '—' }}
+        <template #item.peso_carga_kg="{ item }">
+          {{ item.peso_carga_kg ? `${item.peso_carga_kg.toLocaleString('es-ES')} kg` : '—' }}
         </template>
 
-        <template #item.total_cost_eur="{ item }">
-          {{ item.total_cost_eur ? `${item.total_cost_eur.toFixed(2)} €` : '—' }}
+        <template #item.coste_total_eur="{ item }">
+          {{ item.coste_total_eur ? `${item.coste_total_eur.toFixed(2)} €` : '—' }}
         </template>
 
         <template #item.status="{ item }">
@@ -185,49 +185,46 @@ const searchQuery = ref('')
 const filterStatus = ref(null)
 const filterDateFrom = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'departure_date', order: 'desc' }])
+const sortBy = ref([{ key: 'fecha_salida', order: 'desc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Fecha', key: 'departure_date', sortable: true },
-  { title: 'Ruta', key: 'route', sortable: false },
-  { title: 'Distancia', key: 'planned_distance_km', sortable: true },
-  { title: 'Carga (kg)', key: 'cargo_weight_kg', sortable: true },
-  { title: 'Coste', key: 'total_cost_eur', sortable: true },
+  { title: 'Fecha', key: 'fecha_salida', sortable: true },
+  { title: 'Ruta', key: 'ruta', sortable: false },
+  { title: 'Distancia', key: 'distancia_total_km', sortable: true },
+  { title: 'Carga (kg)', key: 'peso_carga_kg', sortable: true },
+  { title: 'Coste', key: 'coste_total_eur', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const statusOptions = [
-  { title: 'Planificada', value: 'planned' },
-  { title: 'En curso', value: 'active' },
-  { title: 'Completada', value: 'completed' },
-  { title: 'Retrasada', value: 'delayed' },
-  { title: 'Incidencia', value: 'incident' },
-  { title: 'Cancelada', value: 'cancelled' },
+  { title: 'Planificada', value: 'planificada' },
+  { title: 'En curso', value: 'en_curso' },
+  { title: 'Completada', value: 'completada' },
+  { title: 'Retrasada', value: 'retrasada' },
+  { title: 'Cancelada', value: 'cancelada' },
 ]
 
 function getStatusColor(status) {
   const map = {
-    planned: 'info',
-    active: 'success',
-    completed: 'grey',
-    delayed: 'warning',
-    incident: 'error',
-    cancelled: 'grey-darken-2',
+    planificada: 'info',
+    en_curso: 'success',
+    completada: 'grey',
+    retrasada: 'warning',
+    cancelada: 'grey-darken-2',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    planned: 'Planificada',
-    active: 'En curso',
-    completed: 'Completada',
-    delayed: 'Retrasada',
-    incident: 'Incidencia',
-    cancelled: 'Cancelada',
+    planificada: 'Planificada',
+    en_curso: 'En curso',
+    completada: 'Completada',
+    retrasada: 'Retrasada',
+    cancelada: 'Cancelada',
   }
   return map[status] ?? status
 }

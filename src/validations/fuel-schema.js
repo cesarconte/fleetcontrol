@@ -11,38 +11,30 @@ export const fuelSchema = z.object({
     .string({ required_error: 'Debe seleccionar un vehículo' })
     .uuid('Vehículo inválido'),
 
-  date: z.string({ required_error: 'La fecha es obligatoria' }).min(1, 'La fecha es obligatoria'),
+  fecha: z.string({ required_error: 'La fecha es obligatoria' }).min(1, 'La fecha es obligatoria'),
 
-  mileage_km: z
+  km_al_momento: z
     .number({ invalid_type_error: 'Kilometraje inválido' })
     .int()
     .positive('El kilometraje debe ser mayor que 0'),
 
-  liters: z
+  litros_kg: z
     .number({ invalid_type_error: 'Litros inválido' })
     .positive('Los litros deben ser mayores que 0'),
 
-  price_per_liter: z
+  precio_por_litro_eur: z
     .number({ invalid_type_error: 'Precio inválido' })
     .positive('El precio debe ser mayor que 0'),
 
-  total_cost_eur: z
+  importe_total_eur: z
     .number({ invalid_type_error: 'Importe inválido' })
     .min(0, 'El importe no puede ser negativo')
     .optional()
     .nullable(),
 
-  station: z.string().optional().or(z.literal('')),
-
-  fuel_type: z
-    .enum(['diesel', 'cng', 'lng', 'hydrogen', 'electric', 'hybrid'], {
-      errorMap: () => ({ message: 'Tipo de combustible inválido' }),
-    })
-    .default('diesel'),
+  estacion_servicio: z.string().optional().or(z.literal('')),
 
   route_id: z.string().uuid().optional().nullable(),
-
-  observations: z.string().optional().or(z.literal('')),
 })
 
 export const fuelUpdateSchema = fuelSchema.partial()

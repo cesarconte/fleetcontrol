@@ -4,23 +4,23 @@
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
           <div class="text-body-2 font-weight-medium">
-            {{ route.origin }} → {{ route.destination }}
+            {{ route.origen_municipio }} → {{ route.destino_municipio }}
           </div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(route.departure_date) }}
+            {{ formatDate(route.fecha_salida) }}
           </div>
         </div>
-        <v-chip :color="getStatusColor(route.status)" size="small" variant="tonal">
-          {{ getStatusLabel(route.status) }}
+        <v-chip :color="getStatusColor(route.status, 'ruta')" size="small" variant="tonal">
+          {{ getStatusLabel(route.status, 'ruta') }}
         </v-chip>
       </div>
 
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ route.planned_distance_km ? `${route.planned_distance_km} km` : '—' }}</span>
+        <span>{{ route.distancia_total_km ? `${route.distancia_total_km} km` : '—' }}</span>
         <span>
-          {{ route.cargo_weight_kg ? `${route.cargo_weight_kg.toLocaleString('es-ES')} kg` : '—' }}
+          {{ route.peso_carga_kg ? `${route.peso_carga_kg.toLocaleString('es-ES')} kg` : '—' }}
         </span>
       </div>
     </v-card-text>
@@ -28,37 +28,10 @@
 </template>
 
 <script setup>
+import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
+import { formatDate } from '@/utils/format-helpers.js'
+
 defineProps({
   route: { type: Object, required: true },
 })
-
-function getStatusColor(status) {
-  const map = {
-    planned: 'info',
-    active: 'success',
-    completed: 'grey',
-    delayed: 'warning',
-    incident: 'error',
-    cancelled: 'grey-darken-2',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    planned: 'Planificada',
-    active: 'En curso',
-    completed: 'Completada',
-    delayed: 'Retrasada',
-    incident: 'Incidencia',
-    cancelled: 'Cancelada',
-  }
-  return map[status] ?? status
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('es-ES')
-}
 </script>

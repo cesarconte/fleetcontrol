@@ -21,9 +21,9 @@
       <!-- Header -->
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ record.description }}</h1>
+          <h1 class="text-h5">{{ record.descripcion }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ getTypeLabel(record.type) }} · {{ formatDate(record.scheduled_date) }}
+            {{ getTipoLabel(record.tipo) }} · {{ formatDate(record.fecha_programada) }}
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -48,11 +48,11 @@
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
                 <v-chip
-                  :color="record.type === 'preventive' ? 'info' : 'warning'"
+                  :color="record.tipo === 'preventivo' ? 'info' : 'warning'"
                   size="small"
                   variant="outlined"
                 >
-                  {{ getTypeLabel(record.type) }}
+                  {{ getTipoLabel(record.tipo) }}
                 </v-chip>
               </v-col>
               <v-col cols="6" sm="4" md="3">
@@ -63,16 +63,16 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha prevista</div>
-                <div class="text-body-1">{{ formatDate(record.scheduled_date) }}</div>
+                <div class="text-body-1">{{ formatDate(record.fecha_programada) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha realización</div>
-                <div class="text-body-1">{{ formatDate(record.completed_date) }}</div>
+                <div class="text-body-1">{{ formatDate(record.fecha_fin) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Km</div>
                 <div class="text-body-1">
-                  {{ record.mileage_km?.toLocaleString('es-ES') || '—' }}
+                  {{ record.km_al_momento?.toLocaleString('es-ES') || '—' }}
                 </div>
               </v-col>
             </v-row>
@@ -84,15 +84,15 @@
             <v-row>
               <v-col cols="12">
                 <div class="text-caption text-medium-emphasis">Diagnóstico</div>
-                <div class="text-body-1">{{ record.diagnosis || '—' }}</div>
+                <div class="text-body-1">{{ record.diagnostico || '—' }}</div>
               </v-col>
               <v-col cols="12">
                 <div class="text-caption text-medium-emphasis">Intervención</div>
-                <div class="text-body-1">{{ record.intervention || '—' }}</div>
+                <div class="text-body-1">{{ record.intervencion_realizada || '—' }}</div>
               </v-col>
               <v-col cols="12">
                 <div class="text-caption text-medium-emphasis">Recambios</div>
-                <div class="text-body-1">{{ record.parts_used || '—' }}</div>
+                <div class="text-body-1">{{ record.recambios || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -103,28 +103,30 @@
             <v-row>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Taller</div>
-                <div class="text-body-1">{{ record.workshop || '—' }}</div>
+                <div class="text-body-1">{{ record.taller_nombre || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Responsable</div>
-                <div class="text-body-1">{{ record.responsible || '—' }}</div>
+                <div class="text-body-1">{{ record.taller_responsable || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste piezas</div>
                 <div class="text-body-1">
-                  {{ record.parts_cost_eur ? `${record.parts_cost_eur.toFixed(2)} €` : '—' }}
+                  {{
+                    record.coste_recambios_eur ? `${record.coste_recambios_eur.toFixed(2)} €` : '—'
+                  }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste total</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ record.total_cost_eur ? `${record.total_cost_eur.toFixed(2)} €` : '—' }}
+                  {{ record.coste_total_eur ? `${record.coste_total_eur.toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Inmovilización</div>
                 <div class="text-body-1">
-                  {{ record.downtime_hours ? `${record.downtime_hours} h` : '—' }}
+                  {{ record.inmovilizacion_horas ? `${record.inmovilizacion_horas} h` : '—' }}
                 </div>
               </v-col>
             </v-row>
@@ -197,21 +199,21 @@ onMounted(() => {
   getById(props.recordId)
 })
 
-function getTypeLabel(type) {
-  return type === 'preventive' ? 'Preventivo' : 'Correctivo'
+function getTipoLabel(tipo) {
+  return tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'
 }
 
 function getStatusColor(status) {
-  const map = { pending: 'info', in_progress: 'warning', completed: 'success', cancelled: 'grey' }
+  const map = { pendiente: 'info', en_curso: 'warning', completada: 'success', cancelada: 'grey' }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pending: 'Pendiente',
-    in_progress: 'En curso',
-    completed: 'Completado',
-    cancelled: 'Cancelado',
+    pendiente: 'Pendiente',
+    en_curso: 'En curso',
+    completada: 'Completada',
+    cancelada: 'Cancelada',
   }
   return map[status] ?? status
 }

@@ -17,7 +17,7 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-select
-                v-model="form.type"
+                v-model="form.tipo"
                 :items="cargoTypes"
                 label="Tipo *"
                 variant="outlined"
@@ -26,9 +26,9 @@
             </v-col>
             <v-col cols="12">
               <v-text-field
-                v-model="form.description"
+                v-model="form.descripcion"
                 label="Descripción *"
-                :error-messages="errors.description"
+                :error-messages="errors.descripcion"
                 variant="outlined"
                 required
                 data-testid="cargo-description"
@@ -36,10 +36,10 @@
             </v-col>
             <v-col cols="6" sm="4">
               <v-text-field
-                v-model.number="form.weight_kg"
+                v-model.number="form.peso_kg"
                 label="Peso (kg) *"
                 type="number"
-                :error-messages="errors.weight_kg"
+                :error-messages="errors.peso_kg"
                 variant="outlined"
                 required
                 data-testid="cargo-weight"
@@ -47,7 +47,7 @@
             </v-col>
             <v-col cols="6" sm="4">
               <v-text-field
-                v-model.number="form.volume_m3"
+                v-model.number="form.volumen_m3"
                 label="Volumen (m³)"
                 type="number"
                 step="0.1"
@@ -60,7 +60,7 @@
       </v-expansion-panel>
 
       <v-expansion-panel
-        v-if="form.type === 'dangerous'"
+        v-if="form.tipo === 'peligrosa'"
         title="Mercancía peligrosa (ADR)"
         value="adr"
       >
@@ -68,19 +68,19 @@
           <v-row>
             <v-col cols="12" sm="4">
               <v-select
-                v-model="form.adr_class"
+                v-model="form.adr_clase"
                 :items="adrClasses"
                 label="Clase ADR"
-                :error-messages="errors.adr_class"
+                :error-messages="errors.adr_clase"
                 variant="outlined"
                 data-testid="cargo-adr-class"
               />
             </v-col>
             <v-col cols="6" sm="4">
               <v-text-field
-                v-model="form.un_number"
+                v-model="form.adr_numero_onu"
                 label="Número ONU (4 dígitos)"
-                :error-messages="errors.un_number"
+                :error-messages="errors.adr_numero_onu"
                 variant="outlined"
                 maxlength="4"
                 data-testid="cargo-un-number"
@@ -88,36 +88,11 @@
             </v-col>
             <v-col cols="6" sm="4">
               <v-select
-                v-model="form.packing_group"
+                v-model="form.adr_grupo_embalaje"
                 :items="packingGroups"
                 label="Grupo embalaje"
                 variant="outlined"
                 data-testid="cargo-packing-group"
-              />
-            </v-col>
-          </v-row>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-
-      <v-expansion-panel v-if="form.type === 'refrigerated'" title="Temperatura" value="temp">
-        <v-expansion-panel-text>
-          <v-row>
-            <v-col cols="6" sm="4">
-              <v-text-field
-                v-model.number="form.required_temp_min_c"
-                label="Temp. mínima (°C)"
-                type="number"
-                variant="outlined"
-                data-testid="cargo-temp-min"
-              />
-            </v-col>
-            <v-col cols="6" sm="4">
-              <v-text-field
-                v-model.number="form.required_temp_max_c"
-                label="Temp. máxima (°C)"
-                type="number"
-                variant="outlined"
-                data-testid="cargo-temp-max"
               />
             </v-col>
           </v-row>
@@ -129,7 +104,7 @@
           <v-row>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.sender_name"
+                v-model="form.cmr_remitente"
                 label="Remitente"
                 variant="outlined"
                 data-testid="cargo-sender"
@@ -137,35 +112,18 @@
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.receiver_name"
+                v-model="form.cmr_destinatario"
                 label="Destinatario"
                 variant="outlined"
                 data-testid="cargo-receiver"
               />
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12">
               <v-text-field
-                v-model="form.loading_place"
+                v-model="form.cmr_lugar_entrega"
                 label="Lugar de carga"
                 variant="outlined"
                 data-testid="cargo-loading"
-              />
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="form.unloading_place"
-                label="Lugar de descarga"
-                variant="outlined"
-                data-testid="cargo-unloading"
-              />
-            </v-col>
-            <v-col cols="12">
-              <v-textarea
-                v-model="form.observations"
-                label="Observaciones"
-                variant="outlined"
-                rows="2"
-                data-testid="cargo-observations"
               />
             </v-col>
           </v-row>
@@ -210,20 +168,16 @@ const routeOptions = ref([])
 
 const form = reactive({
   route_id: '',
-  description: '',
-  weight_kg: null,
-  volume_m3: null,
-  type: 'general',
-  adr_class: '',
-  un_number: '',
-  packing_group: '',
-  sender_name: '',
-  receiver_name: '',
-  loading_place: '',
-  unloading_place: '',
-  required_temp_min_c: null,
-  required_temp_max_c: null,
-  observations: '',
+  descripcion: '',
+  peso_kg: null,
+  volumen_m3: null,
+  tipo: 'general',
+  adr_clase: '',
+  adr_numero_onu: '',
+  adr_grupo_embalaje: '',
+  cmr_remitente: '',
+  cmr_destinatario: '',
+  cmr_lugar_entrega: '',
   ...props.initialValues,
 })
 

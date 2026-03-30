@@ -72,24 +72,24 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template v-slot:item.plate="{ item }">
-          <span class="font-weight-medium">{{ item.plate }}</span>
+        <template v-slot:item.matricula="{ item }">
+          <span class="font-weight-medium">{{ item.matricula }}</span>
         </template>
 
         <template v-slot:item.status="{ item }">
-          <v-chip :color="getStatusColor(item.status)" size="small" variant="tonal">
-            {{ getStatusLabel(item.status) }}
+          <v-chip :color="getStatusColor(item.status, 'vehiculo')" size="small" variant="tonal">
+            {{ getStatusLabel(item.status, 'vehiculo') }}
           </v-chip>
         </template>
 
-        <template v-slot:item.dgt_badge="{ item }">
-          <v-chip :color="getDgtColor(item.dgt_badge)" size="small" variant="flat">
-            {{ getDgtLabel(item.dgt_badge) }}
+        <template v-slot:item.distintivo_ambiental="{ item }">
+          <v-chip :color="getDgtColor(item.distintivo_ambiental)" size="small" variant="flat">
+            {{ getDgtLabel(item.distintivo_ambiental) }}
           </v-chip>
         </template>
 
-        <template v-slot:item.vehicle_type="{ item }">
-          {{ getTypeLabel(item.vehicle_type) }}
+        <template v-slot:item.tipo_vehiculo="{ item }">
+          {{ getTypeLabel(item.tipo_vehiculo) }}
         </template>
 
         <template v-slot:item.actions="{ item }">
@@ -148,6 +148,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVehicles } from '@/composables/use-vehicles.js'
+import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers.js'
 import VehicleCard from './VehicleCard.vue'
 
 const router = useRouter()
@@ -167,97 +168,55 @@ const searchQuery = ref('')
 const filterStatus = ref(null)
 const filterType = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'plate', order: 'asc' }])
+const sortBy = ref([{ key: 'matricula', order: 'asc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Matrícula', key: 'plate', sortable: true },
-  { title: 'Marca', key: 'brand', sortable: true },
-  { title: 'Modelo', key: 'model', sortable: true },
-  { title: 'Tipo', key: 'vehicle_type', sortable: true },
+  { title: 'Matrícula', key: 'matricula', sortable: true },
+  { title: 'Marca', key: 'marca', sortable: true },
+  { title: 'Modelo', key: 'modelo', sortable: true },
+  { title: 'Tipo', key: 'tipo_vehiculo', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
-  { title: 'DGT', key: 'dgt_badge', sortable: true },
+  { title: 'DGT', key: 'distintivo_ambiental', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
 const statusOptions = [
-  { title: 'Activo', value: 'active' },
-  { title: 'En ruta', value: 'in_route' },
-  { title: 'En mantenimiento', value: 'in_maintenance' },
-  { title: 'Inactivo', value: 'inactive' },
-  { title: 'Archivado', value: 'archived' },
+  { title: 'Activo', value: 'activo' },
+  { title: 'En ruta', value: 'en_ruta' },
+  { title: 'En mantenimiento', value: 'en_mantenimiento' },
+  { title: 'Inactivo', value: 'inactivo' },
+  { title: 'Dado de baja', value: 'dado_de_baja' },
 ]
 
 const typeOptions = [
-  { title: 'Tractor', value: 'tractor' },
-  { title: 'Rígido', value: 'rigid' },
-  { title: 'Semirremolque', value: 'semitrailer' },
-  { title: 'Remolque', value: 'trailer' },
-  { title: 'Cisterna', value: 'tanker' },
-  { title: 'Frigorífico', value: 'refrigerated' },
-  { title: 'Volquete', value: 'dump' },
-  { title: 'Lona', value: 'curtain' },
-  { title: 'Furgón', value: 'box' },
-  { title: 'Especial', value: 'special' },
+  { title: 'Tractora', value: 'tractora' },
+  { title: 'Rígido', value: 'vehiculo_rigido' },
+  { title: 'Semirremolque', value: 'semirremolque' },
+  { title: 'Remolque', value: 'remolque' },
+  { title: 'Cisterna', value: 'cisterna' },
+  { title: 'Frigorífico', value: 'frigorifico' },
+  { title: 'Volquete', value: 'basculante' },
+  { title: 'Lona', value: 'lona' },
+  { title: 'Furgón', value: 'caja_cerrada' },
+  { title: 'Especial', value: 'especial' },
+  { title: 'Portacoches', value: 'portacoches' },
 ]
-
-function getStatusColor(status) {
-  const map = {
-    active: 'success',
-    in_route: 'info',
-    in_maintenance: 'warning',
-    inactive: 'grey',
-    archived: 'grey-darken-2',
-  }
-  return map[status] ?? 'grey'
-}
-
-function getStatusLabel(status) {
-  const map = {
-    active: 'Activo',
-    in_route: 'En ruta',
-    in_maintenance: 'Mantenimiento',
-    inactive: 'Inactivo',
-    archived: 'Archivado',
-  }
-  return map[status] ?? status
-}
-
-function getDgtColor(badge) {
-  const map = {
-    zero: 'green-darken-2',
-    eco: 'green',
-    c: 'yellow-darken-2',
-    b: 'orange',
-    none: 'grey',
-  }
-  return map[badge] ?? 'grey'
-}
-
-function getDgtLabel(badge) {
-  const map = {
-    zero: '0',
-    eco: 'ECO',
-    c: 'C',
-    b: 'B',
-    none: '—',
-  }
-  return map[badge] ?? badge
-}
 
 function getTypeLabel(type) {
   const map = {
-    tractor: 'Tractor',
-    rigid: 'Rígido',
-    semitrailer: 'Semirremolque',
-    trailer: 'Remolque',
-    tanker: 'Cisterna',
-    refrigerated: 'Frigorífico',
-    dump: 'Volquete',
-    curtain: 'Lona',
-    box: 'Furgón',
-    special: 'Especial',
+    tractora: 'Tractora',
+    vehiculo_rigido: 'Rígido',
+    semirremolque: 'Semirremolque',
+    remolque: 'Remolque',
+    cisterna: 'Cisterna',
+    frigorifico: 'Frigorífico',
+    basculante: 'Volquete',
+    lona: 'Lona',
+    caja_cerrada: 'Furgón',
+    especial: 'Especial',
+    portacoches: 'Portacoches',
   }
   return map[type] ?? type
 }
@@ -271,7 +230,7 @@ function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
   if (filterStatus.value) f.status = filterStatus.value
-  if (filterType.value) f.vehicle_type = filterType.value
+  if (filterType.value) f.tipo_vehiculo = filterType.value
   setFilters(f)
 }
 

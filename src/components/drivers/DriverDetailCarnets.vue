@@ -153,15 +153,11 @@
 
 <script setup>
 import { useDriverDocuments } from '@/composables/use-driver-documents.js'
+import { formatDate } from '@/utils/format-helpers.js'
 
 const props = defineProps({
   driver: { type: Object, required: true },
 })
 
 const { getEstadoDocumento: getEstado } = useDriverDocuments(props.driver.id)
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('es-ES')
-}
 </script>

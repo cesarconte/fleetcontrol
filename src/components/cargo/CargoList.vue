@@ -51,20 +51,18 @@
         data-testid="cargo-table"
         @click:row="handleRowClick"
       >
-        <template #item.weight_kg="{ item }">
-          {{ item.weight_kg?.toLocaleString('es-ES') }} kg
-        </template>
+        <template #item.peso_kg="{ item }">{{ item.peso_kg?.toLocaleString('es-ES') }} kg</template>
 
-        <template #item.type="{ item }">
-          <v-chip :color="getCargoTypeColor(item.type)" size="small" variant="tonal">
-            {{ getCargoTypeLabel(item.type) }}
+        <template #item.tipo="{ item }">
+          <v-chip :color="getCargoTypeColor(item.tipo)" size="small" variant="tonal">
+            {{ getCargoTypeLabel(item.tipo) }}
           </v-chip>
         </template>
 
         <template #item.adr="{ item }">
-          <template v-if="item.type === 'dangerous'">
+          <template v-if="item.tipo === 'peligrosa'">
             <v-chip color="error" size="x-small" variant="outlined">
-              {{ item.adr_class }} · ONU {{ item.un_number }}
+              {{ item.adr_clase }} · ONU {{ item.adr_numero_onu }}
             </v-chip>
           </template>
           <span v-else class="text-medium-emphasis">—</span>
@@ -156,9 +154,9 @@ const sortBy = ref([{ key: 'created_at', order: 'desc' }])
 let searchTimer = null
 
 const headers = [
-  { title: 'Descripción', key: 'description', sortable: false },
-  { title: 'Peso', key: 'weight_kg', sortable: true },
-  { title: 'Tipo', key: 'type', sortable: true },
+  { title: 'Descripción', key: 'descripcion', sortable: false },
+  { title: 'Peso', key: 'peso_kg', sortable: true },
+  { title: 'Tipo', key: 'tipo', sortable: true },
   { title: 'ADR', key: 'adr', sortable: false },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
@@ -173,7 +171,7 @@ function debouncedSearch() {
 function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
-  if (filterType.value) f.type = filterType.value
+  if (filterType.value) f.tipo = filterType.value
   setFilters(f)
 }
 
