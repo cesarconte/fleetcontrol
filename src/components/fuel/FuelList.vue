@@ -132,6 +132,14 @@
       <div v-if="!isLoading && items.length === 0" class="text-center pa-8">
         <v-icon size="48" color="grey">mdi-gas-station</v-icon>
         <p class="text-body-1 mt-4 text-medium-emphasis">No hay repostajes</p>
+        <v-btn
+          color="primary"
+          class="mt-4"
+          :to="{ name: 'FuelCreate' }"
+          data-testid="fuel-mobile-create"
+        >
+          Registrar repostaje
+        </v-btn>
       </div>
       <div v-if="totalPages > 1" class="d-flex justify-center mt-4">
         <v-pagination v-model="tablePage" :length="totalPages" :total-visible="5" rounded />

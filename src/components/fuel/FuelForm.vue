@@ -114,6 +114,7 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
 import { apiVehicles } from '@/services/api-vehicles.js'
+import { useNotificationStore } from '@/stores/notifications.js'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -128,6 +129,7 @@ const emit = defineEmits(['submit'])
 const formRef = ref(null)
 const loadingRefs = ref(true)
 const vehicleOptions = ref([])
+const notifications = useNotificationStore()
 
 const form = reactive({
   vehicle_id: '',
@@ -168,7 +170,7 @@ onMounted(async () => {
       value: v.id,
     }))
   } catch {
-    // Silently fail
+    notifications.error('Error al cargar vehículos')
   } finally {
     loadingRefs.value = false
   }
