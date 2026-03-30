@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-29
+> **Última actualización:** 2026-03-30
 > **Actualizado por:** AI Agent
 
 ---
@@ -91,11 +91,11 @@ Automatización:       [PENDIENTE]
 | Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod) |
 | Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                      |
 | Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                |
-| Módulo Conductores         | 🔴 Sin empezar | CRUD, licencias, horas, CAP                               |
-| Módulo Rutas               | 🔴 Sin empezar | Activas, historial, planificación                         |
-| Módulo Mantenimiento       | 🔴 Sin empezar | Preventivo, correctivo, repuestos                         |
-| Módulo Combustible         | 🔴 Sin empezar | Registro, estadísticas                                    |
-| Módulo Cargas              | 🔴 Sin empezar | CRUD, ADR, tipos de carga                                 |
+| Módulo Conductores         | 🟢 Completado  | CRUD, licencias, horas, CAP                               |
+| Módulo Rutas               | 🟢 Completado  | Activas, historial, planificación                         |
+| Módulo Mantenimiento       | 🟢 Completado  | Preventivo, correctivo, repuestos                         |
+| Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                    |
+| Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga                                 |
 | Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones  |
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría  |
 | Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                      |
@@ -208,23 +208,19 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-03-29
+**Fecha:** 2026-03-30
 **Trabajo realizado:**
 
-- Fases 1-5 completadas: Setup + BD + Layout + Auth + Vehículos CRUD
-- `api-vehicles.js`: getPaginated con filtros, search por matrícula
-- `use-vehicles.js`: composable reactivo con paginación, filtros, CRUD
-- `vehicle-schema.js`: Zod — matrícula española, MMA ≤ 44000, dimensiones
-- `VehicleList.vue`: VDataTableServer (desktop) + cards (mobile), filtros
-- `VehicleForm.vue`: formulario con 4 secciones colapsables (Vee-Validate)
-- `VehicleDetail.vue`: ficha con expansion panels + documentos
-- `VehicleDocuments.vue`: tabla documentos por vehículo
-- 4 páginas: List, Detail, Create, Edit (con rutas)
-- 92 tests pasando, `npm run check` limpio (0 errores)
+- Code review fixes aplicados a los 5 módulos CRUD (Conductores, Rutas, Mantenimiento, Combustible, Cargas)
+- Correcciones: persistent dialogs, data-testid, error handling, CTA mobile empty state, ESLint v-slot
+- 5 branches con tests pasando (126 + 146 + 116 + 119 + 119 = 626 tests totales)
+- Todos los branches listos para PR → dev
 
 **Próximos pasos:**
 
-1. Fase 5: CRUD Vehículos (template para todos los módulos)
+1. Crear PRs para los 5 branches → dev
+2. Merge de los 5 branches a dev
+3. (Futuro) Extraer helpers compartidos (DRY) como `src/utils/*-helpers.js`
 
 **Bloqueos activos:**
 
