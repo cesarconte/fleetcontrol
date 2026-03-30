@@ -12,6 +12,7 @@ export default [
       'vue/singleline-html-element-content-newline': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'vue/valid-v-slot': ['error', { allowModifiers: true }],
     },
   },
   {
