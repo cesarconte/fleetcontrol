@@ -15,12 +15,12 @@
         <div>
           <h1 class="text-h5">{{ record.description }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ formatKg(record.weight_kg) }} · {{ getTypeLabel(record.type) }}
+            {{ formatKg(record.weight_kg) }} · {{ getCargoTypeLabel(record.type) }}
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip :color="getTypeColor(record.type)" variant="tonal">
-            {{ getTypeLabel(record.type) }}
+          <v-chip :color="getCargoTypeColor(record.type)" variant="tonal">
+            {{ getCargoTypeLabel(record.type) }}
           </v-chip>
           <v-btn
             icon="mdi-pencil"
@@ -52,7 +52,7 @@
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getTypeLabel(record.type) }}</div>
+                <div class="text-body-1">{{ getCargoTypeLabel(record.type) }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -122,14 +122,23 @@
       </v-card>
     </div>
 
-    <v-dialog v-model="confirmDelete" max-width="400">
+    <v-dialog v-model="confirmDelete" max-width="400" persistent>
       <v-card>
         <v-card-title>¿Eliminar carga?</v-card-title>
         <v-card-text>Se eliminará el registro permanentemente.</v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">Cancelar</v-btn>
-          <v-btn color="error" :loading="isDeleting" @click="handleDelete">Eliminar</v-btn>
+          <v-btn variant="text" data-testid="delete-cancel" @click="confirmDelete = false">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="error"
+            :loading="isDeleting"
+            data-testid="delete-confirm"
+            @click="handleDelete"
+          >
+            Eliminar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -140,6 +149,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCargo } from '@/composables/use-cargo.js'
+import { getCargoTypeColor, getCargoTypeLabel, formatKg } from '@/utils/cargo-helpers.js'
 
 const props = defineProps({ recordId: { type: String, required: true } })
 const router = useRouter()
@@ -152,30 +162,13 @@ onMounted(() => {
   getById(props.recordId)
 })
 
-function getTypeColor(type) {
-  const map = { general: 'info', refrigerated: 'cyan', dangerous: 'error', special: 'warning' }
-  return map[type] ?? 'grey'
-}
-
-function getTypeLabel(type) {
-  const map = {
-    general: 'General',
-    refrigerated: 'Frigorífica',
-    dangerous: 'Peligrosa',
-    special: 'Especial',
-  }
-  return map[type] ?? type
-}
-
-function formatKg(kg) {
-  return kg ? `${kg.toLocaleString('es-ES')} kg` : '—'
-}
-
 async function handleDelete() {
   isDeleting.value = true
   try {
     await remove(props.recordId)
     router.push('/cargas')
+  } catch {
+    // Error handled by composable notification
   } finally {
     isDeleting.value = false
     confirmDelete.value = false

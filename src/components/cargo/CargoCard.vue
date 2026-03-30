@@ -9,8 +9,8 @@
             {{ record.volume_m3 ? ` · ${record.volume_m3} m³` : '' }}
           </div>
         </div>
-        <v-chip :color="getTypeColor(record.type)" size="small" variant="tonal">
-          {{ getTypeLabel(record.type) }}
+        <v-chip :color="getCargoTypeColor(record.type)" size="small" variant="tonal">
+          {{ getCargoTypeLabel(record.type) }}
         </v-chip>
       </div>
 
@@ -26,25 +26,7 @@
 </template>
 
 <script setup>
+import { getCargoTypeColor, getCargoTypeLabel, formatKg } from '@/utils/cargo-helpers.js'
+
 defineProps({ record: { type: Object, required: true } })
-
-function getTypeColor(type) {
-  const map = { general: 'info', refrigerated: 'cyan', dangerous: 'error', special: 'warning' }
-  return map[type] ?? 'grey'
-}
-
-function getTypeLabel(type) {
-  const map = {
-    general: 'General',
-    refrigerated: 'Frigorífica',
-    dangerous: 'Peligrosa',
-    special: 'Especial',
-  }
-  return map[type] ?? type
-}
-
-function formatKg(kg) {
-  if (!kg) return '—'
-  return `${kg.toLocaleString('es-ES')} kg`
-}
 </script>

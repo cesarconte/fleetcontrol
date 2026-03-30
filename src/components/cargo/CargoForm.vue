@@ -191,6 +191,8 @@
 <script setup>
 import { ref, reactive, watch, onMounted } from 'vue'
 import { apiRoutes } from '@/services/api-routes.js'
+import { useNotificationStore } from '@/stores/notifications.js'
+import { CARGO_TYPE_OPTIONS } from '@/utils/cargo-helpers.js'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -233,12 +235,8 @@ watch(
   { deep: true },
 )
 
-const cargoTypes = [
-  { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'refrigerated' },
-  { title: 'Peligrosa (ADR)', value: 'dangerous' },
-  { title: 'Especial', value: 'special' },
-]
+const notifications = useNotificationStore()
+const cargoTypes = CARGO_TYPE_OPTIONS
 
 const adrClasses = [
   { title: '1 — Explosivos', value: '1' },
@@ -270,6 +268,7 @@ onMounted(async () => {
       value: r.id,
     }))
   } catch {
+    notifications.error('Error al cargar rutas')
   } finally {
     loadingRefs.value = false
   }

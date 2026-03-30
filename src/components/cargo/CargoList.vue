@@ -56,8 +56,8 @@
         </template>
 
         <template #item.type="{ item }">
-          <v-chip :color="getTypeColor(item.type)" size="small" variant="tonal">
-            {{ getTypeLabel(item.type) }}
+          <v-chip :color="getCargoTypeColor(item.type)" size="small" variant="tonal">
+            {{ getCargoTypeLabel(item.type) }}
           </v-chip>
         </template>
 
@@ -113,6 +113,14 @@
       <div v-if="!isLoading && items.length === 0" class="text-center pa-8">
         <v-icon size="48" color="grey">mdi-package-variant-closed</v-icon>
         <p class="text-body-1 mt-4 text-medium-emphasis">No hay cargas</p>
+        <v-btn
+          color="primary"
+          class="mt-4"
+          :to="{ name: 'CargoCreate' }"
+          data-testid="cargo-mobile-create"
+        >
+          Registrar carga
+        </v-btn>
       </div>
       <div v-if="totalPages > 1" class="d-flex justify-center mt-4">
         <v-pagination v-model="tablePage" :length="totalPages" :total-visible="5" rounded />
@@ -125,6 +133,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCargo } from '@/composables/use-cargo.js'
+import { getCargoTypeColor, getCargoTypeLabel, CARGO_TYPE_OPTIONS } from '@/utils/cargo-helpers.js'
 import CargoCard from './CargoCard.vue'
 
 const router = useRouter()
@@ -154,27 +163,7 @@ const headers = [
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
-const typeOptions = [
-  { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'refrigerated' },
-  { title: 'Peligrosa (ADR)', value: 'dangerous' },
-  { title: 'Especial', value: 'special' },
-]
-
-function getTypeColor(type) {
-  const map = { general: 'info', refrigerated: 'cyan', dangerous: 'error', special: 'warning' }
-  return map[type] ?? 'grey'
-}
-
-function getTypeLabel(type) {
-  const map = {
-    general: 'General',
-    refrigerated: 'Frigorífica',
-    dangerous: 'Peligrosa',
-    special: 'Especial',
-  }
-  return map[type] ?? type
-}
+const typeOptions = CARGO_TYPE_OPTIONS
 
 function debouncedSearch() {
   clearTimeout(searchTimer)
