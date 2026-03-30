@@ -154,14 +154,23 @@
       </v-card>
     </div>
 
-    <v-dialog v-model="confirmDelete" max-width="400">
+    <v-dialog v-model="confirmDelete" max-width="400" persistent>
       <v-card>
         <v-card-title>¿Eliminar registro?</v-card-title>
         <v-card-text>Se eliminará el registro permanentemente.</v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">Cancelar</v-btn>
-          <v-btn color="error" :loading="isDeleting" @click="handleDelete">Eliminar</v-btn>
+          <v-btn variant="text" data-testid="delete-cancel" @click="confirmDelete = false">
+            Cancelar
+          </v-btn>
+          <v-btn
+            color="error"
+            :loading="isDeleting"
+            data-testid="delete-confirm"
+            @click="handleDelete"
+          >
+            Eliminar
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -217,6 +226,8 @@ async function handleDelete() {
   try {
     await remove(props.recordId)
     router.push('/mantenimiento')
+  } catch {
+    // Error handled by composable notification
   } finally {
     isDeleting.value = false
     confirmDelete.value = false
