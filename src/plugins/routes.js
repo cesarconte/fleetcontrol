@@ -48,9 +48,45 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/conductores/nuevo',
+    name: 'DriverCreate',
+    component: () => import('@/pages/DriverCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/conductores/:id',
+    name: 'DriverDetail',
+    component: () => import('@/pages/DriverDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/conductores/:id/edit',
+    name: 'DriverEdit',
+    component: () => import('@/pages/DriverEditPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/rutas',
     name: 'Routes',
     component: () => import('@/pages/RoutesListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/rutas/nueva',
+    name: 'RouteCreate',
+    component: () => import('@/pages/RouteCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/rutas/:id',
+    name: 'RouteDetail',
+    component: () => import('@/pages/RouteDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/rutas/:id/edit',
+    name: 'RouteEdit',
+    component: () => import('@/pages/RouteEditPage.vue'),
     meta: { requiresAuth: true },
   },
   {
@@ -60,9 +96,45 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/mantenimiento/nuevo',
+    name: 'MaintenanceCreate',
+    component: () => import('@/pages/MaintenanceCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/mantenimiento/:id',
+    name: 'MaintenanceDetail',
+    component: () => import('@/pages/MaintenanceDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/mantenimiento/:id/edit',
+    name: 'MaintenanceEdit',
+    component: () => import('@/pages/MaintenanceEditPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/combustible',
     name: 'Fuel',
     component: () => import('@/pages/FuelListPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/combustible/nuevo',
+    name: 'FuelCreate',
+    component: () => import('@/pages/FuelCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/combustible/:id',
+    name: 'FuelDetail',
+    component: () => import('@/pages/FuelDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/combustible/:id/edit',
+    name: 'FuelEdit',
+    component: () => import('@/pages/FuelEditPage.vue'),
     meta: { requiresAuth: true },
   },
   {
