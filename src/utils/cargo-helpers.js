@@ -2,14 +2,23 @@
  * FleetControl — Cargo Helpers
  *
  * Shared utility functions and constants for cargo module.
+ * Type options derived from cargo-categories.js (DRY).
  */
 
-export const CARGO_TYPE_OPTIONS = [
-  { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'frigorifica' },
-  { title: 'Peligrosa (ADR)', value: 'peligrosa' },
-  { title: 'Especial', value: 'especial' },
-]
+import { CARGO_CATEGORIES } from '@/constants/cargo-categories.js'
+
+const LEGACY_LABELS = {
+  general: 'General',
+  frigorifica: 'Frigorífica',
+  peligrosa: 'Peligrosa',
+  especial: 'Especial',
+}
+
+/** @type {Array<{ title: string, value: string }>} */
+export const CARGO_TYPE_OPTIONS = CARGO_CATEGORIES.map(c => ({
+  title: LEGACY_LABELS[c.legacyType] ?? c.legacyType,
+  value: c.legacyType,
+}))
 
 export function getCargoTypeColor(tipo) {
   const map = { general: 'info', frigorifica: 'teal', peligrosa: 'error', especial: 'warning' }
@@ -17,13 +26,7 @@ export function getCargoTypeColor(tipo) {
 }
 
 export function getCargoTypeLabel(tipo) {
-  const map = {
-    general: 'General',
-    frigorifica: 'Frigorífica',
-    peligrosa: 'Peligrosa',
-    especial: 'Especial',
-  }
-  return map[tipo] ?? tipo
+  return LEGACY_LABELS[tipo] ?? tipo
 }
 
 export function formatKg(kg) {

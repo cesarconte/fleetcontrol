@@ -3,14 +3,19 @@
  *
  * All cargo form validations per PRD §4.6.
  * ADR validation for dangerous goods.
+ * Subcategory validation from taxonomy.
  */
 
 import { z } from 'zod'
+import { getAllSubcategories } from '@/constants/cargo-categories.js'
 
 /** ADR classes 1-9 */
 const ADR_CLASSES = ['1', '2', '3', '4.1', '4.2', '4.3', '5.1', '5.2', '6.1', '6.2', '7', '8', '9']
 
-export const cargoSchema = z.object({
+/** Valid subcategory IDs from taxonomy */
+const VALID_SUBCATEGORY_IDS = getAllSubcategories().map(s => s.id)
+
+const cargoBaseSchema = z.object({
   route_id: z.string({ required_error: 'Debe seleccionar una ruta' }).uuid('Ruta inválida'),
 
   descripcion: z
@@ -28,6 +33,13 @@ export const cargoSchema = z.object({
       errorMap: () => ({ message: 'Tipo de carga inválido' }),
     })
     .default('general'),
+
+  subcategoria_id: z
+    .enum(VALID_SUBCATEGORY_IDS, {
+      errorMap: () => ({ message: 'Subcategoría inválida' }),
+    })
+    .optional()
+    .or(z.literal('')),
 
   // ── ADR (solo si tipo === 'peligrosa') ───────────────
   adr_clase: z
@@ -51,7 +63,19 @@ export const cargoSchema = z.object({
   cmr_lugar_entrega: z.string().optional().or(z.literal('')),
 })
 
-export const cargoUpdateSchema = cargoSchema.partial()
+export const cargoSchema = cargoBaseSchema.refine(
+  data => {
+    if (!data.subcategoria_id) return true
+    const sub = getAllSubcategories().find(s => s.id === data.subcategoria_id)
+    return sub && sub.mapToLegacy === data.tipo
+  },
+  {
+    message: 'La subcategoría no corresponde al tipo de carga seleccionado',
+    path: ['subcategoria_id'],
+  },
+)
+
+export const cargoUpdateSchema = cargoBaseSchema.partial()
 
 export const cargoSearchSchema = z.object({
   search: z.string().optional(),
