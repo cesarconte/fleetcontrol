@@ -63,7 +63,7 @@ describe('cargoSchema', () => {
     })
 
     it('debería usar general por defecto', () => {
-      const { tipo, ...rest } = validCargo
+      const { ...rest } = validCargo
       const result = cargoSchema.safeParse(rest)
       expect(result.success).toBe(true)
       expect(result.data.tipo).toBe('general')
@@ -156,6 +156,69 @@ describe('cargoSchema', () => {
         cmr_remitente: 'Transportes García SL',
         cmr_destinatario: 'Distribuciones Norte',
         cmr_lugar_entrega: 'Madrid',
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('subcategoria_id', () => {
+    it('debería aceptar subcategoría válida con tipo compatible', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        tipo: 'peligrosa',
+        subcategoria_id: 'adr-clase-3',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería rechazar subcategoría con tipo incompatible', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        tipo: 'general',
+        subcategoria_id: 'adr-clase-3',
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('debería aceptar subcategoría vacía', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        subcategoria_id: '',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería rechazar subcategoría inexistente', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        subcategoria_id: 'no-existe',
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('debería aceptar subcategoría ATP con tipo frigorifica', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        tipo: 'frigorifica',
+        subcategoria_id: 'atp-congelados',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería aceptar subcategoría gen con tipo general', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        tipo: 'general',
+        subcategoria_id: 'gen-paletizada',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('debería aceptar subcategoría ani con tipo especial', () => {
+      const result = cargoSchema.safeParse({
+        ...validCargo,
+        tipo: 'especial',
+        subcategoria_id: 'ani-ganado-mayor',
       })
       expect(result.success).toBe(true)
     })

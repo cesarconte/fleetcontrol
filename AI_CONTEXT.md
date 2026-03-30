@@ -85,26 +85,26 @@ Automatización:       [PENDIENTE]
 
 ### Gestión — Core (v1.0)
 
-| Módulo                     | Estado         | Notas                                                     |
-| -------------------------- | -------------- | --------------------------------------------------------- |
-| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                  |
-| Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod) |
-| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                      |
-| Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                |
-| Módulo Conductores         | 🟢 Completado  | CRUD, licencias, horas, CAP                               |
-| Módulo Rutas               | 🟢 Completado  | Activas, historial, planificación                         |
-| Módulo Mantenimiento       | 🟢 Completado  | Preventivo, correctivo, repuestos                         |
-| Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                    |
-| Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga                                 |
-| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones  |
-| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría  |
-| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                      |
-| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                 |
-| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                          |
-| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                             |
-| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                 |
-| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                             |
-| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                          |
+| Módulo                     | Estado         | Notas                                                                        |
+| -------------------------- | -------------- | ---------------------------------------------------------------------------- |
+| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                                     |
+| Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod)                    |
+| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                                         |
+| Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                                   |
+| Módulo Conductores         | 🟢 Completado  | CRUD, licencias, horas, CAP                                                  |
+| Módulo Rutas               | 🟢 Completado  | Activas, historial, planificación                                            |
+| Módulo Mantenimiento       | 🟢 Completado  | Preventivo, correctivo, repuestos                                            |
+| Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                                       |
+| Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance |
+| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                     |
+| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
+| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                                         |
+| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                                    |
+| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                                             |
+| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
+| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
+| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
+| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                                             |
 
 ### Documentación de Transporte (v1.0)
 
@@ -209,76 +209,73 @@ _(Complementa las de AGENTS.md)_
 ## 8. Contexto de la Última Sesión
 
 **Fecha:** 2026-03-30
-**Branch:** feature/conductores-carnets
+**Branch:** feature/taxonomia-cargas
 
 **Trabajo realizado:**
 
-- Módulo Conductores: añadida sección completa de Carnets y Certificaciones (form + detail)
-- Carnets soportados: Carnet de conducir (C, C+E, D, D+E...), CAP, Tarjeta tacógrafo, Reconocimiento médico, ADR
-- Renombrado de todos los campos del frontend a español para coincidir con la BD (nombre_completo, nif_nie, etc.)
-- Valores de status en español: activo, baja_temporal, baja_definitiva
-- Subida de documentos adjuntos via Supabase Storage (PDF/JPEG/PNG, max 10MB)
-- Nuevo composable `use-driver-documents.js` con cálculo de estado de vencimiento
-- Nuevas constantes `driver-document-types.js` (tipos de doc + clases de carnet)
-- Migración SQL para bucket `documentos-conductores` con RLS
-- Componentes extraídos para mantener <200 líneas/archivo
-- 298 tests pasando, lint y typecheck limpios
+- **Taxonomía de Cargas**: Implementada taxonomía jerárquica completa (4 categorías, 27 subcategorías) con requisitos de vehículo por subcategoría
+- **Equipamiento Normativo**: Definidos requisitos de equipamiento obligatorio por subcategoría (ADR, ATP, Animales, Carga General) con referencias legales
+- **Compliance de Vehículos**: Creado módulo de verificación de compatibilidad vehículo-carga con auto-checks y checklists de equipamiento
+- **Selector jerárquico en CargoForm**: Reemplazado selector plano de tipo por dos selects encadenados (categoría → subcategoría) con info de normativa y requisitos
+- **Ampliación CargoDetail**: Nueva sección "Requisitos y Normativa" con checklist de equipamiento y referencia legal
+- **Validación Zod**: Añadido `subcategoria_id` al schema con validación cruzada tipo↔subcategoría
+- **Ampliación vehicle_type**: 11 nuevos tipos de vehículo añadidos al enum PostgreSQL (furgoneta, furgon, ganadero, isotermo, mega, plataforma_abierta, gondola, portacovertores, tolva, grua, mixto)
+- **Refactorización cargo-helpers**: `CARGO_TYPE_OPTIONS` derivado de `cargo-categories.js` (DRY)
+- **Migración SQL creada**: `20260330_015_cargo_taxonomia.sql` (subcategoria_id + vehicle_type ampliado)
+- **Tests**: 111 tests nuevos/actualizados para el módulo de cargas (375 totales pasando, lint 0 errores)
 
 **Archivos creados (6):**
 
-- `src/constants/driver-document-types.js` + `.spec.js`
-- `src/composables/use-driver-documents.js`
-- `src/components/drivers/DriverFormCarnets.vue`
-- `src/components/drivers/DriverDetailCarnets.vue`
-- `src/components/drivers/DriverDocumentUploader.vue`
-- `supabase/migrations/20260330_014_driver_storage.sql`
+- `src/constants/cargo-categories.js` + `.spec.js` (taxonomía + 49 tests)
+- `src/constants/vehicle-equipment.js` + `.spec.js` (equipamiento normativo)
+- `src/utils/cargo-compliance.js` + `.spec.js` (verificación compliance + 24 tests)
+- `supabase/migrations/20260330_015_cargo_taxonomia.sql`
 
-**Archivos modificados (8):**
+**Archivos modificados (5):**
 
-- `src/validations/driver-schema.js` + `.spec.js`
-- `src/services/api-drivers.js` + `.spec.js`
-- `src/components/drivers/DriverForm.vue`
-- `src/components/drivers/DriverDetail.vue`
-- `src/components/drivers/DriverList.vue`
-- `src/components/drivers/DriverCard.vue`
-
-**Convención establecida:**
-
-- Nombres de archivo: inglés
-- Texto UI: español (España)
-- Columnas BD: español (snake_case)
-- Campos de formulario que mapean a BD: español
+- `src/utils/cargo-helpers.js` (derivado de constantes)
+- `src/components/cargo/CargoForm.vue` (selector jerárquico)
+- `src/components/cargo/CargoDetail.vue` (sección requisitos y normativa)
+- `src/validations/cargo-schema.js` + `.spec.js` (subcategoria_id + 7 tests nuevos)
 
 **Próximos pasos:**
 
-1. Crear PR → dev y merge
-2. Revisar si otros módulos (vehículos, rutas, etc.) tienen el mismo problema de nombres EN vs ES
-3. (Futuro) Extraer helpers compartidos (DRY) como `src/utils/*-helpers.js`
+1. ✅ Crear PR → dev y merge
+2. **PENDIENTE: Aplicar migración `20260330_015` a Supabase** (conexión no disponible en esta sesión). Ejecutar manualmente o cuando la conexión esté activa.
+3. **PENDIENTE Fase 5.1**: Integrar `checkVehicleCompliance()` en la planificación de rutas (§4.4.3 PRD) — validar automáticamente si el vehículo es apto para la carga al planificar una ruta.
+4. **PENDIENTE**: Definir equipamiento para 6 subcategorías de carga general sin equipamiento específico: `gen-granel-solido`, `gen-granel-liquido`, `gen-textil`, `gen-maquinaria`, `gen-gran-volumen`, `gen-mudanzas` (ver TODO en `vehicle-equipment.spec.js`).
+5. **PENDIENTE**: Crear tabla `vehicle_documents` en BD para almacenar certificaciones del vehículo (permiso ADR, certificado ATP, ITV, seguro, etc.) y habilitar compliance automático real contra documentos vigentes.
+6. **PENDIENTE**: Actualizar `CargoList.vue` y `CargoCard.vue` para mostrar subcategoría y badge de compliance.
+7. Revisar si otros módulos (vehículos, rutas, etc.) tienen el mismo problema de nombres EN vs ES
 
 **Bloqueos activos:**
 
-- Ninguno
+- Conexión a Supabase no disponible para aplicar migración (no bloqueante para desarrollo local)
 
 ---
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                                |
-| ------------------------------- | ------------ | ---------------------------------------- |
-| PRD completo                    | Documento    | `PRD.md`                                 |
-| Reglas del agente               | Documento    | `AGENTS.md`                              |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)     |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`            |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`          |
-| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js` |
-| Tipos de documentos             | Código       | `src/constants/document-types.js`        |
-| Schema BD                       | SQL          | `supabase/migrations/`                   |
-| Material Design 3               | Docs         | https://m3.material.io                   |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                    |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                      |
-| ADR 2025                        | Normativa    | UNECE                                    |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                           |
+| Recurso                         | Tipo         | Ubicación                                              |
+| ------------------------------- | ------------ | ------------------------------------------------------ |
+| PRD completo                    | Documento    | `PRD.md`                                               |
+| Reglas del agente               | Documento    | `AGENTS.md`                                            |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                   |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                          |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`                        |
+| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                    |
+| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                   |
+| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
+| Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
+| Schema BD                       | SQL          | `supabase/migrations/`                                 |
+| Migración taxonomía cargas      | SQL          | `supabase/migrations/20260330_015_cargo_taxonomia.sql` |
+| Material Design 3               | Docs         | https://m3.material.io                                 |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                              |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                    |
+| ADR 2025                        | Normativa    | UNECE                                                  |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                         |
 
 ---
 

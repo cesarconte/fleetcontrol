@@ -17,11 +17,23 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-select
-                v-model="form.tipo"
-                :items="cargoTypes"
-                label="Tipo *"
+                v-model="selectedCategoryId"
+                :items="categoryOptions"
+                label="Categoría *"
                 variant="outlined"
-                data-testid="cargo-type"
+                data-testid="cargo-category"
+                @update:model-value="onCategoryChange"
+              />
+            </v-col>
+            <v-col cols="6" sm="3">
+              <v-select
+                v-model="form.subcategoria_id"
+                :items="subcategoryOptions"
+                label="Subcategoría"
+                variant="outlined"
+                :disabled="!selectedCategoryId"
+                data-testid="cargo-subcategory"
+                @update:model-value="onSubcategoryChange"
               />
             </v-col>
             <v-col cols="12">
@@ -54,6 +66,29 @@
                 variant="outlined"
                 data-testid="cargo-volume"
               />
+            </v-col>
+          </v-row>
+
+          <v-row v-if="selectedSubcategory">
+            <v-col cols="12">
+              <v-alert type="info" variant="tonal" density="compact">
+                <div class="text-caption font-weight-medium mb-1">Normativa aplicable</div>
+                <div class="text-body-2">{{ normativeReference || '—' }}</div>
+              </v-alert>
+            </v-col>
+            <v-col v-if="vehicleRequirements.length" cols="12">
+              <div class="text-caption text-medium-emphasis mb-1">Requisitos del vehículo</div>
+              <div class="d-flex flex-wrap ga-1">
+                <v-chip
+                  v-for="req in vehicleRequirements"
+                  :key="req"
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                >
+                  {{ formatRequirement(req) }}
+                </v-chip>
+              </div>
             </v-col>
           </v-row>
         </v-expansion-panel-text>
@@ -147,10 +182,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { apiRoutes } from '@/services/api-routes.js'
 import { useNotificationStore } from '@/stores/notifications.js'
-import { CARGO_TYPE_OPTIONS } from '@/utils/cargo-helpers.js'
+import {
+  getCategoryOptions,
+  getSubcategoryOptions,
+  getVehicleRequirements,
+  getCategoryById,
+  subcategoryToLegacyType,
+} from '@/constants/cargo-categories.js'
+import { getNormativeReference } from '@/constants/vehicle-equipment.js'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -172,6 +214,7 @@ const form = reactive({
   peso_kg: null,
   volumen_m3: null,
   tipo: 'general',
+  subcategoria_id: '',
   adr_clase: '',
   adr_numero_onu: '',
   adr_grupo_embalaje: '',
@@ -185,12 +228,58 @@ watch(
   () => props.initialValues,
   nv => {
     Object.assign(form, nv)
+    if (nv.subcategoria_id) {
+      const sub = getVehicleRequirements(nv.subcategoria_id)
+      if (sub.length) {
+        // Derive category from subcategory
+        const catId = nv.subcategoria_id.split('-')[0]
+        selectedCategoryId.value = catId
+      }
+    }
   },
   { deep: true },
 )
 
 const notifications = useNotificationStore()
-const cargoTypes = CARGO_TYPE_OPTIONS
+
+// ── Hierarchical selectors ──────────────────────────────────────────────
+
+const selectedCategoryId = ref('')
+const categoryOptions = getCategoryOptions()
+
+const subcategoryOptions = computed(() =>
+  selectedCategoryId.value ? getSubcategoryOptions(selectedCategoryId.value) : [],
+)
+
+const selectedSubcategory = computed(() => form.subcategoria_id || null)
+
+const vehicleRequirements = computed(() =>
+  selectedSubcategory.value ? getVehicleRequirements(selectedSubcategory.value) : [],
+)
+
+const normativeReference = computed(() =>
+  selectedSubcategory.value ? getNormativeReference(selectedSubcategory.value) : null,
+)
+
+function onCategoryChange(categoryId) {
+  form.subcategoria_id = ''
+  if (categoryId) {
+    const cat = getCategoryById(categoryId)
+    if (cat) form.tipo = cat.legacyType
+  }
+}
+
+function onSubcategoryChange(subcategoryId) {
+  if (subcategoryId) {
+    form.tipo = subcategoryToLegacyType(subcategoryId)
+  }
+}
+
+function formatRequirement(req) {
+  return req.replace(/_/g, ' ')
+}
+
+// ── ADR options (unchanged) ─────────────────────────────────────────────
 
 const adrClasses = [
   { title: '1 — Explosivos', value: '1' },
@@ -214,7 +303,14 @@ const packingGroups = [
   { title: 'III — Peligro bajo', value: 'III' },
 ]
 
+// ── Init ────────────────────────────────────────────────────────────────
+
 onMounted(async () => {
+  // Restore category from existing subcategory
+  if (form.subcategoria_id) {
+    selectedCategoryId.value = form.subcategoria_id.split('-')[0]
+  }
+
   try {
     const routes = await apiRoutes.getAll()
     routeOptions.value = routes.map(r => ({

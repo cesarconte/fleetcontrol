@@ -16,6 +16,7 @@
           <h1 class="text-h5">{{ record.descripcion }}</h1>
           <p class="text-body-2 text-medium-emphasis">
             {{ formatKg(record.peso_kg) }} · {{ getCargoTypeLabel(record.tipo) }}
+            <template v-if="subcategoryName">· {{ subcategoryName }}</template>
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -54,6 +55,10 @@
                 <div class="text-caption text-medium-emphasis">Tipo</div>
                 <div class="text-body-1">{{ getCargoTypeLabel(record.tipo) }}</div>
               </v-col>
+              <v-col v-if="subcategoryName" cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Subcategoría</div>
+                <div class="text-body-1">{{ subcategoryName }}</div>
+              </v-col>
             </v-row>
           </v-expansion-panel-text>
         </v-expansion-panel>
@@ -72,6 +77,50 @@
               <v-col cols="4">
                 <div class="text-caption text-medium-emphasis">Grupo embalaje</div>
                 <div class="text-body-1">{{ record.adr_grupo_embalaje || '—' }}</div>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+
+        <v-expansion-panel
+          v-if="normativeRef || equipmentGroups.length"
+          title="Requisitos y Normativa"
+          value="requirements"
+        >
+          <v-expansion-panel-text>
+            <v-row>
+              <v-col v-if="normativeRef" cols="12">
+                <v-alert type="info" variant="tonal" density="compact" class="mb-3">
+                  <div class="text-caption font-weight-medium">Normativa aplicable</div>
+                  <div class="text-body-2">{{ normativeRef }}</div>
+                </v-alert>
+              </v-col>
+              <v-col v-if="record.subcategoria_id" cols="12">
+                <div class="text-caption text-medium-emphasis mb-1">Requisitos del vehículo</div>
+                <div class="d-flex flex-wrap ga-1">
+                  <v-chip
+                    v-for="req in vehicleReqs"
+                    :key="req"
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                  >
+                    {{ req.replace(/_/g, ' ') }}
+                  </v-chip>
+                </div>
+              </v-col>
+              <v-col v-for="group in equipmentGroups" :key="group.groupName" cols="12">
+                <div class="text-caption font-weight-medium mb-1">{{ group.groupName }}</div>
+                <v-list density="compact" class="bg-transparent">
+                  <v-list-item v-for="el in group.elementos" :key="el" class="px-0" min-height="32">
+                    <template #prepend>
+                      <v-icon size="small" color="warning">mdi-checkbox-blank-outline</v-icon>
+                    </template>
+                    <v-list-item-title class="text-body-2">
+                      {{ el.replace(/_/g, ' ') }}
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -142,10 +191,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCargo } from '@/composables/use-cargo.js'
 import { getCargoTypeColor, getCargoTypeLabel, formatKg } from '@/utils/cargo-helpers.js'
+import { getSubcategoryById, getVehicleRequirements } from '@/constants/cargo-categories.js'
+import { getEquipmentChecklist, getNormativeReference } from '@/constants/vehicle-equipment.js'
 
 const props = defineProps({ recordId: { type: String, required: true } })
 const router = useRouter()
@@ -153,6 +204,27 @@ const { getById, remove, isLoading, currentRecord: record } = useCargo()
 const openPanels = ref(['details'])
 const confirmDelete = ref(false)
 const isDeleting = ref(false)
+
+const subcategoryName = computed(() => {
+  if (!record.value?.subcategoria_id) return null
+  const sub = getSubcategoryById(record.value.subcategoria_id)
+  return sub ? sub.nombre : null
+})
+
+const normativeRef = computed(() => {
+  if (!record.value?.subcategoria_id) return null
+  return getNormativeReference(record.value.subcategoria_id)
+})
+
+const vehicleReqs = computed(() => {
+  if (!record.value?.subcategoria_id) return []
+  return getVehicleRequirements(record.value.subcategoria_id)
+})
+
+const equipmentGroups = computed(() => {
+  if (!record.value?.subcategoria_id) return []
+  return getEquipmentChecklist(record.value.subcategoria_id)
+})
 
 onMounted(() => {
   getById(props.recordId)
