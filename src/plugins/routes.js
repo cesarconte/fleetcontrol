@@ -144,6 +144,24 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/cargas/nueva',
+    name: 'CargoCreate',
+    component: () => import('@/pages/CargoCreatePage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cargas/:id',
+    name: 'CargoDetail',
+    component: () => import('@/pages/CargoDetailPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cargas/:id/edit',
+    name: 'CargoEdit',
+    component: () => import('@/pages/CargoEditPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/tacografos',
     name: 'Tachographs',
     component: () => import('@/pages/TachographsPage.vue'),
