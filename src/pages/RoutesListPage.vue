@@ -1,12 +1,16 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Rutas</h1>
-    <v-card>
-      <v-card-text>
-        <p class="text-body-1 text-medium-emphasis">Página en construcción</p>
-      </v-card-text>
-    </v-card>
+    <div class="d-flex justify-space-between align-center mb-4">
+      <h1 class="text-h4">Rutas</h1>
+      <v-btn color="primary" :to="{ name: 'RouteCreate' }" data-testid="routes-create-btn">
+        <v-icon start>mdi-plus</v-icon>
+        Nueva ruta
+      </v-btn>
+    </div>
+    <RouteList />
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import RouteList from '@/components/routes/RouteList.vue'
+</script>
