@@ -4,6 +4,9 @@
  * Pure functions to check vehicle compliance against cargo subcategory
  * requirements and provide equipment checklists.
  *
+ * Compatibility checks use tipo_carroceria (vehicle body type) which
+ * "dialogues" directly with cargo type per EU/RD 2822/1998 classification.
+ *
  * @see PRD §4.4.3 — Planificación de Rutas (validación automática)
  * @see PRD §4.6 — Gestión de Cargas
  */
@@ -28,55 +31,42 @@ import {
  */
 
 /**
- * Map of vehicle types that are suitable for each cargo legacy type.
- * A vehicle is "compatible" if its tipo_vehiculo is in the list for the cargo type.
+ * Map of body types (tipo_carroceria) compatible with each cargo legacy type.
+ * Values match vehicle_body_type enum in PostgreSQL.
  */
 const VEHICLE_COMPATIBILITY = {
   general: [
     'lona',
     'caja_cerrada',
+    'caja_abierta',
     'furgon',
     'furgoneta',
     'plataforma_abierta',
-    'semirremolque',
-    'remolque',
-    'vehiculo_rigido',
-    'tractora',
     'portacontenedores',
-    'mixto',
+    'capitone',
     'especial',
   ],
-  frigorifica: ['frigorifico', 'isotermo', 'semirremolque', 'vehiculo_rigido', 'tractora'],
-  peligrosa: [
-    'cisterna',
-    'caja_cerrada',
-    'semirremolque',
-    'vehiculo_rigido',
-    'tractora',
-    'especial',
-  ],
+  frigorifica: ['frigorifico', 'isotermo', 'calorifico'],
+  peligrosa: ['cisterna', 'caja_cerrada', 'especial'],
   especial: [
     'ganadero',
     'plataforma_abierta',
     'basculante',
-    'gondola',
     'grua',
-    'portacoches',
-    'mega',
+    'portavehiculos',
     'tolva',
-    'camion_basculante',
-    'semirremolque',
-    'vehiculo_rigido',
-    'tractora',
+    'jaula',
+    'silo',
     'especial',
   ],
 }
 
 /**
- * Additional type-specific compatibility overrides per subcategory.
- * These extend or refine the legacy type defaults.
+ * Additional compatibility overrides per subcategory.
+ * When present, ONLY these body types are allowed (no fallback to legacy).
+ * Values match vehicle_body_type enum.
  */
-const SUBCATEGORY_VEHICLE_OVERRIDES = {
+const SUBCATEGORY_BODY_OVERRIDES = {
   'adr-clase-1': ['caja_cerrada', 'especial'],
   'adr-clase-2': ['cisterna'],
   'adr-clase-3': ['cisterna'],
@@ -85,45 +75,41 @@ const SUBCATEGORY_VEHICLE_OVERRIDES = {
   'atp-congelados': ['frigorifico', 'isotermo'],
   'atp-refrig-fuerte': ['frigorifico', 'isotermo'],
   'atp-refrig-suave': ['frigorifico', 'isotermo'],
-  'atp-calorificos': ['isotermo'],
-  'ani-ganado-mayor': ['ganadero'],
-  'ani-ganado-menor': ['ganadero'],
-  'ani-aves-conejos': ['ganadero', 'especial'],
-  'gen-granel-solido': ['basculante', 'camion_basculante', 'tolva'],
+  'atp-calorificos': ['isotermo', 'calorifico'],
+  'ani-ganado-mayor': ['ganadero', 'jaula'],
+  'ani-ganado-menor': ['ganadero', 'jaula'],
+  'ani-aves-conejos': ['jaula', 'ganadero'],
+  'gen-granel-solido': ['basculante', 'tolva'],
   'gen-granel-liquido': ['cisterna'],
   'gen-vidrio': ['plataforma_abierta', 'especial'],
-  'gen-maquinaria': ['gondola', 'plataforma_abierta', 'portacoches', 'grua'],
-  'gen-siderurgico': ['plataforma_abierta', 'gondola'],
-  'gen-gran-volumen': ['mega', 'semirremolque'],
-  'gen-mudanzas': ['caja_cerrada', 'furgon', 'furgoneta', 'mixto'],
+  'gen-maquinaria': ['plataforma_abierta', 'grua', 'portavehiculos'],
+  'gen-siderurgico': ['plataforma_abierta', 'portabobinas'],
+  'gen-gran-volumen': ['lona', 'especial'],
+  'gen-mudanzas': ['caja_cerrada', 'furgon', 'furgoneta', 'capitone'],
 }
 
 /**
- * Check if a vehicle type is compatible with a cargo subcategory.
- * @param {string} vehicleType - The vehicle's tipo_vehiculo value
+ * Check if a vehicle body type is compatible with a cargo subcategory.
+ * @param {string} bodyType - The vehicle's tipo_carroceria value
  * @param {string} subcategoryId - The cargo subcategory ID
  * @returns {boolean}
  */
-export function isVehicleTypeCompatible(vehicleType, subcategoryId) {
+export function isVehicleTypeCompatible(bodyType, subcategoryId) {
   const sub = getSubcategoryById(subcategoryId)
   if (!sub) return true
 
-  // Check subcategory-specific overrides first
-  const overrides = SUBCATEGORY_VEHICLE_OVERRIDES[subcategoryId]
-  if (overrides && overrides.includes(vehicleType)) return true
-  if (overrides && !overrides.includes(vehicleType)) {
-    // If overrides exist, they are the ONLY allowed types
-    return false
+  const overrides = SUBCATEGORY_BODY_OVERRIDES[subcategoryId]
+  if (overrides) {
+    return overrides.includes(bodyType)
   }
 
-  // Fall back to legacy type compatibility
   const legacyType = sub.mapToLegacy
   const compatible = VEHICLE_COMPATIBILITY[legacyType] ?? []
-  return compatible.includes(vehicleType)
+  return compatible.includes(bodyType)
 }
 
 /**
- * Get the recommended vehicle types for a subcategory.
+ * Get the recommended body types for a subcategory.
  * @param {string} subcategoryId
  * @returns {string[]}
  */
@@ -131,7 +117,7 @@ export function getRecommendedVehicleTypes(subcategoryId) {
   const sub = getSubcategoryById(subcategoryId)
   if (!sub) return []
 
-  const overrides = SUBCATEGORY_VEHICLE_OVERRIDES[subcategoryId]
+  const overrides = SUBCATEGORY_BODY_OVERRIDES[subcategoryId]
   if (overrides) return overrides
 
   return VEHICLE_COMPATIBILITY[sub.mapToLegacy] ?? []
@@ -139,7 +125,7 @@ export function getRecommendedVehicleTypes(subcategoryId) {
 
 /**
  * Full compliance check for a vehicle against a cargo subcategory.
- * @param {{ tipo_vehiculo: string, mma_kg?: number, status?: string } | null} vehicle
+ * @param {{ tipo_carroceria: string, categoria_ue?: string, mma_kg?: number, status?: string } | null} vehicle
  * @param {string} subcategoryId
  * @returns {ComplianceResult}
  */
@@ -162,25 +148,25 @@ export function checkVehicleCompliance(vehicle, subcategoryId) {
   const autoPassed = []
   const autoFailed = []
 
-  // ── Auto check 1: Vehicle type compatibility ──────────────────────────
-  if (vehicle?.tipo_vehiculo) {
-    if (isVehicleTypeCompatible(vehicle.tipo_vehiculo, subcategoryId)) {
-      autoPassed.push(`Tipo de vehículo (${vehicle.tipo_vehiculo}) compatible`)
+  // ── Auto check 1: Body type compatibility ──────────────────────────────
+  if (vehicle?.tipo_carroceria) {
+    if (isVehicleTypeCompatible(vehicle.tipo_carroceria, subcategoryId)) {
+      autoPassed.push(`Carrocería (${vehicle.tipo_carroceria}) compatible`)
     } else {
       autoFailed.push(
-        `Tipo de vehículo (${vehicle.tipo_vehiculo}) no apto. Recomendado: ${getRecommendedVehicleTypes(subcategoryId).join(', ')}`,
+        `Carrocería (${vehicle.tipo_carroceria}) no apta. Recomendado: ${getRecommendedVehicleTypes(subcategoryId).join(', ')}`,
       )
     }
   }
 
-  // ── Auto check 2: Vehicle is active ───────────────────────────────────
+  // ── Auto check 2: Vehicle is active ────────────────────────────────────
   if (vehicle?.status && vehicle.status !== 'activo') {
     autoFailed.push(`Vehículo en estado "${vehicle.status}" — debe estar activo`)
   } else if (vehicle?.status === 'activo') {
     autoPassed.push('Vehículo activo')
   }
 
-  // ── Equipment checklist (manual verification) ─────────────────────────
+  // ── Equipment checklist (manual verification) ──────────────────────────
   const equipmentGroups = getEquipmentChecklist(subcategoryId)
   const allEquipment = getEquipmentElements(subcategoryId)
   const normative = getNormativeReference(subcategoryId)
@@ -200,7 +186,7 @@ export function checkVehicleCompliance(vehicle, subcategoryId) {
 }
 
 /**
- * Get combined requirements summary for a subcategory (vehicle type + equipment).
+ * Get combined requirements summary for a subcategory.
  * @param {string} subcategoryId
  * @returns {{ vehicleRequirements: string[], equipmentElements: string[], normativeReference: string | null }}
  */

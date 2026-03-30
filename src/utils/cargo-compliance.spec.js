@@ -63,7 +63,7 @@ describe('cargo-compliance', () => {
 
   describe('checkVehicleCompliance', () => {
     it('vehículo compatible debería ser compliant', () => {
-      const vehicle = { tipo_vehiculo: 'cisterna', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'cisterna', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'adr-clase-3')
       expect(result.isCompliant).toBe(true)
       expect(result.autoFailed).toHaveLength(0)
@@ -71,34 +71,34 @@ describe('cargo-compliance', () => {
     })
 
     it('vehículo incompatible debería fallar auto checks', () => {
-      const vehicle = { tipo_vehiculo: 'frigorifico', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'frigorifico', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'adr-clase-3')
       expect(result.isCompliant).toBe(false)
       expect(result.autoFailed.length).toBeGreaterThan(0)
     })
 
     it('vehículo inactivo debería fallar', () => {
-      const vehicle = { tipo_vehiculo: 'cisterna', status: 'mantenimiento' }
+      const vehicle = { tipo_carroceria: 'cisterna', status: 'mantenimiento' }
       const result = checkVehicleCompliance(vehicle, 'adr-clase-3')
       expect(result.isCompliant).toBe(false)
       expect(result.autoFailed.some(f => f.includes('mantenimiento'))).toBe(true)
     })
 
     it('debería retornar equipamiento como manual checks', () => {
-      const vehicle = { tipo_vehiculo: 'cisterna', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'cisterna', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'adr-clase-3')
       expect(result.manualChecks.length).toBeGreaterThan(0)
       expect(result.manualChecks).toContain('calzo_proporcionado_al_peso')
     })
 
     it('debería retornar referencia normativa', () => {
-      const vehicle = { tipo_vehiculo: 'cisterna', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'cisterna', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'adr-clase-3')
       expect(result.normativeReference).toContain('ADR')
     })
 
     it('debería retornar nombre de subcategoría', () => {
-      const vehicle = { tipo_vehiculo: 'frigorifico', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'frigorifico', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'atp-congelados')
       expect(result.subcategoryName).toContain('Congelados')
     })
@@ -117,14 +117,14 @@ describe('cargo-compliance', () => {
     })
 
     it('ATP debería tener checklist de equipamiento frigorífico', () => {
-      const vehicle = { tipo_vehiculo: 'frigorifico', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'frigorifico', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'atp-congelados')
       expect(result.equipmentChecklist.length).toBeGreaterThanOrEqual(1)
       expect(result.manualChecks).toContain('termografo_registrador_de_temperatura')
     })
 
     it('gen-paletizada debería tener equipamiento de estiba', () => {
-      const vehicle = { tipo_vehiculo: 'lona', status: 'activo' }
+      const vehicle = { tipo_carroceria: 'lona', status: 'activo' }
       const result = checkVehicleCompliance(vehicle, 'gen-paletizada')
       expect(result.manualChecks).toContain('cinchas_de_amarre_homologadas_en_12195_2')
     })

@@ -20,7 +20,7 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ getTypeLabel(vehicle.tipo_vehiculo) }}</span>
+        <span>{{ getBodyLabel(vehicle.tipo_carroceria) }}</span>
         <span>
           <v-chip
             v-if="vehicle.distintivo_ambiental && vehicle.distintivo_ambiental !== 'sin_etiqueta'"
@@ -38,25 +38,9 @@
 
 <script setup>
 import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers.js'
+import { getBodyLabel } from '@/constants/vehicle-types.js'
 
 defineProps({
   vehicle: { type: Object, required: true },
 })
-
-function getTypeLabel(type) {
-  const map = {
-    tractora: 'Tractora',
-    vehiculo_rigido: 'Rígido',
-    semirremolque: 'Semirremolque',
-    remolque: 'Remolque',
-    cisterna: 'Cisterna',
-    frigorifico: 'Frigorífico',
-    basculante: 'Volquete',
-    lona: 'Lona',
-    caja_cerrada: 'Furgón',
-    especial: 'Especial',
-    portacoches: 'Portacoches',
-  }
-  return map[type] ?? type
-}
 </script>
