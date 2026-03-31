@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-31 (sesión 4)
+> **Última actualización:** 2026-03-31 (sesión 6, en progreso)
 > **Actualizado por:** AI Agent
 
 ---
@@ -283,9 +283,12 @@ _(Complementa las de AGENTS.md)_
    - `RouteForm.vue` actualizado: guarda objeto vehículo, selector subcategoría agrupado, panel compliance
    - `route-schema.js` actualizado con `subcategoria_id` opcional
    - Tipo legado eliminado del formulario (se deriva automáticamente de la subcategoría)
-2. **PENDIENTE**: Definir equipamiento para 6 subcategorías gen sin equipamiento específico.
-3. **PENDIENTE**: Tabla `vehicle_documents` ya existe en BD — integrar con compliance real contra documentos vigentes.
-4. **PENDIENTE**: Eliminar columnas de backup en BD si existen (`tipo_vehiculo_deprecated`, `tipo_vehiculo_old_value`) — verificar si se aplicaron en alguna migración anterior.
+2. **COMPLETADO**: Definir equipamiento para 11 subcategorías (sesión 5).
+3. **EN PROGRESO**: Integrar `vehicle_documents` con compliance real contra documentos vigentes.
+   - Acciones NO incluidas en este paso (pendientes futuro):
+     - CRUD completo de documentos en UI (formulario subida/edición/borrado)
+     - Validación de certificado ADR vehículo en subcategorías ADR
+4. **PENDIENTE (bajo)**: Eliminar columnas de backup en BD si existen.
 
 **Bloqueos activos:**
 

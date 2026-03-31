@@ -80,8 +80,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { checkVehicleCompliance } from '@/utils/cargo-compliance.js'
+import { useVehicleDocuments } from '@/composables/use-vehicle-documents.js'
 
 const props = defineProps({
   vehicle: { type: Object, required: true },
@@ -89,8 +90,17 @@ const props = defineProps({
   cargoWeightKg: { type: Number, default: null },
 })
 
+const { documents, fetchDocuments } = useVehicleDocuments()
+
+// Fetch documents when vehicle changes
+watch(
+  () => props.vehicle?.id,
+  id => fetchDocuments(id),
+  { immediate: true },
+)
+
 const complianceResult = computed(() => {
-  return checkVehicleCompliance(props.vehicle, props.subcategoriaId)
+  return checkVehicleCompliance(props.vehicle, props.subcategoriaId, documents.value)
 })
 
 const weightWarning = computed(() => {

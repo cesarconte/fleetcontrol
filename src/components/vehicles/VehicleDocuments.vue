@@ -16,7 +16,7 @@
           </td>
         </tr>
         <tr v-for="doc in documents" :key="doc.id">
-          <td>{{ doc.doc_name }}</td>
+          <td>{{ getVehicleDocumentTypeLabel(doc.doc_type) }}</td>
           <td>
             <v-chip :color="getStatusColor(doc.status)" size="x-small" variant="tonal">
               {{ getStatusLabel(doc.status) }}
@@ -39,23 +39,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from '@/services/supabase-client.js'
+import { watch } from 'vue'
+import { useVehicleDocuments } from '@/composables/use-vehicle-documents.js'
+import { getVehicleDocumentTypeLabel } from '@/constants/vehicle-document-types.js'
 
 const props = defineProps({
   vehicleId: { type: String, required: true },
 })
 
-const documents = ref([])
+const { documents, fetchDocuments } = useVehicleDocuments()
 
-onMounted(async () => {
-  const { data } = await supabase
-    .from('vehicle_documents')
-    .select('*')
-    .eq('vehicle_id', props.vehicleId)
-    .order('expiry_date', { ascending: true })
-  if (data) documents.value = data
-})
+watch(
+  () => props.vehicleId,
+  id => fetchDocuments(id),
+  { immediate: true },
+)
 
 function getStatusColor(status) {
   const map = {

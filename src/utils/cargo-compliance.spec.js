@@ -128,6 +128,84 @@ describe('cargo-compliance', () => {
       const result = checkVehicleCompliance(vehicle, 'gen-paletizada')
       expect(result.manualChecks).toContain('cinchas_de_amarre_homologadas_en_12195_2')
     })
+
+    it('con documentos válidos debería pasar documentación', () => {
+      const vehicle = { body_type: 'curtain', status: 'active' }
+      const docs = [
+        { doc_type: 'itv', status: 'valid' },
+        { doc_type: 'seguro_rc', status: 'valid' },
+        { doc_type: 'permiso_circulacion', status: 'valid' },
+        { doc_type: 'tarjeta_transporte', status: 'valid' },
+        { doc_type: 'calibracion_tacografo', status: 'valid' },
+      ]
+      const result = checkVehicleCompliance(vehicle, 'gen-paletizada', docs)
+      expect(result.isCompliant).toBe(true)
+      expect(result.autoPassed.some(p => p.includes('itv'))).toBe(true)
+      expect(result.autoFailed).toHaveLength(0)
+    })
+
+    it('con ITV vencida debería fallar', () => {
+      const vehicle = { body_type: 'curtain', status: 'active' }
+      const docs = [
+        { doc_type: 'itv', status: 'expired' },
+        { doc_type: 'seguro_rc', status: 'valid' },
+        { doc_type: 'permiso_circulacion', status: 'valid' },
+        { doc_type: 'tarjeta_transporte', status: 'valid' },
+        { doc_type: 'calibracion_tacografo', status: 'valid' },
+      ]
+      const result = checkVehicleCompliance(vehicle, 'gen-paletizada', docs)
+      expect(result.isCompliant).toBe(false)
+      expect(result.autoFailed.some(f => f.includes('itv') && f.includes('vencido'))).toBe(true)
+    })
+
+    it('con ITV crítica debería fallar', () => {
+      const vehicle = { body_type: 'curtain', status: 'active' }
+      const docs = [
+        { doc_type: 'itv', status: 'critical' },
+        { doc_type: 'seguro_rc', status: 'valid' },
+      ]
+      const result = checkVehicleCompliance(vehicle, 'gen-paletizada', docs)
+      expect(result.isCompliant).toBe(false)
+      expect(result.autoFailed.some(f => f.includes('crítico'))).toBe(true)
+    })
+
+    it('ruta ADR sin certificado vehículo debería fallar', () => {
+      const vehicle = { body_type: 'tanker', status: 'active' }
+      const docs = [
+        { doc_type: 'itv', status: 'valid' },
+        { doc_type: 'seguro_rc', status: 'valid' },
+        { doc_type: 'permiso_circulacion', status: 'valid' },
+        { doc_type: 'tarjeta_transporte', status: 'valid' },
+        { doc_type: 'calibracion_tacografo', status: 'valid' },
+      ]
+      const result = checkVehicleCompliance(vehicle, 'adr-clase-3', docs)
+      expect(result.isCompliant).toBe(false)
+      expect(result.autoFailed.some(f => f.includes('certificado_adr_vehiculo'))).toBe(true)
+    })
+
+    it('ruta ADR con certificado vehículo válido debería pasar', () => {
+      const vehicle = { body_type: 'tanker', status: 'active' }
+      const docs = [
+        { doc_type: 'itv', status: 'valid' },
+        { doc_type: 'seguro_rc', status: 'valid' },
+        { doc_type: 'permiso_circulacion', status: 'valid' },
+        { doc_type: 'tarjeta_transporte', status: 'valid' },
+        { doc_type: 'calibracion_tacografo', status: 'valid' },
+        { doc_type: 'certificado_adr_vehiculo', status: 'valid' },
+      ]
+      const result = checkVehicleCompliance(vehicle, 'adr-clase-3', docs)
+      expect(result.isCompliant).toBe(true)
+      expect(result.autoPassed.some(p => p.includes('ADR'))).toBe(true)
+    })
+
+    it('sin documentos no debería afectar compliance', () => {
+      const vehicle = { body_type: 'curtain', status: 'active' }
+      const result = checkVehicleCompliance(vehicle, 'gen-paletizada', [])
+      expect(result.isCompliant).toBe(true)
+      // No document checks should appear
+      expect(result.autoPassed.every(p => !p.includes('Documentación'))).toBe(true)
+      expect(result.autoFailed.every(f => !f.includes('Documento'))).toBe(true)
+    })
   })
 
   describe('getRequirementsForSubcategory', () => {
