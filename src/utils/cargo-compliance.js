@@ -124,12 +124,83 @@ export function getRecommendedVehicleTypes(subcategoryId) {
 }
 
 /**
+ * Documents required for all vehicles regardless of cargo type.
+ * @type {string[]}
+ */
+const REQUIRED_DOCS_ALL = [
+  'itv',
+  'seguro_rc',
+  'permiso_circulacion',
+  'tarjeta_transporte',
+  'calibracion_tacografo',
+]
+
+/**
+ * Additional documents required per subcategory prefix.
+ * @type {Object<string, string[]>}
+ */
+const SUBCATEGORY_DOC_REQUIREMENTS = {
+  'adr-': ['certificado_adr_vehiculo'],
+}
+
+/**
+ * Check required documents against their status.
+ * @param {Array<{ doc_type: string, status: string }>} documents
+ * @param {string} subcategoryId
+ * @returns {{ passed: string[], failed: string[] }}
+ */
+function checkRequiredDocuments(documents, subcategoryId) {
+  const passed = []
+  const failed = []
+
+  // Build a map of doc_type → status for quick lookup
+  const docMap = new Map(documents.map(d => [d.doc_type, d.status]))
+
+  // Check documents required for all vehicles
+  for (const docType of REQUIRED_DOCS_ALL) {
+    const status = docMap.get(docType)
+    if (!status) {
+      // Permiso de circulación may not have a row (no expiry)
+      if (docType === 'permiso_circulacion') continue
+      failed.push(`Documento requerido sin registrar: ${docType}`)
+    } else if (status === 'expired') {
+      failed.push(`Documento vencido: ${docType}`)
+    } else if (status === 'critical') {
+      failed.push(`Documento crítico (vence en ≤7 días): ${docType}`)
+    } else if (status === 'valid' || status === 'expiring_soon') {
+      passed.push(`Documentación ${docType}: en regla`)
+    }
+  }
+
+  // Check subcategory-specific requirements
+  for (const [prefix, requiredDocs] of Object.entries(SUBCATEGORY_DOC_REQUIREMENTS)) {
+    if (subcategoryId?.startsWith(prefix)) {
+      for (const docType of requiredDocs) {
+        const status = docMap.get(docType)
+        if (!status) {
+          failed.push(`Documento requerido para ADR: ${docType}`)
+        } else if (status === 'expired') {
+          failed.push(`Documento ADR vencido: ${docType}`)
+        } else if (status === 'critical') {
+          failed.push(`Documento ADR crítico: ${docType}`)
+        } else if (status === 'valid' || status === 'expiring_soon') {
+          passed.push(`Documentación ADR: en regla`)
+        }
+      }
+    }
+  }
+
+  return { passed, failed }
+}
+
+/**
  * Full compliance check for a vehicle against a cargo subcategory.
  * @param {{ body_type: string, eu_category?: string, gross_weight_kg?: number, status?: string } | null} vehicle
  * @param {string} subcategoryId
+ * @param {Array<{ doc_type: string, status: string }>} [vehicleDocuments]
  * @returns {ComplianceResult}
  */
-export function checkVehicleCompliance(vehicle, subcategoryId) {
+export function checkVehicleCompliance(vehicle, subcategoryId, vehicleDocuments = []) {
   const sub = getSubcategoryById(subcategoryId)
 
   if (!sub) {
@@ -164,6 +235,13 @@ export function checkVehicleCompliance(vehicle, subcategoryId) {
     autoFailed.push(`Vehículo en estado "${vehicle.status}" — debe estar activo`)
   } else if (vehicle?.status === 'active') {
     autoPassed.push('Vehículo activo')
+  }
+
+  // ── Auto check 3: Required documents ───────────────────────────────────
+  if (vehicleDocuments.length > 0) {
+    const docResults = checkRequiredDocuments(vehicleDocuments, subcategoryId)
+    autoPassed.push(...docResults.passed)
+    autoFailed.push(...docResults.failed)
   }
 
   // ── Equipment checklist (manual verification) ──────────────────────────
