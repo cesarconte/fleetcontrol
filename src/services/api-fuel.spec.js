@@ -23,10 +23,10 @@ import { supabase } from '@/services/supabase-client.js'
 const mockRecord = {
   id: '1',
   vehicle_id: 'v1',
-  fecha: '2026-03-15',
-  km_al_momento: 100000,
-  litros_kg: 150,
-  precio_por_litro_eur: 1.45,
+  refuel_date: '2026-03-15',
+  odometer_km: 100000,
+  quantity: 150,
+  unit_price: 1.45,
 }
 
 describe('apiFuel', () => {
@@ -64,9 +64,9 @@ describe('apiFuel', () => {
 describe('calculateConsumption', () => {
   it('debería calcular consumo L/100km correctamente', () => {
     const records = [
-      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 0 },
-      { fecha: '2026-03-10', km_al_momento: 101000, litros_kg: 120 },
-      { fecha: '2026-03-20', km_al_momento: 102500, litros_kg: 180 },
+      { refuel_date: '2026-03-01', odometer_km: 100000, quantity: 0 },
+      { refuel_date: '2026-03-10', odometer_km: 101000, quantity: 120 },
+      { refuel_date: '2026-03-20', odometer_km: 102500, quantity: 180 },
     ]
     const result = calculateConsumption(records)
     expect(result.entries).toHaveLength(2)
@@ -79,7 +79,7 @@ describe('calculateConsumption', () => {
 
   it('debería retornar null con menos de 2 registros', () => {
     const result = calculateConsumption([
-      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 150 },
+      { refuel_date: '2026-03-01', odometer_km: 100000, quantity: 150 },
     ])
     expect(result.avgConsumption).toBeNull()
     expect(result.entries).toHaveLength(0)
@@ -97,9 +97,9 @@ describe('calculateConsumption', () => {
 
   it('debería saltar registros donde km no aumenta', () => {
     const records = [
-      { fecha: '2026-03-01', km_al_momento: 100000, litros_kg: 0 },
-      { fecha: '2026-03-05', km_al_momento: 100000, litros_kg: 50 },
-      { fecha: '2026-03-10', km_al_momento: 101000, litros_kg: 120 },
+      { refuel_date: '2026-03-01', odometer_km: 100000, quantity: 0 },
+      { refuel_date: '2026-03-05', odometer_km: 100000, quantity: 50 },
+      { refuel_date: '2026-03-10', odometer_km: 101000, quantity: 120 },
     ]
     const result = calculateConsumption(records)
     expect(result.entries).toHaveLength(1)

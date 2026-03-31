@@ -9,7 +9,7 @@ import { createCrudService } from './create-crud-service.js'
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
-const base = createCrudService('fuel_records', { orderBy: 'fecha', ascending: false })
+const base = createCrudService('fuel_records', { orderBy: 'refuel_date', ascending: false })
 
 export const apiFuel = {
   ...base,
@@ -18,7 +18,7 @@ export const apiFuel = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'fecha', asc: false },
+    sort = { col: 'refuel_date', asc: false },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -30,9 +30,9 @@ export const apiFuel = {
       .order(sort.col, { ascending: sort.asc })
 
     if (filters.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id)
-    if (filters.date_from) query = query.gte('fecha', filters.date_from)
-    if (filters.date_to) query = query.lte('fecha', filters.date_to)
-    if (filters.search) query = query.ilike('estacion_servicio', `%${filters.search}%`)
+    if (filters.date_from) query = query.gte('refuel_date', filters.date_from)
+    if (filters.date_to) query = query.lte('refuel_date', filters.date_to)
+    if (filters.search) query = query.ilike('station_name', `%${filters.search}%`)
 
     const { data, error, count } = await query
     if (error) throw mapSupabaseError(error)
@@ -44,10 +44,10 @@ export const apiFuel = {
       .from('fuel_records')
       .select('*')
       .eq('vehicle_id', vehicleId)
-      .order('fecha', { ascending: true })
+      .order('refuel_date', { ascending: true })
 
-    if (dateFrom) query = query.gte('fecha', dateFrom)
-    if (dateTo) query = query.lte('fecha', dateTo)
+    if (dateFrom) query = query.gte('refuel_date', dateFrom)
+    if (dateTo) query = query.lte('refuel_date', dateTo)
 
     const { data, error } = await query
     if (error) throw mapSupabaseError(error)
@@ -79,16 +79,16 @@ export function calculateConsumption(records) {
     const prev = records[i - 1]
     const curr = records[i]
 
-    const kmDiff = curr.km_al_momento - prev.km_al_momento
+    const kmDiff = curr.odometer_km - prev.odometer_km
     if (kmDiff <= 0) continue
 
-    const litros = curr.litros_kg
+    const litros = curr.quantity
     const consumption = (litros / kmDiff) * 100
 
     entries.push({
-      fecha: curr.fecha,
-      from_km: prev.km_al_momento,
-      to_km: curr.km_al_momento,
+      refuel_date: curr.refuel_date,
+      from_km: prev.odometer_km,
+      to_km: curr.odometer_km,
       km: kmDiff,
       litros,
       consumption: Math.round(consumption * 100) / 100,

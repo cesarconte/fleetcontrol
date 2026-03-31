@@ -11,7 +11,7 @@ import { createCrudService } from './create-crud-service.js'
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
-const base = createCrudService('vehicles', { orderBy: 'matricula', ascending: true })
+const base = createCrudService('vehicles', { orderBy: 'plate', ascending: true })
 
 export const apiVehicles = {
   ...base,
@@ -20,7 +20,7 @@ export const apiVehicles = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'matricula', asc: true },
+    sort = { col: 'plate', asc: true },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -32,23 +32,22 @@ export const apiVehicles = {
       .order(sort.col, { ascending: sort.asc })
 
     if (filters.status) query = query.eq('status', filters.status)
-    if (filters.categoria_ue) query = query.eq('categoria_ue', filters.categoria_ue)
-    if (filters.tipo_carroceria) query = query.eq('tipo_carroceria', filters.tipo_carroceria)
-    if (filters.distintivo_ambiental)
-      query = query.eq('distintivo_ambiental', filters.distintivo_ambiental)
-    if (filters.search) query = query.ilike('matricula', `%${filters.search}%`)
+    if (filters.eu_category) query = query.eq('eu_category', filters.eu_category)
+    if (filters.body_type) query = query.eq('body_type', filters.body_type)
+    if (filters.dgt_badge) query = query.eq('dgt_badge', filters.dgt_badge)
+    if (filters.search) query = query.ilike('plate', `%${filters.search}%`)
 
     const { data, error, count } = await query
     if (error) throw mapSupabaseError(error)
     return { data, total: count, page, pageSize }
   },
 
-  async search(matricula) {
+  async search(plate) {
     const { data, error } = await supabase
       .from('vehicles')
       .select('*')
-      .ilike('matricula', `%${matricula}%`)
-      .order('matricula')
+      .ilike('plate', `%${plate}%`)
+      .order('plate')
 
     if (error) throw mapSupabaseError(error)
     return data

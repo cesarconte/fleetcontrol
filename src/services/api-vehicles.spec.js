@@ -24,13 +24,13 @@ import { supabase } from '@/services/supabase-client.js'
 
 const mockVehicle = {
   id: '1',
-  matricula: '1234ABC',
-  marca: 'Mercedes',
-  modelo: 'Actros',
-  tipo_vehiculo: 'tractora',
+  plate: '1234ABC',
+  brand: 'Mercedes',
+  model: 'Actros',
+  vehicle_type: 'tractora',
   status: 'activo',
-  tipo_combustible: 'diesel',
-  distintivo_ambiental: 'sin_etiqueta',
+  fuel_type: 'diesel',
+  dgt_badge: 'sin_etiqueta',
 }
 
 describe('apiVehicles', () => {

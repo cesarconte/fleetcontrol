@@ -21,9 +21,9 @@ import { supabase } from '@/services/supabase-client.js'
 const mockCargo = {
   id: '1',
   route_id: 'r1',
-  descripcion: 'Electrodomésticos',
-  peso_kg: 15000,
-  tipo: 'general',
+  description: 'Electrodomésticos',
+  weight_kg: 15000,
+  cargo_type: 'general',
 }
 
 describe('apiCargo', () => {

@@ -3,9 +3,9 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
-          <div class="text-h6 font-weight-bold">{{ driver.nombre_completo }}</div>
+          <div class="text-h6 font-weight-bold">{{ driver.full_name }}</div>
           <div class="text-body-2 text-medium-emphasis">
-            {{ driver.nif_nie }}
+            {{ driver.nif }}
           </div>
         </div>
         <v-chip :color="getStatusColor(driver.status, 'conductor')" size="small" variant="tonal">
@@ -16,8 +16,8 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ driver.ciudad || '—' }}</span>
-        <span>{{ driver.telefono || '—' }}</span>
+        <span>{{ driver.city || '—' }}</span>
+        <span>{{ driver.phone || '—' }}</span>
       </div>
     </v-card-text>
   </v-card>

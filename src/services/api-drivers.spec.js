@@ -34,12 +34,12 @@ import { supabase } from '@/services/supabase-client.js'
 
 const mockDriver = {
   id: '1',
-  nombre_completo: 'Juan García López',
-  nif_nie: '12345678A',
-  fecha_nacimiento: '1985-03-15',
+  full_name: 'Juan García López',
+  nif: '12345678A',
+  birth_date: '1985-03-15',
   status: 'activo',
   email: 'juan@test.com',
-  telefono: '612345678',
+  phone: '612345678',
 }
 
 describe('apiDrivers', () => {
@@ -132,7 +132,7 @@ describe('apiDrivers', () => {
 
   describe('getDocumentos', () => {
     it('debería obtener documentos de un conductor', async () => {
-      const mockDocs = [{ id: '1', tipo_documento: 'carnet_conducir' }]
+      const mockDocs = [{ id: '1', doc_type: 'carnet_conducir' }]
       const mockOrder = vi.fn().mockResolvedValue({ data: mockDocs, error: null })
       const mockEq = vi.fn().mockReturnValue({ order: mockOrder })
       const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
@@ -148,7 +148,7 @@ describe('apiDrivers', () => {
   describe('eliminarDocumento', () => {
     it('debería eliminar un documento', async () => {
       const mockDoc = {
-        archivo_url: 'https://test.url/documentos-conductores/1/file.pdf',
+        file_url: 'https://test.url/documentos-conductores/1/file.pdf',
         driver_id: '1',
       }
 

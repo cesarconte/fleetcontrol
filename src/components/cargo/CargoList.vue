@@ -51,18 +51,20 @@
         data-testid="cargo-table"
         @click:row="handleRowClick"
       >
-        <template #item.peso_kg="{ item }">{{ item.peso_kg?.toLocaleString('es-ES') }} kg</template>
+        <template #item.weight_kg="{ item }">
+          {{ item.weight_kg?.toLocaleString('es-ES') }} kg
+        </template>
 
-        <template #item.tipo="{ item }">
-          <v-chip :color="getCargoTypeColor(item.tipo)" size="small" variant="tonal">
-            {{ getCargoTypeLabel(item.tipo) }}
+        <template #item.cargo_type="{ item }">
+          <v-chip :color="getCargoTypeColor(item.cargo_type)" size="small" variant="tonal">
+            {{ getCargoTypeLabel(item.cargo_type) }}
           </v-chip>
         </template>
 
         <template #item.adr="{ item }">
-          <template v-if="item.tipo === 'peligrosa'">
+          <template v-if="item.cargo_type === 'peligrosa'">
             <v-chip color="error" size="x-small" variant="outlined">
-              {{ item.adr_clase }} · ONU {{ item.adr_numero_onu }}
+              {{ item.adr_class }} · ONU {{ item.adr_un_number }}
             </v-chip>
           </template>
           <span v-else class="text-medium-emphasis">—</span>
@@ -154,9 +156,9 @@ const sortBy = ref([{ key: 'created_at', order: 'desc' }])
 let searchTimer = null
 
 const headers = [
-  { title: 'Descripción', key: 'descripcion', sortable: false },
-  { title: 'Peso', key: 'peso_kg', sortable: true },
-  { title: 'Tipo', key: 'tipo', sortable: true },
+  { title: 'Descripción', key: 'description', sortable: false },
+  { title: 'Peso', key: 'weight_kg', sortable: true },
+  { title: 'Tipo', key: 'cargo_type', sortable: true },
   { title: 'ADR', key: 'adr', sortable: false },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
@@ -171,7 +173,7 @@ function debouncedSearch() {
 function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
-  if (filterType.value) f.tipo = filterType.value
+  if (filterType.value) f.cargo_type = filterType.value
   setFilters(f)
 }
 

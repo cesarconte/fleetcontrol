@@ -14,10 +14,10 @@
       </v-col>
       <v-col cols="6" sm="3">
         <v-text-field
-          v-model="form.fecha"
+          v-model="form.refuel_date"
           label="Fecha *"
           type="date"
-          :error-messages="errors.fecha"
+          :error-messages="errors.refuel_date"
           variant="outlined"
           required
           data-testid="fuel-date"
@@ -34,10 +34,10 @@
       </v-col>
       <v-col cols="6" sm="4">
         <v-text-field
-          v-model.number="form.km_al_momento"
+          v-model.number="form.odometer_km"
           label="Km en el momento *"
           type="number"
-          :error-messages="errors.km_al_momento"
+          :error-messages="errors.odometer_km"
           variant="outlined"
           required
           data-testid="fuel-mileage"
@@ -45,11 +45,11 @@
       </v-col>
       <v-col cols="6" sm="4">
         <v-text-field
-          v-model.number="form.litros_kg"
+          v-model.number="form.quantity"
           label="Litros *"
           type="number"
           step="0.01"
-          :error-messages="errors.litros_kg"
+          :error-messages="errors.quantity"
           variant="outlined"
           required
           data-testid="fuel-liters"
@@ -57,11 +57,11 @@
       </v-col>
       <v-col cols="6" sm="4">
         <v-text-field
-          v-model.number="form.precio_por_litro_eur"
+          v-model.number="form.unit_price"
           label="Precio/litro (€) *"
           type="number"
           step="0.001"
-          :error-messages="errors.precio_por_litro_eur"
+          :error-messages="errors.unit_price"
           variant="outlined"
           required
           data-testid="fuel-price"
@@ -69,7 +69,7 @@
       </v-col>
       <v-col cols="6" sm="4">
         <v-text-field
-          v-model.number="form.importe_total_eur"
+          v-model.number="form.total_eur"
           label="Importe total (€)"
           type="number"
           step="0.01"
@@ -79,7 +79,7 @@
       </v-col>
       <v-col cols="12" sm="8">
         <v-text-field
-          v-model="form.estacion_servicio"
+          v-model="form.station_name"
           label="Estación de servicio"
           variant="outlined"
           data-testid="fuel-station"
@@ -133,12 +133,12 @@ const notifications = useNotificationStore()
 
 const form = reactive({
   vehicle_id: '',
-  fecha: '',
-  km_al_momento: null,
-  litros_kg: null,
-  precio_por_litro_eur: null,
-  importe_total_eur: null,
-  estacion_servicio: '',
+  refuel_date: '',
+  odometer_km: null,
+  quantity: null,
+  unit_price: null,
+  total_eur: null,
+  station_name: '',
   fuel_type: 'diesel',
   route_id: null,
   observations: '',

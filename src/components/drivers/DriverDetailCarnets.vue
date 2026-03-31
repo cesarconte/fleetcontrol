@@ -6,27 +6,27 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Clase</div>
-          <div class="text-body-1 font-weight-medium">{{ driver.carnet_clase || '—' }}</div>
+          <div class="text-body-1 font-weight-medium">{{ driver.carnet_class || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Número</div>
-          <div class="text-body-1">{{ driver.carnet_numero || '—' }}</div>
+          <div class="text-body-1">{{ driver.carnet_number || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha expedición</div>
-          <div class="text-body-1">{{ formatDate(driver.carnet_fecha_expedicion) }}</div>
+          <div class="text-body-1">{{ formatDate(driver.carnet_issue_date) }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
           <div class="d-flex align-center ga-2">
-            <div class="text-body-1">{{ formatDate(driver.carnet_fecha_vencimiento) }}</div>
+            <div class="text-body-1">{{ formatDate(driver.carnet_expiry_date) }}</div>
             <v-chip
-              v-if="driver.carnet_fecha_vencimiento"
-              :color="getEstado(driver.carnet_fecha_vencimiento).color"
+              v-if="driver.carnet_expiry_date"
+              :color="getEstado(driver.carnet_expiry_date).color"
               size="x-small"
               variant="tonal"
             >
-              {{ getEstado(driver.carnet_fecha_vencimiento).label }}
+              {{ getEstado(driver.carnet_expiry_date).label }}
             </v-chip>
           </div>
         </v-col>
@@ -41,23 +41,23 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Número CAP</div>
-          <div class="text-body-1">{{ driver.cap_numero || '—' }}</div>
+          <div class="text-body-1">{{ driver.cap_number || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Horas formación</div>
-          <div class="text-body-1">{{ driver.cap_horas_formacion ?? '—' }}</div>
+          <div class="text-body-1">{{ driver.cap_training_hours ?? '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
           <div class="d-flex align-center ga-2">
-            <div class="text-body-1">{{ formatDate(driver.cap_fecha_vencimiento) }}</div>
+            <div class="text-body-1">{{ formatDate(driver.cap_expiry_date) }}</div>
             <v-chip
-              v-if="driver.cap_fecha_vencimiento"
-              :color="getEstado(driver.cap_fecha_vencimiento).color"
+              v-if="driver.cap_expiry_date"
+              :color="getEstado(driver.cap_expiry_date).color"
               size="x-small"
               variant="tonal"
             >
-              {{ getEstado(driver.cap_fecha_vencimiento).label }}
+              {{ getEstado(driver.cap_expiry_date).label }}
             </v-chip>
           </div>
         </v-col>
@@ -70,19 +70,19 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Número</div>
-          <div class="text-body-1">{{ driver.tarjeta_tacografo_numero || '—' }}</div>
+          <div class="text-body-1">{{ driver.tachograph_card_number || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
           <div class="d-flex align-center ga-2">
-            <div class="text-body-1">{{ formatDate(driver.tarjeta_tacografo_vencimiento) }}</div>
+            <div class="text-body-1">{{ formatDate(driver.tachograph_card_expiry) }}</div>
             <v-chip
-              v-if="driver.tarjeta_tacografo_vencimiento"
-              :color="getEstado(driver.tarjeta_tacografo_vencimiento).color"
+              v-if="driver.tachograph_card_expiry"
+              :color="getEstado(driver.tachograph_card_expiry).color"
               size="x-small"
               variant="tonal"
             >
-              {{ getEstado(driver.tarjeta_tacografo_vencimiento).label }}
+              {{ getEstado(driver.tachograph_card_expiry).label }}
             </v-chip>
           </div>
         </v-col>
@@ -95,21 +95,21 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha reconocimiento</div>
-          <div class="text-body-1">{{ formatDate(driver.reconocimiento_medico_fecha) }}</div>
+          <div class="text-body-1">{{ formatDate(driver.medical_exam_date) }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
           <div class="d-flex align-center ga-2">
             <div class="text-body-1">
-              {{ formatDate(driver.reconocimiento_medico_vencimiento) }}
+              {{ formatDate(driver.medical_exam_expiry) }}
             </div>
             <v-chip
-              v-if="driver.reconocimiento_medico_vencimiento"
-              :color="getEstado(driver.reconocimiento_medico_vencimiento).color"
+              v-if="driver.medical_exam_expiry"
+              :color="getEstado(driver.medical_exam_expiry).color"
               size="x-small"
               variant="tonal"
             >
-              {{ getEstado(driver.reconocimiento_medico_vencimiento).label }}
+              {{ getEstado(driver.medical_exam_expiry).label }}
             </v-chip>
           </div>
         </v-col>
@@ -122,26 +122,26 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">¿Certificado ADR?</div>
-          <v-chip :color="driver.adr_certificado ? 'success' : 'grey'" size="small" variant="tonal">
-            {{ driver.adr_certificado ? 'Sí' : 'No' }}
+          <v-chip :color="driver.adr_certificate ? 'success' : 'grey'" size="small" variant="tonal">
+            {{ driver.adr_certificate ? 'Sí' : 'No' }}
           </v-chip>
         </v-col>
-        <template v-if="driver.adr_certificado">
+        <template v-if="driver.adr_certificate">
           <v-col cols="6" sm="4" md="3">
             <div class="text-caption text-medium-emphasis">Número</div>
-            <div class="text-body-1">{{ driver.adr_numero || '—' }}</div>
+            <div class="text-body-1">{{ driver.adr_number || '—' }}</div>
           </v-col>
           <v-col cols="6" sm="4" md="3">
             <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
             <div class="d-flex align-center ga-2">
-              <div class="text-body-1">{{ formatDate(driver.adr_fecha_vencimiento) }}</div>
+              <div class="text-body-1">{{ formatDate(driver.adr_expiry_date) }}</div>
               <v-chip
-                v-if="driver.adr_fecha_vencimiento"
-                :color="getEstado(driver.adr_fecha_vencimiento).color"
+                v-if="driver.adr_expiry_date"
+                :color="getEstado(driver.adr_expiry_date).color"
                 size="x-small"
                 variant="tonal"
               >
-                {{ getEstado(driver.adr_fecha_vencimiento).label }}
+                {{ getEstado(driver.adr_expiry_date).label }}
               </v-chip>
             </div>
           </v-col>

@@ -16,9 +16,9 @@
       <!-- Header -->
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ vehicle.matricula }}</h1>
+          <h1 class="text-h5">{{ vehicle.plate }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ vehicle.marca }} {{ vehicle.modelo }} {{ vehicle.variante }}
+            {{ vehicle.brand }} {{ vehicle.model }} {{ vehicle.variant }}
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -43,7 +43,7 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Matrícula</div>
-                <div class="text-body-1 font-weight-medium">{{ vehicle.matricula }}</div>
+                <div class="text-body-1 font-weight-medium">{{ vehicle.plate }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">VIN</div>
@@ -51,38 +51,34 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Marca</div>
-                <div class="text-body-1">{{ vehicle.marca }}</div>
+                <div class="text-body-1">{{ vehicle.brand }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Modelo</div>
-                <div class="text-body-1">{{ vehicle.modelo }}</div>
+                <div class="text-body-1">{{ vehicle.model }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Categoría UE</div>
-                <div class="text-body-1">{{ getEUCategoriaLabel(vehicle.categoria_ue) }}</div>
+                <div class="text-body-1">{{ getEUCategoriaLabel(vehicle.eu_category) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Carrocería</div>
-                <div class="text-body-1">{{ getBodyLabel(vehicle.tipo_carroceria) }}</div>
+                <div class="text-body-1">{{ getBodyLabel(vehicle.body_type) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Combustible</div>
-                <div class="text-body-1">{{ getFuelLabel(vehicle.tipo_combustible) }}</div>
+                <div class="text-body-1">{{ getFuelLabel(vehicle.fuel_type) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">DGT</div>
-                <v-chip
-                  :color="getDgtColor(vehicle.distintivo_ambiental)"
-                  size="small"
-                  variant="flat"
-                >
-                  {{ getDgtLabel(vehicle.distintivo_ambiental) }}
+                <v-chip :color="getDgtColor(vehicle.dgt_badge)" size="small" variant="flat">
+                  {{ getDgtLabel(vehicle.dgt_badge) }}
                 </v-chip>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Euro</div>
                 <div class="text-body-1">
-                  {{ vehicle.euro_emisiones?.replace('_', ' ') || '—' }}
+                  {{ vehicle.euro_class?.replace('_', ' ') || '—' }}
                 </div>
               </v-col>
             </v-row>
@@ -95,30 +91,30 @@
             <v-row>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">MMA</div>
-                <div class="text-body-1">{{ formatKg(vehicle.mma_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.gross_weight_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Tara</div>
-                <div class="text-body-1">{{ formatKg(vehicle.tara_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.tare_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Carga útil</div>
-                <div class="text-body-1">{{ formatKg(vehicle.carga_util_max_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.max_payload_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">MMA conjunto</div>
-                <div class="text-body-1">{{ formatKg(vehicle.mma_conjunto_kg) }}</div>
+                <div class="text-body-1">{{ formatKg(vehicle.combined_gross_weight_kg) }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Dimensiones (A×H×L)</div>
                 <div class="text-body-1">
-                  {{ formatM(vehicle.anchura_max_m) }} × {{ formatM(vehicle.altura_max_m) }} ×
-                  {{ formatM(vehicle.longitud_total_m) }}
+                  {{ formatM(vehicle.width_m) }} × {{ formatM(vehicle.height_m) }} ×
+                  {{ formatM(vehicle.length_m) }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Nº ejes</div>
-                <div class="text-body-1">{{ vehicle.numero_ejes ?? '—' }}</div>
+                <div class="text-body-1">{{ vehicle.axle_count ?? '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -159,7 +155,7 @@
       <v-card>
         <v-card-title>¿Eliminar vehículo?</v-card-title>
         <v-card-text>
-          Se eliminará el vehículo {{ vehicle?.matricula }} permanentemente. Esta acción no se puede
+          Se eliminará el vehículo {{ vehicle?.plate }} permanentemente. Esta acción no se puede
           deshacer.
         </v-card-text>
         <v-card-actions>

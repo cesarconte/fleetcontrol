@@ -18,17 +18,17 @@ const VALID_SUBCATEGORY_IDS = getAllSubcategories().map(s => s.id)
 const cargoBaseSchema = z.object({
   route_id: z.string({ required_error: 'Debe seleccionar una ruta' }).uuid('Ruta inválida'),
 
-  descripcion: z
+  description: z
     .string({ required_error: 'La descripción es obligatoria' })
     .min(2, 'La descripción debe tener al menos 2 caracteres'),
 
-  peso_kg: z
+  weight_kg: z
     .number({ invalid_type_error: 'Peso inválido' })
     .positive('El peso debe ser mayor que 0'),
 
-  volumen_m3: z.number().positive().optional().nullable(),
+  volume_m3: z.number().positive().optional().nullable(),
 
-  tipo: z
+  cargo_type: z
     .enum(['general', 'frigorifica', 'peligrosa', 'especial'], {
       errorMap: () => ({ message: 'Tipo de carga inválido' }),
     })
@@ -41,33 +41,28 @@ const cargoBaseSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  // ── ADR (solo si tipo === 'peligrosa') ───────────────
-  adr_clase: z
+  // ── ADR (solo si cargo_type === 'peligrosa') ─────────
+  adr_class: z
     .enum(ADR_CLASSES, {
       errorMap: () => ({ message: 'Clase ADR inválida' }),
     })
     .optional()
     .or(z.literal('')),
 
-  adr_numero_onu: z
+  adr_un_number: z
     .string()
     .regex(/^[0-9]{4}$/, 'Número ONU debe tener 4 dígitos')
     .optional()
     .or(z.literal('')),
 
-  adr_grupo_embalaje: z.enum(['I', 'II', 'III', '']).optional().or(z.literal('')),
-
-  // ── CMR fields ──────────────────────────────────────
-  cmr_remitente: z.string().optional().or(z.literal('')),
-  cmr_destinatario: z.string().optional().or(z.literal('')),
-  cmr_lugar_entrega: z.string().optional().or(z.literal('')),
+  adr_packing_group: z.enum(['I', 'II', 'III', '']).optional().or(z.literal('')),
 })
 
 export const cargoSchema = cargoBaseSchema.refine(
   data => {
     if (!data.subcategoria_id) return true
     const sub = getAllSubcategories().find(s => s.id === data.subcategoria_id)
-    return sub && sub.mapToLegacy === data.tipo
+    return sub && sub.mapToLegacy === data.cargo_type
   },
   {
     message: 'La subcategoría no corresponde al tipo de carga seleccionado',
@@ -79,6 +74,7 @@ export const cargoUpdateSchema = cargoBaseSchema.partial()
 
 export const cargoSearchSchema = z.object({
   search: z.string().optional(),
-  tipo: z.string().optional(),
+  cargo_type: z.string().optional(),
+  description: z.string().optional(),
   route_id: z.string().optional(),
 })

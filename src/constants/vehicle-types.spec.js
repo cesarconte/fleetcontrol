@@ -53,11 +53,11 @@ describe('vehicle-types', () => {
       })
     })
 
-    it('debería incluir rigido, cab_tractora, tren_carretera, trailer', () => {
+    it('debería incluir valores en inglés: rigid, tractor, road_train, trailer', () => {
       const values = VEHICLE_STRUCTURE_TYPES.map(t => t.value)
-      expect(values).toContain('rigido')
-      expect(values).toContain('cab_tractora')
-      expect(values).toContain('tren_carretera')
+      expect(values).toContain('rigid')
+      expect(values).toContain('tractor')
+      expect(values).toContain('road_train')
       expect(values).toContain('trailer')
     })
 
@@ -79,21 +79,21 @@ describe('vehicle-types', () => {
       })
     })
 
-    it('IDs deberían ser kebab-case o snake_case', () => {
+    it('values deberían ser snake_case en inglés', () => {
       const validPattern = /^[a-z][a-z_]+$/
       VEHICLE_BODY_TYPES.forEach(t => {
         expect(validPattern.test(t.value)).toBe(true)
       })
     })
 
-    it('debería incluir tipos clave: lona, frigorifico, cisterna, basculante', () => {
+    it('debería incluir body types clave en inglés: curtain, refrigerated, tanker, dump', () => {
       const values = VEHICLE_BODY_TYPES.map(t => t.value)
-      expect(values).toContain('lona')
-      expect(values).toContain('frigorifico')
-      expect(values).toContain('cisterna')
-      expect(values).toContain('basculante')
-      expect(values).toContain('portacontenedores')
-      expect(values).toContain('portabobinas')
+      expect(values).toContain('curtain')
+      expect(values).toContain('refrigerated')
+      expect(values).toContain('tanker')
+      expect(values).toContain('dump')
+      expect(values).toContain('container_carrier')
+      expect(values).toContain('coil_carrier')
     })
 
     it('debería estar congelado', () => {
@@ -116,12 +116,12 @@ describe('vehicle-types', () => {
   })
 
   describe('getStructureLabel', () => {
-    it('debería retornar label para rigido', () => {
-      expect(getStructureLabel('rigido')).toBe('Rígido')
+    it('debería retornar label para rigid', () => {
+      expect(getStructureLabel('rigid')).toBe('Rígido')
     })
 
-    it('debería retornar label para cab_tractora', () => {
-      expect(getStructureLabel('cab_tractora')).toContain('Tractora')
+    it('debería retornar label para tractor', () => {
+      expect(getStructureLabel('tractor')).toContain('Tractora')
     })
 
     it('debería retornar el valor para desconocido', () => {
@@ -130,12 +130,12 @@ describe('vehicle-types', () => {
   })
 
   describe('getBodyLabel', () => {
-    it('debería retornar label para lona', () => {
-      expect(getBodyLabel('lona')).toContain('Lona')
+    it('debería retornar label para curtain', () => {
+      expect(getBodyLabel('curtain')).toContain('Lona')
     })
 
-    it('debería retornar label para cisterna', () => {
-      expect(getBodyLabel('cisterna')).toContain('Cisterna')
+    it('debería retornar label para tanker', () => {
+      expect(getBodyLabel('tanker')).toContain('Cisterna')
     })
 
     it('debería retornar el valor para desconocido', () => {
@@ -154,8 +154,8 @@ describe('vehicle-types', () => {
   })
 
   describe('getBodyDescription', () => {
-    it('debería retornar descripción para frigorifico', () => {
-      expect(getBodyDescription('frigorifico')).toContain('perecedera')
+    it('debería retornar descripción para refrigerated', () => {
+      expect(getBodyDescription('refrigerated')).toContain('perecedera')
     })
 
     it('debería retornar null para desconocido', () => {

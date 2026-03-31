@@ -59,8 +59,8 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template #item.nombre_completo="{ item }">
-          <span class="font-weight-medium">{{ item.nombre_completo }}</span>
+        <template #item.full_name="{ item }">
+          <span class="font-weight-medium">{{ item.full_name }}</span>
         </template>
 
         <template #item.status="{ item }">
@@ -69,8 +69,8 @@
           </v-chip>
         </template>
 
-        <template #item.fecha_nacimiento="{ item }">
-          {{ formatDate(item.fecha_nacimiento) }}
+        <template #item.birth_date="{ item }">
+          {{ formatDate(item.birth_date) }}
         </template>
 
         <template #item.actions="{ item }">
@@ -157,14 +157,14 @@ const {
 const searchQuery = ref('')
 const filterStatus = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'nombre_completo', order: 'asc' }])
+const sortBy = ref([{ key: 'full_name', order: 'asc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Nombre', key: 'nombre_completo', sortable: true },
-  { title: 'NIF/NIE', key: 'nif_nie', sortable: true },
-  { title: 'Teléfono', key: 'telefono', sortable: false },
+  { title: 'Nombre', key: 'full_name', sortable: true },
+  { title: 'NIF/NIE', key: 'nif', sortable: true },
+  { title: 'Teléfono', key: 'phone', sortable: false },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]

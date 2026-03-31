@@ -66,22 +66,20 @@
         hover
         data-testid="fuel-table"
       >
-        <template #item.fecha="{ item }">
-          {{ formatDate(item.fecha) }}
+        <template #item.refuel_date="{ item }">
+          {{ formatDate(item.refuel_date) }}
         </template>
 
-        <template #item.km_al_momento="{ item }">
-          {{ item.km_al_momento?.toLocaleString('es-ES') }} km
+        <template #item.odometer_km="{ item }">
+          {{ item.odometer_km?.toLocaleString('es-ES') }} km
         </template>
 
-        <template #item.litros_kg="{ item }">{{ item.litros_kg?.toFixed(1) }} L</template>
+        <template #item.quantity="{ item }">{{ item.quantity?.toFixed(1) }} L</template>
 
-        <template #item.precio_por_litro_eur="{ item }">
-          {{ item.precio_por_litro_eur?.toFixed(3) }} €/L
-        </template>
+        <template #item.unit_price="{ item }">{{ item.unit_price?.toFixed(3) }} €/L</template>
 
-        <template #item.importe_total_eur="{ item }">
-          <span class="font-weight-medium">{{ item.importe_total_eur?.toFixed(2) }} €</span>
+        <template #item.total_eur="{ item }">
+          <span class="font-weight-medium">{{ item.total_eur?.toFixed(2) }} €</span>
         </template>
 
         <template #item.actions="{ item }">
@@ -166,17 +164,17 @@ const filterVehicle = ref(null)
 const filterDateFrom = ref(null)
 const filterDateTo = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'fecha', order: 'desc' }])
+const sortBy = ref([{ key: 'refuel_date', order: 'desc' }])
 const vehicleOptions = ref([])
 const loadingVehicles = ref(true)
 
 const headers = [
-  { title: 'Fecha', key: 'fecha', sortable: true },
+  { title: 'Fecha', key: 'refuel_date', sortable: true },
   { title: 'Vehículo', key: 'vehicle_id', sortable: false },
-  { title: 'Km', key: 'km_al_momento', sortable: true },
-  { title: 'Litros', key: 'litros_kg', sortable: true },
-  { title: 'Precio/L', key: 'precio_por_litro_eur', sortable: true },
-  { title: 'Total', key: 'importe_total_eur', sortable: true },
+  { title: 'Km', key: 'odometer_km', sortable: true },
+  { title: 'Litros', key: 'quantity', sortable: true },
+  { title: 'Precio/L', key: 'unit_price', sortable: true },
+  { title: 'Total', key: 'total_eur', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 

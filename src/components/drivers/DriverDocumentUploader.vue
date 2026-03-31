@@ -29,33 +29,31 @@
       <v-list-item
         v-for="doc in documentos"
         :key="doc.id"
-        :href="doc.archivo_url"
+        :href="doc.file_url"
         target="_blank"
         data-testid="driver-doc-item"
       >
         <template #prepend>
-          <v-icon :icon="getFileIcon(doc.archivo_tipo)" size="small" />
+          <v-icon :icon="getFileIcon(doc.file_type)" size="small" />
         </template>
 
         <v-list-item-title class="text-body-2">
-          {{ getTipoLabel(doc.tipo_documento) }}
+          {{ getTipoLabel(doc.doc_type) }}
         </v-list-item-title>
 
         <v-list-item-subtitle class="text-caption">
-          {{ doc.archivo_nombre }}
-          <template v-if="doc.fecha_vencimiento">
-            · Vence: {{ formatDate(doc.fecha_vencimiento) }}
-          </template>
+          {{ doc.file_name }}
+          <template v-if="doc.expiry_date">· Vence: {{ formatDate(doc.expiry_date) }}</template>
         </v-list-item-subtitle>
 
         <template #append>
           <v-chip
-            :color="getEstado(doc.fecha_vencimiento).color"
+            :color="getEstado(doc.expiry_date).color"
             size="x-small"
             variant="tonal"
             class="mr-2"
           >
-            {{ getEstado(doc.fecha_vencimiento).label }}
+            {{ getEstado(doc.expiry_date).label }}
           </v-chip>
           <v-btn
             icon="mdi-delete-outline"
@@ -78,7 +76,7 @@
             <v-row>
               <v-col cols="12">
                 <v-select
-                  v-model="uploadForm.tipo_documento"
+                  v-model="uploadForm.doc_type"
                   :items="tipoOptions"
                   label="Tipo de documento *"
                   variant="outlined"
@@ -100,15 +98,7 @@
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="uploadForm.numero_referencia"
-                  label="Número de referencia"
-                  variant="outlined"
-                  data-testid="driver-doc-ref"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="uploadForm.fecha_expedicion"
+                  v-model="uploadForm.issue_date"
                   label="Fecha de expedición"
                   type="date"
                   variant="outlined"
@@ -117,7 +107,7 @@
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="uploadForm.fecha_vencimiento"
+                  v-model="uploadForm.expiry_date"
                   label="Fecha de vencimiento"
                   type="date"
                   variant="outlined"
@@ -160,7 +150,7 @@
     <v-dialog v-model="showDeleteDialog" max-width="400" persistent>
       <v-card>
         <v-card-title>¿Eliminar documento?</v-card-title>
-        <v-card-text>Se eliminará "{{ docToDelete?.archivo_nombre }}" permanentemente.</v-card-text>
+        <v-card-text>Se eliminará "{{ docToDelete?.file_name }}" permanentemente.</v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" data-testid="delete-doc-cancel" @click="showDeleteDialog = false">
@@ -211,10 +201,9 @@ const docToDelete = ref(null)
 const isDeleting = ref(false)
 
 const uploadForm = reactive({
-  tipo_documento: '',
-  numero_referencia: '',
-  fecha_expedicion: '',
-  fecha_vencimiento: '',
+  doc_type: '',
+  issue_date: '',
+  expiry_date: '',
   notas: '',
 })
 
@@ -265,10 +254,9 @@ async function handleDelete() {
 
 function closeUploadDialog() {
   showUploadDialog.value = false
-  uploadForm.tipo_documento = ''
-  uploadForm.numero_referencia = ''
-  uploadForm.fecha_expedicion = ''
-  uploadForm.fecha_vencimiento = ''
+  uploadForm.doc_type = ''
+  uploadForm.issue_date = ''
+  uploadForm.expiry_date = ''
   uploadForm.notas = ''
   uploadFiles.value = []
   uploadFormRef.value?.resetValidation()

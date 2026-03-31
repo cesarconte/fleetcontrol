@@ -7,10 +7,10 @@
           <v-row>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.fecha_salida"
+                v-model="form.planned_departure"
                 label="Fecha salida *"
                 type="date"
-                :error-messages="errors.fecha_salida"
+                :error-messages="errors.planned_departure"
                 variant="outlined"
                 required
                 data-testid="route-departure-date"
@@ -27,7 +27,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.fecha_llegada_prevista"
+                v-model="form.planned_arrival"
                 label="Fecha llegada"
                 type="date"
                 variant="outlined"
@@ -62,9 +62,9 @@
           <v-row>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.origen_municipio"
+                v-model="form.origin_city"
                 label="Origen *"
-                :error-messages="errors.origen_municipio"
+                :error-messages="errors.origin_city"
                 variant="outlined"
                 required
                 data-testid="route-origin"
@@ -72,9 +72,9 @@
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field
-                v-model="form.destino_municipio"
+                v-model="form.destination_city"
                 label="Destino *"
-                :error-messages="errors.destino_municipio"
+                :error-messages="errors.destination_city"
                 variant="outlined"
                 required
                 data-testid="route-destination"
@@ -82,7 +82,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model="form.origen_provincia"
+                v-model="form.origin_province"
                 label="Provincia origen"
                 variant="outlined"
                 data-testid="route-origin-province"
@@ -90,7 +90,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model="form.destino_provincia"
+                v-model="form.destination_province"
                 label="Provincia destino"
                 variant="outlined"
                 data-testid="route-dest-province"
@@ -98,7 +98,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-text-field
-                v-model.number="form.distancia_total_km"
+                v-model.number="form.planned_distance_km"
                 label="Distancia planificada (km)"
                 type="number"
                 variant="outlined"
@@ -107,7 +107,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="3">
               <v-text-field
-                v-model.number="form.duracion_prevista_min"
+                v-model.number="form.planned_duration_min"
                 label="Duración estimada (min)"
                 type="number"
                 step="5"
@@ -132,6 +132,7 @@
                 variant="outlined"
                 :loading="loadingRefs"
                 data-testid="route-vehicle"
+                @update:model-value="onVehicleChange"
               />
             </v-col>
             <v-col cols="12" sm="6">
@@ -155,7 +156,7 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="form.descripcion_carga"
+                v-model="form.cargo_description"
                 label="Descripción de la carga"
                 variant="outlined"
                 data-testid="route-cargo-desc"
@@ -163,7 +164,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.peso_carga_kg"
+                v-model.number="form.cargo_weight_kg"
                 label="Peso (kg)"
                 type="number"
                 variant="outlined"
@@ -172,7 +173,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.volumen_carga_m3"
+                v-model.number="form.cargo_volume_m3"
                 label="Volumen (m³)"
                 type="number"
                 step="0.1"
@@ -180,16 +181,25 @@
                 data-testid="route-cargo-volume"
               />
             </v-col>
-            <v-col cols="12" sm="4" md="3">
+            <v-col cols="12" sm="6" md="6">
               <v-select
-                v-model="form.tipo_carga"
-                :items="cargoTypes"
-                label="Tipo de carga"
+                v-model="form.subcategoria_id"
+                :items="subcategoryOptions"
+                label="Tipo de carga (subcategoría)"
                 variant="outlined"
-                data-testid="route-cargo-type"
+                data-testid="route-cargo-subcategory"
+                clearable
               />
             </v-col>
           </v-row>
+
+          <!-- Compliance check -->
+          <RouteCompliancePanel
+            v-if="selectedVehicle && form.subcategoria_id"
+            :vehicle="selectedVehicle"
+            :subcategoria-id="form.subcategoria_id"
+            :cargo-weight-kg="form.cargo_weight_kg"
+          />
         </v-expansion-panel-text>
       </v-expansion-panel>
 
@@ -199,7 +209,7 @@
           <v-row>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.distancia_recorrida_km"
+                v-model.number="form.actual_distance_km"
                 label="Distancia real (km)"
                 type="number"
                 variant="outlined"
@@ -208,7 +218,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.duracion_real_min"
+                v-model.number="form.actual_duration_min"
                 label="Duración real (min)"
                 type="number"
                 step="5"
@@ -218,7 +228,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.consumo_combustible_l"
+                v-model.number="form.fuel_consumed_liters"
                 label="Combustible (L)"
                 type="number"
                 step="0.1"
@@ -228,7 +238,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.coste_combustible_eur"
+                v-model.number="form.fuel_cost_eur"
                 label="Coste combustible (€)"
                 type="number"
                 step="0.01"
@@ -238,7 +248,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.coste_peajes_eur"
+                v-model.number="form.toll_cost_eur"
                 label="Peajes (€)"
                 type="number"
                 step="0.01"
@@ -248,7 +258,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.coste_total_eur"
+                v-model.number="form.total_cost_eur"
                 label="Coste total (€)"
                 type="number"
                 step="0.01"
@@ -258,7 +268,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="3">
               <v-text-field
-                v-model.number="form.retraso_minutos"
+                v-model.number="form.delay_minutes"
                 label="Retraso (min)"
                 type="number"
                 variant="outlined"
@@ -275,25 +285,17 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.cmr_numero"
-                label="Nº CMR"
+                v-model="form.linked_document_ref"
+                label="Nº CMR / Ref. documento"
                 variant="outlined"
                 data-testid="route-cmr"
-              />
-            </v-col>
-            <v-col cols="12" sm="6" md="4">
-              <v-text-field
-                v-model="form.albaran_numero"
-                label="Nº Albarán"
-                variant="outlined"
-                data-testid="route-albaran"
               />
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
               <v-textarea
-                v-model="form.observaciones"
+                v-model="form.result_notes"
                 label="Observaciones"
                 variant="outlined"
                 rows="3"
@@ -326,6 +328,8 @@ import { ref, reactive, watch, onMounted } from 'vue'
 import { apiVehicles } from '@/services/api-vehicles.js'
 import { apiDrivers } from '@/services/api-drivers.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { CARGO_CATEGORIES } from '@/constants/cargo-categories.js'
+import RouteCompliancePanel from './RouteCompliancePanel.vue'
 
 const props = defineProps({
   initialValues: { type: Object, default: () => ({}) },
@@ -344,37 +348,47 @@ const openPanels = ref(['planning', 'location'])
 const loadingRefs = ref(true)
 const vehicleOptions = ref([])
 const driverOptions = ref([])
+const vehiclesList = ref([])
+const selectedVehicle = ref(null)
+
+// All subcategories grouped by category for VSelect
+const subcategoryOptions = CARGO_CATEGORIES.flatMap(cat =>
+  cat.subcategorias.map(sub => ({
+    title: sub.nombre,
+    value: sub.id,
+    props: { subtitle: cat.nombre },
+  })),
+)
 
 const form = reactive({
-  fecha_salida: '',
+  planned_departure: '',
   departure_time: '',
-  fecha_llegada_prevista: '',
+  planned_arrival: '',
   arrival_time: '',
-  origen_municipio: '',
-  origen_provincia: '',
-  origen_pais: 'España',
-  destino_municipio: '',
-  destino_provincia: '',
-  destino_pais: 'España',
+  origin_city: '',
+  origin_province: '',
+  origin_country: 'España',
+  destination_city: '',
+  destination_province: '',
+  destination_country: 'España',
   vehicle_id: '',
   driver_id: '',
-  distancia_total_km: null,
-  distancia_recorrida_km: null,
-  duracion_prevista_min: null,
-  duracion_real_min: null,
-  descripcion_carga: '',
-  peso_carga_kg: null,
-  volumen_carga_m3: null,
-  tipo_carga: 'general',
-  consumo_combustible_l: null,
-  coste_combustible_eur: null,
-  coste_peajes_eur: null,
-  coste_total_eur: null,
+  planned_distance_km: null,
+  actual_distance_km: null,
+  planned_duration_min: null,
+  actual_duration_min: null,
+  cargo_description: '',
+  cargo_weight_kg: null,
+  cargo_volume_m3: null,
+  subcategoria_id: '',
+  fuel_consumed_liters: null,
+  fuel_cost_eur: null,
+  toll_cost_eur: null,
+  total_cost_eur: null,
   status: 'planificada',
-  retraso_minutos: null,
-  observaciones: '',
-  cmr_numero: '',
-  albaran_numero: '',
+  delay_minutes: null,
+  result_notes: '',
+  linked_document_ref: '',
   ...props.initialValues,
 })
 
@@ -382,6 +396,10 @@ watch(
   () => props.initialValues,
   newValues => {
     Object.assign(form, newValues)
+    // Restore selected vehicle from initial values
+    if (form.vehicle_id && vehiclesList.value.length) {
+      selectedVehicle.value = vehiclesList.value.find(v => v.id === form.vehicle_id) ?? null
+    }
   },
   { deep: true },
 )
@@ -394,16 +412,14 @@ const routeStatuses = [
   { title: 'Cancelada', value: 'cancelada' },
 ]
 
-const cargoTypes = [
-  { title: 'General', value: 'general' },
-  { title: 'Frigorífica', value: 'frigorifica' },
-  { title: 'Peligrosa (ADR)', value: 'peligrosa' },
-  { title: 'Especial', value: 'especial' },
-]
+function onVehicleChange(vehicleId) {
+  selectedVehicle.value = vehiclesList.value.find(v => v.id === vehicleId) ?? null
+}
 
 onMounted(async () => {
   try {
     const [vehicles, drivers] = await Promise.all([apiVehicles.getAll(), apiDrivers.getAll()])
+    vehiclesList.value = vehicles
     vehicleOptions.value = vehicles.map(v => ({
       title: `${v.plate} — ${v.brand} ${v.model}`,
       value: v.id,
@@ -412,6 +428,10 @@ onMounted(async () => {
       title: `${d.full_name} (${d.nif})`,
       value: d.id,
     }))
+    // Restore selected vehicle if editing
+    if (form.vehicle_id) {
+      selectedVehicle.value = vehicles.find(v => v.id === form.vehicle_id) ?? null
+    }
   } catch {
     notifications.error('Error al cargar vehículos y conductores')
   } finally {

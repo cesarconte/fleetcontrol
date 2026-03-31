@@ -1,134 +1,85 @@
 -- =============================================================================
 -- Migration: 20260330_016_vehicle_types.sql
--- Description: Reestructuración vehículos — 3 campos UE (categoría, estructura, carrocería)
---              EU Homologation Categories + RD 2822/1998 Anexo II
+-- Description: Vehicle restructuring — EU category + body type columns
+--              EU Homologation Categories + RD 2822/1998 Annex II
+--              All column names and enum values in English to match existing DB.
 -- =============================================================================
 
--- ── 1. Crear nuevos enums ───────────────────────────────────────────────────
+-- ── 1. Create new enums (English values) ─────────────────────────────────────
 
-CREATE TYPE eu_categoria AS ENUM (
+CREATE TYPE eu_category AS ENUM (
   'N1', 'N2', 'N3',
   'O1', 'O2', 'O3', 'O4'
 );
 
-CREATE TYPE vehicle_body_type AS ENUM (
-  'caja_abierta', 'lona', 'caja_cerrada', 'frigorifico', 'isotermo',
-  'calorifico', 'cisterna', 'silo', 'basculante', 'portavehiculos',
-  'portacontenedores', 'jaula', 'ganadero', 'capitone', 'portabobinas',
-  'plataforma_abierta', 'furgon', 'furgoneta', 'grua', 'tolva',
-  'especial'
+CREATE TYPE body_type AS ENUM (
+  'open_box', 'curtain', 'closed_box', 'refrigerated', 'insulated',
+  'heated', 'tanker', 'silo', 'dump', 'car_carrier',
+  'container_carrier', 'cage', 'livestock', 'padded', 'coil_carrier',
+  'open_platform', 'delivery_truck', 'van', 'crane', 'hopper',
+  'special'
 );
 
--- ── 2. Añadir nuevas columnas (nullable temporalmente) ──────────────────────
+-- ── 2. Add new columns (nullable temporarily) ───────────────────────────────
 
 ALTER TABLE vehicles
-  ADD COLUMN categoria_ue eu_categoria,
-  ADD COLUMN tipo_carroceria vehicle_body_type;
+  ADD COLUMN IF NOT EXISTS eu_category eu_category,
+  ADD COLUMN IF NOT EXISTS body_type body_type;
 
--- ── 3. Migrar datos existentes ──────────────────────────────────────────────
--- Mapping del antiguo tipo_vehiculo a los 3 nuevos campos.
--- NOTA: El campo tipo_vehiculo original se conserva como backup.
+-- ── 3. Migrate existing data from vehicle_type ──────────────────────────────
+-- Map existing vehicle_type values → body_type + eu_category.
+-- vehicle_type column is preserved (represents physical structure).
 
 DO $$
-DECLARE
-  v_count int;
 BEGIN
-  -- tractora → cab_tractora / especial / N3
-  UPDATE vehicles SET tipo_carroceria = 'especial', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'tractora' AND tipo_carroceria IS NULL;
+  -- tractor → special body, N3
+  UPDATE vehicles SET body_type = 'special', eu_category = 'N3'
+  WHERE vehicle_type = 'tractor' AND body_type IS NULL;
 
-  -- vehiculo_rigido → rigido / caja_cerrada / N3
-  UPDATE vehicles SET tipo_carroceria = 'caja_cerrada', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'vehiculo_rigido' AND tipo_carroceria IS NULL;
+  -- rigid → closed_box, N3
+  UPDATE vehicles SET body_type = 'closed_box', eu_category = 'N3'
+  WHERE vehicle_type = 'rigid' AND body_type IS NULL;
 
-  -- semirremolque → semirremolque / lona / O4
-  UPDATE vehicles SET tipo_carroceria = 'lona', categoria_ue = 'O4'
-  WHERE tipo_vehiculo = 'semirremolque' AND tipo_carroceria IS NULL;
+  -- semitrailer → curtain, O4
+  UPDATE vehicles SET body_type = 'curtain', eu_category = 'O4'
+  WHERE vehicle_type = 'semitrailer' AND body_type IS NULL;
 
-  -- remolque → remolque / caja_abierta / O3
-  UPDATE vehicles SET tipo_carroceria = 'caja_abierta', categoria_ue = 'O3'
-  WHERE tipo_vehiculo = 'remolque' AND tipo_carroceria IS NULL;
+  -- trailer → open_box, O3
+  UPDATE vehicles SET body_type = 'open_box', eu_category = 'O3'
+  WHERE vehicle_type = 'trailer' AND body_type IS NULL;
 
-  -- portacoches → rigido / portavehiculos / N3
-  UPDATE vehicles SET tipo_carroceria = 'portavehiculos', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'portacoches' AND tipo_carroceria IS NULL;
+  -- tanker → tanker, N3
+  UPDATE vehicles SET body_type = 'tanker', eu_category = 'N3'
+  WHERE vehicle_type = 'tanker' AND body_type IS NULL;
 
-  -- cisterna → rigido / cisterna / N3
-  UPDATE vehicles SET tipo_carroceria = 'cisterna', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'cisterna' AND tipo_carroceria IS NULL;
+  -- refrigerated → refrigerated, N3
+  UPDATE vehicles SET body_type = 'refrigerated', eu_category = 'N3'
+  WHERE vehicle_type = 'refrigerated' AND body_type IS NULL;
 
-  -- frigorifico → rigido / frigorifico / N3
-  UPDATE vehicles SET tipo_carroceria = 'frigorifico', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'frigorifico' AND tipo_carroceria IS NULL;
+  -- dump → dump, N3
+  UPDATE vehicles SET body_type = 'dump', eu_category = 'N3'
+  WHERE vehicle_type = 'dump' AND body_type IS NULL;
 
-  -- basculante → rigido / basculante / N3
-  UPDATE vehicles SET tipo_carroceria = 'basculante', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'basculante' AND tipo_carroceria IS NULL;
+  -- curtain → curtain, N3
+  UPDATE vehicles SET body_type = 'curtain', eu_category = 'N3'
+  WHERE vehicle_type = 'curtain' AND body_type IS NULL;
 
-  -- lona → rigido / lona / N3
-  UPDATE vehicles SET tipo_carroceria = 'lona', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'lona' AND tipo_carroceria IS NULL;
+  -- box → closed_box, N3
+  UPDATE vehicles SET body_type = 'closed_box', eu_category = 'N3'
+  WHERE vehicle_type = 'box' AND body_type IS NULL;
 
-  -- caja_cerrada → rigido / caja_cerrada / N3
-  UPDATE vehicles SET tipo_carroceria = 'caja_cerrada', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'caja_cerrada' AND tipo_carroceria IS NULL;
+  -- special → special, N3
+  UPDATE vehicles SET body_type = 'special', eu_category = 'N3'
+  WHERE vehicle_type = 'special' AND body_type IS NULL;
 
-  -- especial → rigido / especial / N3
-  UPDATE vehicles SET tipo_carroceria = 'especial', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'especial' AND tipo_carroceria IS NULL;
+  -- Any remaining NULL → special, N3 (fallback)
+  UPDATE vehicles SET body_type = 'special', eu_category = 'N3'
+  WHERE body_type IS NULL;
 
-  -- furgoneta → rigido / furgoneta / N1
-  UPDATE vehicles SET tipo_carroceria = 'furgoneta', categoria_ue = 'N1'
-  WHERE tipo_vehiculo = 'furgoneta' AND tipo_carroceria IS NULL;
-
-  -- furgon → rigido / furgon / N2
-  UPDATE vehicles SET tipo_carroceria = 'furgon', categoria_ue = 'N2'
-  WHERE tipo_vehiculo = 'furgon' AND tipo_carroceria IS NULL;
-
-  -- ganadero → rigido / ganadero / N3
-  UPDATE vehicles SET tipo_carroceria = 'ganadero', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'ganadero' AND tipo_carroceria IS NULL;
-
-  -- isotermo → rigido / isotermo / N3
-  UPDATE vehicles SET tipo_carroceria = 'isotermo', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'isotermo' AND tipo_carroceria IS NULL;
-
-  -- mega → semirremolque / lona / O4
-  UPDATE vehicles SET tipo_carroceria = 'lona', categoria_ue = 'O4'
-  WHERE tipo_vehiculo = 'mega' AND tipo_carroceria IS NULL;
-
-  -- plataforma_abierta → rigido / plataforma_abierta / N3
-  UPDATE vehicles SET tipo_carroceria = 'plataforma_abierta', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'plataforma_abierta' AND tipo_carroceria IS NULL;
-
-  -- gondola → rigido / plataforma_abierta / N3
-  UPDATE vehicles SET tipo_carroceria = 'plataforma_abierta', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'gondola' AND tipo_carroceria IS NULL;
-
-  -- portacovertores → rigido / portacontenedores / N3
-  UPDATE vehicles SET tipo_carroceria = 'portacontenedores', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'portacovertores' AND tipo_carroceria IS NULL;
-
-  -- tolva → rigido / tolva / N3
-  UPDATE vehicles SET tipo_carroceria = 'tolva', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'tolva' AND tipo_carroceria IS NULL;
-
-  -- grua → rigido / grua / N3
-  UPDATE vehicles SET tipo_carroceria = 'grua', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'grua' AND tipo_carroceria IS NULL;
-
-  -- mixto → rigido / especial / N3
-  UPDATE vehicles SET tipo_carroceria = 'especial', categoria_ue = 'N3'
-  WHERE tipo_vehiculo = 'mixto' AND tipo_carroceria IS NULL;
-
-  -- Cualquier otro valor restante → rigido / especial / N3
-  UPDATE vehicles SET tipo_carroceria = 'especial', categoria_ue = 'N3'
-  WHERE tipo_carroceria IS NULL;
-
-  RAISE NOTICE 'Migración de datos de tipo_vehiculo completada';
+  RAISE NOTICE 'Data migration from vehicle_type completed';
 END $$;
 
--- ── 4. Verificar integridad y hacer NOT NULL ────────────────────────────────
+-- ── 4. Set NOT NULL after migration ──────────────────────────────────────────
 
 DO $$
 DECLARE
@@ -136,38 +87,26 @@ DECLARE
 BEGIN
   SELECT COUNT(*) INTO null_count
   FROM vehicles
-  WHERE categoria_ue IS NULL OR tipo_carroceria IS NULL;
+  WHERE eu_category IS NULL OR body_type IS NULL;
 
   IF null_count > 0 THEN
-    RAISE EXCEPTION 'Hay % vehículos con categoria_ue o tipo_carroceria NULL', null_count;
+    RAISE EXCEPTION '% vehicles with eu_category or body_type NULL', null_count;
   END IF;
 END $$;
 
 ALTER TABLE vehicles
-  ALTER COLUMN categoria_ue SET NOT NULL,
-  ALTER COLUMN tipo_carroceria SET NOT NULL;
+  ALTER COLUMN eu_category SET NOT NULL,
+  ALTER COLUMN body_type SET NOT NULL;
 
--- ── 5. Renombrar columna antigua (backup por seguridad) ─────────────────────
+-- ── 5. Comments ──────────────────────────────────────────────────────────────
 
-ALTER TABLE vehicles RENAME COLUMN tipo_vehiculo TO tipo_vehiculo_deprecated;
+COMMENT ON COLUMN vehicles.eu_category IS
+  'EU homologation category by mass (N1-N3, O1-O4). Reg. (UE) 2018/858.';
+COMMENT ON COLUMN vehicles.body_type IS
+  'Body type / utilization criterion. RD 2822/1998 Annex II.';
 
--- Backup del valor original como texto (por si acaso)
-ALTER TABLE vehicles ADD COLUMN tipo_vehiculo_old_value text;
-UPDATE vehicles SET tipo_vehiculo_old_value = tipo_vehiculo_deprecated::text;
+-- ── 6. Indexes ───────────────────────────────────────────────────────────────
 
-COMMENT ON COLUMN vehicles.tipo_vehiculo_deprecated IS
-  'DEPRECATED: Antiguo enum vehicle_type. Renombrado en migración 016. Eliminar en futura migración.';
-COMMENT ON COLUMN vehicles.tipo_vehiculo_old_value IS
-  'Backup del valor original de tipo_vehiculo. Eliminar en futura migración.';
-COMMENT ON COLUMN vehicles.categoria_ue IS
-  'Categoría UE de homologación por masa (N1-N3, O1-O4). Reg. (UE) 2018/858.';
-COMMENT ON COLUMN vehicles.tipo_carroceria IS
-  'Tipo de carrocería / criterio de utilización. RD 2822/1998 Anexo II.';
-
--- ── 6. Índices ──────────────────────────────────────────────────────────────
-
-DROP INDEX IF EXISTS idx_vehicles_tipo;
-
-CREATE INDEX idx_vehicles_categoria_ue ON vehicles(categoria_ue);
-CREATE INDEX idx_vehicles_tipo_carroceria ON vehicles(tipo_carroceria);
-CREATE INDEX idx_vehicles_cat_carroc ON vehicles(categoria_ue, tipo_carroceria);
+CREATE INDEX IF NOT EXISTS idx_vehicles_eu_category ON vehicles(eu_category);
+CREATE INDEX IF NOT EXISTS idx_vehicles_body_type ON vehicles(body_type);
+CREATE INDEX IF NOT EXISTS idx_vehicles_cat_body ON vehicles(eu_category, body_type);

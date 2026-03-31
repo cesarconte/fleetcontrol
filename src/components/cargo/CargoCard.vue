@@ -3,22 +3,22 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
-          <div class="text-body-2 font-weight-medium">{{ record.descripcion }}</div>
+          <div class="text-body-2 font-weight-medium">{{ record.description }}</div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatKg(record.peso_kg) }}
-            {{ record.volumen_m3 ? ` · ${record.volumen_m3} m³` : '' }}
+            {{ formatKg(record.weight_kg) }}
+            {{ record.volume_m3 ? ` · ${record.volume_m3} m³` : '' }}
           </div>
         </div>
-        <v-chip :color="getCargoTypeColor(record.tipo)" size="small" variant="tonal">
-          {{ getCargoTypeLabel(record.tipo) }}
+        <v-chip :color="getCargoTypeColor(record.cargo_type)" size="small" variant="tonal">
+          {{ getCargoTypeLabel(record.cargo_type) }}
         </v-chip>
       </div>
 
-      <template v-if="record.tipo === 'peligrosa'">
+      <template v-if="record.cargo_type === 'peligrosa'">
         <v-divider class="my-2" />
         <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-          <span>Clase ADR: {{ record.adr_clase || '—' }}</span>
-          <span>ONU: {{ record.adr_numero_onu || '—' }}</span>
+          <span>Clase ADR: {{ record.adr_class || '—' }}</span>
+          <span>ONU: {{ record.adr_un_number || '—' }}</span>
         </div>
       </template>
     </v-card-text>

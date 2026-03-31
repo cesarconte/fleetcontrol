@@ -2,7 +2,7 @@
  * FleetControl — Drivers Service
  *
  * Extends base CRUD with driver-specific queries.
- * Column names match the Supabase drivers table (Spanish).
+ * Column names match the Supabase drivers table.
  */
 
 import { createCrudService } from './create-crud-service.js'
@@ -10,7 +10,7 @@ import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
 const base = createCrudService('drivers', {
-  orderBy: 'nombre_completo',
+  orderBy: 'full_name',
   ascending: true,
 })
 
@@ -21,7 +21,7 @@ export const apiDrivers = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'nombre_completo', asc: true },
+    sort = { col: 'full_name', asc: true },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -34,9 +34,7 @@ export const apiDrivers = {
 
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.search) {
-      query = query.or(
-        `nombre_completo.ilike.%${filters.search}%,nif_nie.ilike.%${filters.search}%`,
-      )
+      query = query.or(`full_name.ilike.%${filters.search}%,nif.ilike.%${filters.search}%`)
     }
 
     const { data, error, count } = await query
@@ -48,8 +46,8 @@ export const apiDrivers = {
     const { data, error } = await supabase
       .from('drivers')
       .select('*')
-      .or(`nombre_completo.ilike.%${term}%,nif_nie.ilike.%${term}%`)
-      .order('nombre_completo')
+      .or(`full_name.ilike.%${term}%,nif.ilike.%${term}%`)
+      .order('full_name')
 
     if (error) throw mapSupabaseError(error)
     return data
@@ -74,12 +72,12 @@ export const apiDrivers = {
    * Upload a document file to Supabase Storage and create the DB record.
    * @param {string} driverId
    * @param {File} file
-   * @param {object} metadata - { tipo_documento, numero_referencia, categoria, fecha_expedicion, fecha_vencimiento, notas }
+   * @param {object} metadata - { doc_type, issue_date, expiry_date, alert_days_before, notas }
    */
   async subirDocumento(driverId, file, metadata) {
     const timestamp = Date.now()
     const ext = file.name.split('.').pop()
-    const filePath = `${driverId}/${metadata.tipo_documento}_${timestamp}.${ext}`
+    const filePath = `${driverId}/${metadata.doc_type}_${timestamp}.${ext}`
 
     const { error: uploadError } = await supabase.storage
       .from('documentos-conductores')
@@ -95,16 +93,12 @@ export const apiDrivers = {
       .from('driver_documents')
       .insert({
         driver_id: driverId,
-        tipo_documento: metadata.tipo_documento,
-        numero_referencia: metadata.numero_referencia || null,
-        categoria: metadata.categoria || null,
-        fecha_expedicion: metadata.fecha_expedicion || null,
-        fecha_vencimiento: metadata.fecha_vencimiento || null,
-        alerta_dias_anticipacion: metadata.alerta_dias_anticipacion || 30,
+        doc_type: metadata.doc_type,
+        issue_date: metadata.issue_date || null,
+        expiry_date: metadata.expiry_date || null,
+        alert_days_before: metadata.alert_days_before || 30,
         notas: metadata.notas || null,
-        archivo_url: publicUrl,
-        archivo_nombre: file.name,
-        archivo_tipo: file.type,
+        file_url: publicUrl,
       })
       .select()
       .single()
@@ -120,14 +114,14 @@ export const apiDrivers = {
   async eliminarDocumento(documentoId) {
     const { data: doc, error: fetchError } = await supabase
       .from('driver_documents')
-      .select('archivo_url, driver_id')
+      .select('file_url, driver_id')
       .eq('id', documentoId)
       .single()
 
     if (fetchError) throw mapSupabaseError(fetchError)
 
-    if (doc.archivo_url) {
-      const urlParts = doc.archivo_url.split('/documentos-conductores/')
+    if (doc.file_url) {
+      const urlParts = doc.file_url.split('/documentos-conductores/')
       if (urlParts[1]) {
         await supabase.storage.from('documentos-conductores').remove([urlParts[1]])
       }

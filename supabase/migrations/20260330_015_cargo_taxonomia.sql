@@ -1,37 +1,33 @@
 -- =============================================================================
 -- Migration: 20260330_015_cargo_taxonomia.sql
--- Description: Taxonomía de cargas — subcategoria_id + ampliación vehicle_type
---              PRD §4.6, Fases 1-3 del plan de implementación
+-- Description: Cargo taxonomy — subcategoria_id + expand vehicle_type enum
+--              PRD §4.6, Phases 1-3 of implementation plan
 -- =============================================================================
 
--- ── 1. Ampliar vehicle_type con clases adicionales ──────────────────────────
--- PostgreSQL solo permite ADD VALUE (sin DELETE). Backward-compatible.
+-- ── 1. Expand vehicle_type enum with additional types (English) ──────────────
 
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'furgoneta';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'furgon';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'ganadero';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'isotermo';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'livestock';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'insulated';
 ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'mega';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'plataforma_abierta';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'open_platform';
 ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'gondola';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'portacovertores';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'tolva';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'grua';
-ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'mixto';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'container_carrier';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'hopper';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'crane';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'mixed';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'van';
+ALTER TYPE vehicle_type ADD VALUE IF NOT EXISTS 'delivery_truck';
 
--- ── 2. Añadir subcategoria_id a cargo_records ───────────────────────────────
--- Nullable y backward-compatible: registros existentes sin subcategoría siguen
--- válidos. La columna se rellena al crear/editar cargas con el nuevo selector.
+-- ── 2. Add subcategoria_id to cargo_records ──────────────────────────────────
 
 ALTER TABLE cargo_records
-  ADD COLUMN subcategoria_id text;
+  ADD COLUMN IF NOT EXISTS subcategoria_id text;
 
 COMMENT ON COLUMN cargo_records.subcategoria_id IS
-  'ID de subcategoría de la taxonomía de cargas (kebab-case). '
-  'Referencia a src/constants/cargo-categories.js. Nullable por backward compatibility.';
+  'Cargo subcategory ID (kebab-case). References src/constants/cargo-categories.js.';
 
--- ── 3. Índice para consultas por subcategoría ───────────────────────────────
+-- ── 3. Index for subcategory queries ─────────────────────────────────────────
 
-CREATE INDEX idx_cargo_subcategoria
+CREATE INDEX IF NOT EXISTS idx_cargo_subcategoria
   ON cargo_records (subcategoria_id)
   WHERE subcategoria_id IS NOT NULL;

@@ -11,7 +11,7 @@ export const maintenanceSchema = z.object({
     .string({ required_error: 'Debe seleccionar un vehículo' })
     .uuid('Vehículo inválido'),
 
-  tipo: z
+  maintenance_type: z
     .enum(['preventivo', 'correctivo'], {
       errorMap: () => ({ message: 'Tipo de mantenimiento inválido' }),
     })
@@ -23,41 +23,38 @@ export const maintenanceSchema = z.object({
     })
     .default('pendiente'),
 
-  fecha_programada: z.string().optional().or(z.literal('')),
-  fecha_fin: z.string().optional().or(z.literal('')),
+  scheduled_date: z.string().optional().or(z.literal('')),
+  actual_date: z.string().optional().or(z.literal('')),
 
-  km_al_momento: z
+  scheduled_km: z
     .number({ invalid_type_error: 'Kilometraje inválido' })
     .int()
     .positive('El kilometraje debe ser mayor que 0')
     .optional()
     .nullable(),
 
-  descripcion: z
+  description: z
     .string({ required_error: 'La descripción es obligatoria' })
     .min(3, 'La descripción debe tener al menos 3 caracteres'),
 
-  diagnostico: z.string().optional().or(z.literal('')),
-  intervencion_realizada: z.string().optional().or(z.literal('')),
+  diagnosis: z.string().optional().or(z.literal('')),
+  intervention: z.string().optional().or(z.literal('')),
 
-  recambios: z.string().optional().or(z.literal('')),
-  coste_recambios_eur: z.number().min(0).optional().nullable(),
+  parts_used: z.string().optional().or(z.literal('')),
 
-  taller_nombre: z.string().optional().or(z.literal('')),
-  taller_responsable: z.string().optional().or(z.literal('')),
+  workshop_name: z.string().optional().or(z.literal('')),
+  responsible_name: z.string().optional().or(z.literal('')),
 
-  inmovilizacion_horas: z.number().min(0).optional().nullable(),
+  downtime_hours: z.number().min(0).optional().nullable(),
 
-  coste_total_eur: z.number().min(0).optional().nullable(),
-
-  observations: z.string().optional().or(z.literal('')),
+  cost_eur: z.number().min(0).optional().nullable(),
 })
 
 export const maintenanceUpdateSchema = maintenanceSchema.partial()
 
 export const maintenanceSearchSchema = z.object({
   search: z.string().optional(),
-  tipo: z.string().optional(),
+  maintenance_type: z.string().optional(),
   status: z.string().optional(),
   vehicle_id: z.string().optional(),
 })

@@ -7,9 +7,9 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nombre_completo"
+                v-model="form.full_name"
                 label="Nombre completo *"
-                :error-messages="errors.nombre_completo"
+                :error-messages="errors.full_name"
                 variant="outlined"
                 required
                 data-testid="driver-nombre-completo"
@@ -17,9 +17,9 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nif_nie"
+                v-model="form.nif"
                 label="NIF/NIE *"
-                :error-messages="errors.nif_nie"
+                :error-messages="errors.nif"
                 variant="outlined"
                 required
                 maxlength="9"
@@ -28,10 +28,10 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.fecha_nacimiento"
+                v-model="form.birth_date"
                 label="Fecha de nacimiento *"
                 type="date"
-                :error-messages="errors.fecha_nacimiento"
+                :error-messages="errors.birth_date"
                 variant="outlined"
                 required
                 data-testid="driver-fecha-nacimiento"
@@ -39,7 +39,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nacionalidad"
+                v-model="form.nationality"
                 label="Nacionalidad"
                 variant="outlined"
                 data-testid="driver-nacionalidad"
@@ -57,9 +57,9 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.telefono"
+                v-model="form.phone"
                 label="Teléfono"
-                :error-messages="errors.telefono"
+                :error-messages="errors.phone"
                 variant="outlined"
                 maxlength="9"
                 data-testid="driver-telefono"
@@ -75,7 +75,7 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="form.direccion"
+                v-model="form.address"
                 label="Dirección"
                 variant="outlined"
                 data-testid="driver-direccion"
@@ -83,7 +83,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.ciudad"
+                v-model="form.city"
                 label="Ciudad"
                 variant="outlined"
                 data-testid="driver-ciudad"
@@ -91,7 +91,7 @@
             </v-col>
             <v-col cols="6" sm="3" md="2">
               <v-text-field
-                v-model="form.codigo_postal"
+                v-model="form.postal_code"
                 label="C.P."
                 variant="outlined"
                 maxlength="5"
@@ -100,7 +100,7 @@
             </v-col>
             <v-col cols="6" sm="3" md="2">
               <v-text-field
-                v-model="form.provincia"
+                v-model="form.province"
                 label="Provincia"
                 variant="outlined"
                 data-testid="driver-provincia"
@@ -116,7 +116,7 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.fecha_incorporacion"
+                v-model="form.hire_date"
                 label="Fecha de incorporación"
                 type="date"
                 variant="outlined"
@@ -174,33 +174,33 @@ const formRef = ref(null)
 const openPanels = ref(['personal'])
 
 const form = reactive({
-  nombre_completo: '',
-  nif_nie: '',
-  fecha_nacimiento: '',
-  nacionalidad: '',
-  direccion: '',
-  ciudad: '',
-  codigo_postal: '',
-  provincia: '',
-  telefono: '',
+  full_name: '',
+  nif: '',
+  birth_date: '',
+  nationality: '',
+  address: '',
+  city: '',
+  postal_code: '',
+  province: '',
+  phone: '',
   email: '',
-  foto_url: '',
-  fecha_incorporacion: '',
+  photo_url: '',
+  hire_date: '',
   status: 'activo',
-  carnet_clase: '',
-  carnet_numero: '',
-  carnet_fecha_expedicion: '',
-  carnet_fecha_vencimiento: '',
-  cap_numero: '',
-  cap_fecha_vencimiento: '',
-  cap_horas_formacion: 35,
-  tarjeta_tacografo_numero: '',
-  tarjeta_tacografo_vencimiento: '',
-  reconocimiento_medico_fecha: '',
-  reconocimiento_medico_vencimiento: '',
-  adr_certificado: false,
-  adr_numero: '',
-  adr_fecha_vencimiento: '',
+  carnet_class: '',
+  carnet_number: '',
+  carnet_issue_date: '',
+  carnet_expiry_date: '',
+  cap_number: '',
+  cap_expiry_date: '',
+  cap_training_hours: 35,
+  tachograph_card_number: '',
+  tachograph_card_expiry: '',
+  medical_exam_date: '',
+  medical_exam_expiry: '',
+  adr_certificate: false,
+  adr_number: '',
+  adr_expiry_date: '',
   ...props.initialValues,
 })
 

@@ -4,11 +4,11 @@
  * Pure functions to check vehicle compliance against cargo subcategory
  * requirements and provide equipment checklists.
  *
- * Compatibility checks use tipo_carroceria (vehicle body type) which
+ * Compatibility checks use body_type (vehicle body type) which
  * "dialogues" directly with cargo type per EU/RD 2822/1998 classification.
  *
- * @see PRD §4.4.3 — Planificación de Rutas (validación automática)
- * @see PRD §4.6 — Gestión de Cargas
+ * @see PRD §4.4.3
+ * @see PRD §4.6
  */
 
 import { getSubcategoryById } from '@/constants/cargo-categories.js'
@@ -21,9 +21,9 @@ import {
 /**
  * @typedef {Object} ComplianceResult
  * @property {boolean} isCompliant
- * @property {string[]} autoPassed - Requirements verified automatically
- * @property {string[]} autoFailed - Requirements that failed automatically
- * @property {string[]} manualChecks - Requirements needing physical verification
+ * @property {string[]} autoPassed
+ * @property {string[]} autoFailed
+ * @property {string[]} manualChecks
  * @property {Array<{ groupName: string, elementos: string[], normativa: string }>} equipmentChecklist
  * @property {string | null} normativeReference
  * @property {string | null} subcategoryName
@@ -31,67 +31,67 @@ import {
  */
 
 /**
- * Map of body types (tipo_carroceria) compatible with each cargo legacy type.
- * Values match vehicle_body_type enum in PostgreSQL.
+ * Body types compatible with each cargo legacy type.
+ * Values match DB body_type enum (English).
  */
 const VEHICLE_COMPATIBILITY = {
   general: [
-    'lona',
-    'caja_cerrada',
-    'caja_abierta',
-    'furgon',
-    'furgoneta',
-    'plataforma_abierta',
-    'portacontenedores',
-    'capitone',
-    'especial',
+    'curtain',
+    'closed_box',
+    'open_box',
+    'delivery_truck',
+    'van',
+    'open_platform',
+    'container_carrier',
+    'padded',
+    'special',
   ],
-  frigorifica: ['frigorifico', 'isotermo', 'calorifico'],
-  peligrosa: ['cisterna', 'caja_cerrada', 'especial'],
+  frigorifica: ['refrigerated', 'insulated', 'heated'],
+  peligrosa: ['tanker', 'closed_box', 'special'],
   especial: [
-    'ganadero',
-    'plataforma_abierta',
-    'basculante',
-    'grua',
-    'portavehiculos',
-    'tolva',
-    'jaula',
+    'livestock',
+    'open_platform',
+    'dump',
+    'crane',
+    'car_carrier',
+    'hopper',
+    'cage',
     'silo',
-    'especial',
+    'special',
   ],
 }
 
 /**
- * Additional compatibility overrides per subcategory.
- * When present, ONLY these body types are allowed (no fallback to legacy).
- * Values match vehicle_body_type enum.
+ * Subcategory-specific body type overrides.
+ * When present, ONLY these body types are allowed.
+ * Values match DB body_type enum (English).
  */
 const SUBCATEGORY_BODY_OVERRIDES = {
-  'adr-clase-1': ['caja_cerrada', 'especial'],
-  'adr-clase-2': ['cisterna'],
-  'adr-clase-3': ['cisterna'],
-  'adr-clase-7': ['especial'],
-  'adr-clase-8': ['cisterna'],
-  'atp-congelados': ['frigorifico', 'isotermo'],
-  'atp-refrig-fuerte': ['frigorifico', 'isotermo'],
-  'atp-refrig-suave': ['frigorifico', 'isotermo'],
-  'atp-calorificos': ['isotermo', 'calorifico'],
-  'ani-ganado-mayor': ['ganadero', 'jaula'],
-  'ani-ganado-menor': ['ganadero', 'jaula'],
-  'ani-aves-conejos': ['jaula', 'ganadero'],
-  'gen-granel-solido': ['basculante', 'tolva'],
-  'gen-granel-liquido': ['cisterna'],
-  'gen-vidrio': ['plataforma_abierta', 'especial'],
-  'gen-maquinaria': ['plataforma_abierta', 'grua', 'portavehiculos'],
-  'gen-siderurgico': ['plataforma_abierta', 'portabobinas'],
-  'gen-gran-volumen': ['lona', 'especial'],
-  'gen-mudanzas': ['caja_cerrada', 'furgon', 'furgoneta', 'capitone'],
+  'adr-clase-1': ['closed_box', 'special'],
+  'adr-clase-2': ['tanker'],
+  'adr-clase-3': ['tanker'],
+  'adr-clase-7': ['special'],
+  'adr-clase-8': ['tanker'],
+  'atp-congelados': ['refrigerated', 'insulated'],
+  'atp-refrig-fuerte': ['refrigerated', 'insulated'],
+  'atp-refrig-suave': ['refrigerated', 'insulated'],
+  'atp-calorificos': ['insulated', 'heated'],
+  'ani-ganado-mayor': ['livestock', 'cage'],
+  'ani-ganado-menor': ['livestock', 'cage'],
+  'ani-aves-conejos': ['cage', 'livestock'],
+  'gen-granel-solido': ['dump', 'hopper'],
+  'gen-granel-liquido': ['tanker'],
+  'gen-vidrio': ['open_platform', 'special'],
+  'gen-maquinaria': ['open_platform', 'crane', 'car_carrier'],
+  'gen-siderurgico': ['open_platform', 'coil_carrier'],
+  'gen-gran-volumen': ['curtain', 'special'],
+  'gen-mudanzas': ['closed_box', 'delivery_truck', 'van', 'padded'],
 }
 
 /**
  * Check if a vehicle body type is compatible with a cargo subcategory.
- * @param {string} bodyType - The vehicle's tipo_carroceria value
- * @param {string} subcategoryId - The cargo subcategory ID
+ * @param {string} bodyType - The vehicle's body_type value (DB English)
+ * @param {string} subcategoryId
  * @returns {boolean}
  */
 export function isVehicleTypeCompatible(bodyType, subcategoryId) {
@@ -125,7 +125,7 @@ export function getRecommendedVehicleTypes(subcategoryId) {
 
 /**
  * Full compliance check for a vehicle against a cargo subcategory.
- * @param {{ tipo_carroceria: string, categoria_ue?: string, mma_kg?: number, status?: string } | null} vehicle
+ * @param {{ body_type: string, eu_category?: string, gross_weight_kg?: number, status?: string } | null} vehicle
  * @param {string} subcategoryId
  * @returns {ComplianceResult}
  */
@@ -149,20 +149,20 @@ export function checkVehicleCompliance(vehicle, subcategoryId) {
   const autoFailed = []
 
   // ── Auto check 1: Body type compatibility ──────────────────────────────
-  if (vehicle?.tipo_carroceria) {
-    if (isVehicleTypeCompatible(vehicle.tipo_carroceria, subcategoryId)) {
-      autoPassed.push(`Carrocería (${vehicle.tipo_carroceria}) compatible`)
+  if (vehicle?.body_type) {
+    if (isVehicleTypeCompatible(vehicle.body_type, subcategoryId)) {
+      autoPassed.push(`Carrocería (${vehicle.body_type}) compatible`)
     } else {
       autoFailed.push(
-        `Carrocería (${vehicle.tipo_carroceria}) no apta. Recomendado: ${getRecommendedVehicleTypes(subcategoryId).join(', ')}`,
+        `Carrocería (${vehicle.body_type}) no apta. Recomendado: ${getRecommendedVehicleTypes(subcategoryId).join(', ')}`,
       )
     }
   }
 
   // ── Auto check 2: Vehicle is active ────────────────────────────────────
-  if (vehicle?.status && vehicle.status !== 'activo') {
+  if (vehicle?.status && vehicle.status !== 'active') {
     autoFailed.push(`Vehículo en estado "${vehicle.status}" — debe estar activo`)
-  } else if (vehicle?.status === 'activo') {
+  } else if (vehicle?.status === 'active') {
     autoPassed.push('Vehículo activo')
   }
 
