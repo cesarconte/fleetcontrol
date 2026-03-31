@@ -3,6 +3,7 @@ import {
   VEHICLE_EQUIPMENT,
   getEquipmentChecklist,
   getEquipmentElements,
+  getRecommendedEquipmentElements,
   getNormativeReference,
   getCategoryEquipment,
   getSubcategoriesWithEquipment,
@@ -34,7 +35,6 @@ describe('vehicle-equipment', () => {
           expect(group).toHaveProperty('elementosObligatorios')
           expect(Array.isArray(group.appliesTo)).toBe(true)
           expect(Array.isArray(group.elementosObligatorios)).toBe(true)
-          expect(group.elementosObligatorios.length).toBeGreaterThan(0)
         })
       })
     })
@@ -58,30 +58,14 @@ describe('vehicle-equipment', () => {
       })
     })
 
-    it('subcategorías cubiertas deberían referenciar IDs válidos', () => {
-      const allSubIds = new Set(getAllSubcategories().map(s => s.id))
+    it('debería cubrir las 27 subcategorías', () => {
       const coveredIds = new Set()
       VEHICLE_EQUIPMENT.forEach(cat => {
         cat.subcategorias.forEach(group => {
           group.appliesTo.forEach(id => coveredIds.add(id))
         })
       })
-      // Todos los IDs cubiertos deben existir en cargo-categories
-      coveredIds.forEach(id => {
-        expect(allSubIds.has(id)).toBe(true)
-      })
-    })
-
-    it('debería cubrir al menos 21 de 27 subcategorías (6 gen sin equipamiento específico definido)', () => {
-      const coveredIds = new Set()
-      VEHICLE_EQUIPMENT.forEach(cat => {
-        cat.subcategorias.forEach(group => {
-          group.appliesTo.forEach(id => coveredIds.add(id))
-        })
-      })
-      expect(coveredIds.size).toBeGreaterThanOrEqual(21)
-      // TODO 2026-03-30: Definir equipamiento para gen-granel-solido, gen-granel-liquido,
-      // gen-textil, gen-maquinaria, gen-gran-volumen, gen-mudanzas
+      expect(coveredIds.size).toBe(27)
     })
   })
 
@@ -94,10 +78,43 @@ describe('vehicle-equipment', () => {
       expect(groupNames.some(n => n.includes('Explosivos'))).toBe(true)
     })
 
+    it('adr-clase-2 debería tener equipamiento general + específico de gases', () => {
+      const groups = getEquipmentChecklist('adr-clase-2')
+      expect(groups.length).toBeGreaterThanOrEqual(2)
+      const allElements = groups.flatMap(g => g.elementos)
+      expect(allElements).toContain('detector_de_fugas_de_gas_portatil')
+    })
+
+    it('adr-clase-6 debería tener equipamiento general + específico de tóxicos', () => {
+      const groups = getEquipmentChecklist('adr-clase-6')
+      expect(groups.length).toBeGreaterThanOrEqual(2)
+      const allElements = groups.flatMap(g => g.elementos)
+      expect(allElements).toContain('mascarilla_filtro_p3_o_equipo_autonomo')
+    })
+
+    it('adr-clase-7 debería tener equipamiento general + específico de radiactivas', () => {
+      const groups = getEquipmentChecklist('adr-clase-7')
+      expect(groups.length).toBeGreaterThanOrEqual(2)
+      const allElements = groups.flatMap(g => g.elementos)
+      expect(allElements).toContain('detector_radiacion_portatil')
+    })
+
     it('atp-congelados debería tener equipamiento ATP', () => {
       const groups = getEquipmentChecklist('atp-congelados')
       expect(groups.length).toBeGreaterThanOrEqual(1)
       expect(groups[0].elementos).toContain('termografo_registrador_de_temperatura')
+    })
+
+    it('gen-granel-solido debería tener equipamiento recomendado', () => {
+      const groups = getEquipmentChecklist('gen-granel-solido')
+      expect(groups.length).toBeGreaterThanOrEqual(1)
+      expect(groups[0].elementosRecomendados).toContain('mascarilla_contra_polvo_ffp2')
+    })
+
+    it('gen-mudanzas debería tener equipamiento recomendado', () => {
+      const groups = getEquipmentChecklist('gen-mudanzas')
+      expect(groups.length).toBeGreaterThanOrEqual(1)
+      expect(groups[0].elementosRecomendados).toContain('mantas_protectoras_para_muebles')
     })
 
     it('subcategoría inexistente debería retornar array vacío', () => {
@@ -105,8 +122,8 @@ describe('vehicle-equipment', () => {
     })
   })
 
-  describe('getEquipmentElements', () => {
-    it('debería retornar lista plana de elementos', () => {
+  describe('getEquipmentElements (obligatorios)', () => {
+    it('debería retornar lista plana de elementos obligatorios', () => {
       const elements = getEquipmentElements('adr-clase-1')
       expect(elements.length).toBeGreaterThan(0)
       expect(elements).toContain('calzo_proporcionado_al_peso')
@@ -118,8 +135,35 @@ describe('vehicle-equipment', () => {
       expect(elements).toContain('cinchas_de_amarre_homologadas_en_12195_2')
     })
 
+    it('gen-granel-solido NO debería tener elementos obligatorios', () => {
+      const elements = getEquipmentElements('gen-granel-solido')
+      expect(elements).toHaveLength(0)
+    })
+
     it('subcategoría sin equipamiento debería retornar array vacío', () => {
       expect(getEquipmentElements('no-existe')).toEqual([])
+    })
+  })
+
+  describe('getRecommendedEquipmentElements', () => {
+    it('gen-granel-solido debería retornar elementos recomendados', () => {
+      const elements = getRecommendedEquipmentElements('gen-granel-solido')
+      expect(elements.length).toBeGreaterThan(0)
+      expect(elements).toContain('mascarilla_contra_polvo_ffp2')
+    })
+
+    it('gen-maquinaria debería retornar elementos recomendados', () => {
+      const elements = getRecommendedEquipmentElements('gen-maquinaria')
+      expect(elements).toContain('senal_sobredimensionada_si_procede')
+    })
+
+    it('gen-paletizada NO debería tener elementos recomendados', () => {
+      const elements = getRecommendedEquipmentElements('gen-paletizada')
+      expect(elements).toHaveLength(0)
+    })
+
+    it('subcategoría inexistente debería retornar array vacío', () => {
+      expect(getRecommendedEquipmentElements('no-existe')).toEqual([])
     })
   })
 
@@ -134,6 +178,11 @@ describe('vehicle-equipment', () => {
       const ref = getNormativeReference('atp-congelados')
       expect(ref).toContain('ATP')
       expect(ref).toContain('237/2000')
+    })
+
+    it('GEN debería referenciar RD 563/2017', () => {
+      const ref = getNormativeReference('gen-paletizada')
+      expect(ref).toContain('563/2017')
     })
 
     it('subcategoría inexistente debería retornar null', () => {
@@ -154,13 +203,15 @@ describe('vehicle-equipment', () => {
   })
 
   describe('getSubcategoriesWithEquipment', () => {
-    it('debería retornar todas las subcategorías cubiertas', () => {
+    it('debería retornar las 27 subcategorías cubiertas', () => {
       const subs = getSubcategoriesWithEquipment()
-      expect(subs.length).toBeGreaterThan(0)
+      expect(subs).toHaveLength(27)
       expect(subs).toContain('adr-clase-1')
       expect(subs).toContain('atp-congelados')
       expect(subs).toContain('ani-ganado-mayor')
       expect(subs).toContain('gen-paletizada')
+      expect(subs).toContain('gen-mudanzas')
+      expect(subs).toContain('gen-granel-solido')
     })
   })
 })

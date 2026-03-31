@@ -1,11 +1,12 @@
 /**
  * FleetControl — Vehicle Equipment Normative (Equipamiento Normativo)
  *
- * Mandatory vehicle equipment per cargo category, based on applicable
- * Spanish and EU transport regulations.
+ * Mandatory and recommended vehicle equipment per cargo category.
+ * - elementosObligatorios: required by Spanish/EU regulation
+ * - elementosRecomendados: industry best practice (not mandatory)
  *
  * @see AGENTS.md §1 — Regulatory Context
- * @see PRD §4.2.3 — Estado en Tiempo Real
+ * @see PRD §4.4.3
  */
 
 /** @param {object} obj */
@@ -21,7 +22,9 @@ function deepFreeze(obj) {
  * @typedef {Object} EquipmentGroup
  * @property {string} id
  * @property {string} nombre
+ * @property {string[]} appliesTo
  * @property {string[]} elementosObligatorios
+ * @property {string[]} [elementosRecomendados]
  */
 
 /**
@@ -34,6 +37,9 @@ function deepFreeze(obj) {
 
 /** @type {CategoryEquipment[]} */
 export const VEHICLE_EQUIPMENT = deepFreeze([
+  // ════════════════════════════════════════════════════════════════════════════
+  // ADR — Mercancías Peligrosas
+  // ════════════════════════════════════════════════════════════════════════════
   {
     idCategoria: 'adr',
     nombreCategoria: 'Mercancías Peligrosas (ADR)',
@@ -77,6 +83,17 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
         ],
       },
       {
+        id: 'adr-clase-2-eq',
+        nombre: 'Clase 2: Gases',
+        appliesTo: ['adr-clase-2'],
+        elementosObligatorios: [
+          'detector_de_fugas_de_gas_portatil',
+          'manometro_de_verificacion_presion',
+          'ganchos_o_arneses_suspension_botellas',
+        ],
+        elementosRecomendados: ['mangueras_flexible_conexion_homologadas'],
+      },
+      {
         id: 'adr-clases-3-9-eq',
         nombre: 'Líquidos, Sólidos y Corrosivos (Cisternas o bultos)',
         appliesTo: ['adr-clase-3', 'adr-clase-4', 'adr-clase-5', 'adr-clase-8', 'adr-clase-9'],
@@ -89,8 +106,34 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
           'interruptor_corte_bateria_en_cabina',
         ],
       },
+      {
+        id: 'adr-clase-6-eq',
+        nombre: 'Clase 6: Materias tóxicas e infecciosas',
+        appliesTo: ['adr-clase-6'],
+        elementosObligatorios: [
+          'mascarilla_filtro_p3_o_equipo_autonomo',
+          'traje_proteccion_contra_agentes_quimicos',
+          'kit_descontaminacion_personal',
+        ],
+        elementosRecomendados: ['doble_bolsa_estanca_para_residuos_contaminados'],
+      },
+      {
+        id: 'adr-clase-7-eq',
+        nombre: 'Clase 7: Materias radiactivas',
+        appliesTo: ['adr-clase-7'],
+        elementosObligatorios: [
+          'detector_radiacion_portatil',
+          'dosimetros_personales_para_tripulacion',
+          'kit_contaminacion_radiactiva',
+          'senal_radiacion_ionizante_adicional',
+        ],
+      },
     ],
   },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ATP — Mercancías Perecederas
+  // ════════════════════════════════════════════════════════════════════════════
   {
     idCategoria: 'atp',
     nombreCategoria: 'Mercancías Perecederas (ATP)',
@@ -110,6 +153,10 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
       },
     ],
   },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // ANI — Animales Vivos
+  // ════════════════════════════════════════════════════════════════════════════
   {
     idCategoria: 'ani',
     nombreCategoria: 'Animales Vivos',
@@ -137,10 +184,14 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
       },
     ],
   },
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // GEN — Carga General y Especialidades
+  // ════════════════════════════════════════════════════════════════════════════
   {
     idCategoria: 'gen',
     nombreCategoria: 'Carga General y Especialidades',
-    normativaAplicable: 'Reglamento General de Vehículos / RD 563/2017 (Estiba)',
+    normativaAplicable: 'RD 563/2017 (Estiba) / RD 2822/1998 (RGV)',
     subcategorias: [
       {
         id: 'gen-estandar-eq',
@@ -150,6 +201,53 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
           'cinchas_de_amarre_homologadas_en_12195_2',
           'puntos_de_amarre_en_chasis',
           'lonas_con_certificado_code_xl_si_hacen_retencion',
+        ],
+      },
+      {
+        id: 'gen-granel-solido-eq',
+        nombre: 'Granel Sólido (cereales, áridos, minerales)',
+        appliesTo: ['gen-granel-solido'],
+        elementosObligatorios: [],
+        elementosRecomendados: [
+          'mascarilla_contra_polvo_ffp2',
+          'pala_o_sistema_descarga_mecanico',
+          'lonas_de_cubricion_estancas',
+          'calzos_antideslizantes_para_descarga',
+        ],
+      },
+      {
+        id: 'gen-granel-liquido-eq',
+        nombre: 'Granel Líquido NO Peligroso',
+        appliesTo: ['gen-granel-liquido'],
+        elementosObligatorios: [],
+        elementosRecomendados: [
+          'bandeja_contencion_derrames',
+          'kit_absorbente_derrames',
+          'gafas_proteccion_contra_salpicaduras',
+        ],
+      },
+      {
+        id: 'gen-textil-eq',
+        nombre: 'Textil / Prendas Colgadas',
+        appliesTo: ['gen-textil'],
+        elementosObligatorios: [],
+        elementosRecomendados: [
+          'barras_colgar_textil_en_techo',
+          'fundas_protectoras_para_prendas',
+          'cintas_sujecion_para_barras',
+        ],
+      },
+      {
+        id: 'gen-maquinaria-eq',
+        nombre: 'Maquinaria y Vehículos',
+        appliesTo: ['gen-maquinaria'],
+        elementosObligatorios: [
+          'cinchas_de_amarre_homologadas_en_12195_2',
+          'calzo_proporcionado_al_peso',
+        ],
+        elementosRecomendados: [
+          'senal_sobredimensionada_si_procede',
+          'carro_auxiliar_para_maquinaria_pesada',
         ],
       },
       {
@@ -174,6 +272,29 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
         ],
       },
       {
+        id: 'gen-gran-volumen-eq',
+        nombre: 'Gran Volumen / Carga Ligera',
+        appliesTo: ['gen-gran-volumen'],
+        elementosObligatorios: ['cinchas_de_amarre_homologadas_en_12195_2'],
+        elementosRecomendados: [
+          'esquineros_proteccion_para_carga',
+          'malla_antideslizante_sobre_carga',
+        ],
+      },
+      {
+        id: 'gen-mudanzas-eq',
+        nombre: 'Mudanzas',
+        appliesTo: ['gen-mudanzas'],
+        elementosObligatorios: [],
+        elementosRecomendados: [
+          'mantas_protectoras_para_muebles',
+          'carro_de_mano_escaleras',
+          'film_de_burbujas_protector',
+          'cinta_embalar_reforzada',
+          'cinchas_de_amarre_interior_furgon',
+        ],
+      },
+      {
         id: 'gen-residuos-eq',
         nombre: 'Residuos No Peligrosos',
         appliesTo: ['gen-residuos'],
@@ -187,9 +308,9 @@ export const VEHICLE_EQUIPMENT = deepFreeze([
   },
 ])
 
-// ── Lookup index (subcategoryId → equipment groups that apply) ──────────────
+// ── Lookup index ────────────────────────────────────────────────────────────
 
-/** @type {Map<string, { groupName: string, elementos: string[], normativa: string }[]>} */
+/** @type {Map<string, { groupName: string, elementos: string[], elementosRecomendados: string[], normativa: string }[]>} */
 const equipmentBySubcategory = new Map()
 
 for (const cat of VEHICLE_EQUIPMENT) {
@@ -201,6 +322,7 @@ for (const cat of VEHICLE_EQUIPMENT) {
       equipmentBySubcategory.get(subId).push({
         groupName: group.nombre,
         elementos: group.elementosObligatorios,
+        elementosRecomendados: group.elementosRecomendados ?? [],
         normativa: cat.normativaAplicable,
       })
     }
@@ -211,8 +333,8 @@ for (const cat of VEHICLE_EQUIPMENT) {
 
 /**
  * Get all equipment groups for a given subcategory ID.
- * @param {string} subcategoryId - e.g. 'adr-clase-1', 'atp-congelados'
- * @returns {Array<{ groupName: string, elementos: string[], normativa: string }>}
+ * @param {string} subcategoryId
+ * @returns {Array<{ groupName: string, elementos: string[], elementosRecomendados: string[], normativa: string }>}
  */
 export function getEquipmentChecklist(subcategoryId) {
   return equipmentBySubcategory.get(subcategoryId) ?? []
@@ -229,6 +351,16 @@ export function getEquipmentElements(subcategoryId) {
 }
 
 /**
+ * Get all recommended equipment elements (flat list) for a subcategory.
+ * @param {string} subcategoryId
+ * @returns {string[]}
+ */
+export function getRecommendedEquipmentElements(subcategoryId) {
+  const groups = getEquipmentChecklist(subcategoryId)
+  return groups.flatMap(g => g.elementosRecomendados)
+}
+
+/**
  * Get the normative reference for a subcategory.
  * @param {string} subcategoryId
  * @returns {string | null}
@@ -240,7 +372,7 @@ export function getNormativeReference(subcategoryId) {
 
 /**
  * Get the category-level equipment by category ID.
- * @param {string} categoryId - e.g. 'adr', 'atp'
+ * @param {string} categoryId
  * @returns {CategoryEquipment | undefined}
  */
 export function getCategoryEquipment(categoryId) {
