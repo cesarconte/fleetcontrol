@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-31 (sesión 6)
+> **Última actualización:** 2026-03-31 (sesión 7)
 > **Actualizado por:** AI Agent
 
 ---
@@ -274,6 +274,15 @@ _(Complementa las de AGENTS.md)_
 - CSVs semilla: 7 archivos en `seed/` con datos de prueba interconectados
 - Tests: 445 passing (37 nuevos). Skill `testing-patterns` aplicada.
 - Acciones pendientes: CRUD UI documentos, validación certificado ADR vehículo
+
+### Sesión 7 — Cobertura completa de tests (composables + utils)
+
+- 11 nuevos archivos de test: 8 composables + 3 utils
+- Todos los composables cubiertos (9/9): use-auth, use-vehicles, use-drivers, use-routes, use-fuel, use-maintenance, use-cargo, use-driver-documents, use-vehicle-documents
+- Todas las utils cubiertas (7/7): format-helpers, maintenance-helpers, status-helpers, cargo-compliance, cargo-helpers, error-map, validate-driver-hours
+- Patrón TDD aplicado (testing-patterns skill): factory mocks, behavior-driven tests
+- Tests: 677 passing, 39 test files, 0 lint errors
+- Solo infraestructura sin test (main.js, router.js, vuetify.js) — no requiere unit tests
 
 ### Sesiones anteriores
 
