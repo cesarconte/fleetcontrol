@@ -1262,17 +1262,50 @@ function unsubscribe() {
 
 ---
 
-## 18. Testing Policy
+## 18. Testing Policy — TDD OBLIGATORIO
 
-### Methodology: TDD (Test-Driven Development)
+### Norma absoluta
 
-**All development follows TDD.** The cycle is always:
+**TODO el desarrollo sigue TDD. No hay excepciones.**
 
-1. **RED** — Write a failing test that defines the expected behavior
-2. **GREEN** — Write the minimum code to make the test pass
-3. **REFACTOR** — Clean up code while keeping tests green
+El ciclo es siempre:
 
-> Write tests FIRST, then implement. Never write production code without a failing test that justifies it.
+1. **RED** — Escribir un test que FALLA definiendo el comportamiento esperado
+2. **GREEN** — Escribir el MÍNIMO código para que el test pase
+3. **REFACTOR** — Mejorar el código manteniendo los tests en verde
+
+> **NUNCA escribir código de producción sin un test que lo justifique.**
+> Si no hay un test que falle, no hay código que escribir.
+
+### Flujo obligatorio por tipo de tarea
+
+| Tarea             | Orden obligatorio                                                            |
+| ----------------- | ---------------------------------------------------------------------------- |
+| **Nueva feature** | 1. Escribir tests que fallan → 2. Implementar mínimo → 3. Refactorizar       |
+| **Bug fix**       | 1. Escribir test que reproduce el bug → 2. Arreglar → 3. Verificar test pasa |
+| **Refactor**      | 1. Tests existentes pasan → 2. Refactorizar → 3. Tests siguen pasando        |
+| **Nuevo archivo** | 1. Crear `*.spec.js` con tests → 2. Crear el archivo fuente                  |
+| **Merge a dev**   | Todos los tests pasan, cobertura no disminuye                                |
+
+### Verificación en cada commit
+
+Antes de cada commit, el agente DEBE:
+
+1. `npm test` — todos los tests pasan
+2. `npm run check` — lint + typecheck limpios
+3. Verificar que cada archivo fuente tiene su `*.spec.js` correspondiente
+
+### Excepciones documentadas
+
+Los únicos archivos que no requieren test unitario son:
+
+- `main.js` (entry point)
+- `router.js` / `routes.js` (configuración Vue Router)
+- `vuetify.js` (configuración plugin)
+- `query-client.js` (configuración TanStack Query)
+- `supabase-client.js` (configuración cliente)
+
+Cualquier otra excepción DEBE documentarse con justificación.
 
 ### Testing Pyramid
 
@@ -1297,12 +1330,14 @@ function unsubscribe() {
 
 ### Coverage Goals
 
-| Category              | Target |
-| --------------------- | ------ |
-| Utils/Functions       | 80%    |
-| Composables           | 70%    |
-| Services (API)        | 60%    |
-| Components (critical) | 40%    |
+| Category              | Target | Current |
+| --------------------- | ------ | ------- |
+| Utils/Functions       | 80%    | 100%    |
+| Composables           | 70%    | 100%    |
+| Services (API)        | 60%    | 100%    |
+| Constants             | 80%    | 100%    |
+| Validations           | 80%    | 100%    |
+| Components (critical) | 40%    | —       |
 
 100% coverage in pure critical functions.
 
@@ -1446,11 +1481,13 @@ When reviewing code (own or others):
 Before merging ANY branch to `dev`:
 
 - [ ] All mandatory context files were read
-- [ ] TDD cycle completed (RED → GREEN → REFACTOR)
+- [ ] **TDD cycle completed** (RED → GREEN → REFACTOR) — tests written BEFORE code
+- [ ] Each source file has its `*.spec.js` test file (exceptions documented in §18)
 - [ ] No `console.log` or temporary comments
 - [ ] All async calls have error handling
 - [ ] `npm run check` passes (lint + typecheck)
-- [ ] All tests pass
+- [ ] All tests pass (`npm test`)
+- [ ] Test coverage does not decrease from current baseline
 - [ ] File under 200 lines (or split proposed)
 - [ ] Business logic in composables, not components
 - [ ] Color palette respected (no hardcoded colors)
