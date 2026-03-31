@@ -39,7 +39,7 @@ Almacenamiento docs:  Supabase Storage
 Email transaccional:  Brevo
 GPS/Telemática API:   [PENDIENTE]
 Despliegue:           [PENDIENTE]
-Automatización:       [PENDIENTE]
+Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 ```
 
 > Las decisiones técnicas se documentan en la sección 5.
@@ -104,7 +104,7 @@ Automatización:       [PENDIENTE]
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟡 En progreso | 392 tests (Vitest), lint + typecheck, Cypress pendiente                      |
+| Testing (TDD)              | 🟡 En progreso | 677 tests (Vitest), Cypress configurado, E2E smoke test                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -210,11 +210,22 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-03-30 (sesión 3)
+**Fecha:** 2026-03-31 (sesión 8)
 **Branch:** dev
-**Tests:** 392 pasando, 0 errores lint, typecheck limpio
+**Tests:** 677 pasando, 0 errores lint, typecheck limpio
 
 **Trabajo realizado:**
+
+### Sesión 8 — Automatización CI/CD completa
+
+- **Husky** v9: git hooks manager configurado
+- **lint-staged** v16: ESLint + Prettier automáticos en archivos staged (pre-commit)
+- **commitlint**: validación de conventional commits (`feat(scope): desc`)
+- **Cypress** v15: instalado, `cypress.config.js`, smoke test semilla
+- **GitHub Actions CI**: pipeline 3 jobs (`branch-check` → `quality` → `e2e`)
+- **Validación de ramas**: pre-push hook + CI verifican formato (`feature/*`, `fix/*`, etc.) y bloquean push directo a `main`
+- 11 archivos creados/modificados
+- Hooks verificados: commit inválido rechazado, commit válido aceptado, nombres de rama validados
 
 ### Sesión 3 — Refactor completo: Alineación código → BD (inglés)
 
