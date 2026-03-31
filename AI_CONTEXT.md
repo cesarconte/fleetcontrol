@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-31 (sesión 6, en progreso)
+> **Última actualización:** 2026-03-31 (sesión 6)
 > **Actualizado por:** AI Agent
 
 ---
@@ -254,6 +254,27 @@ _(Complementa las de AGENTS.md)_
 - `route-schema.js`: campo `subcategoria_id` opcional añadido
 - Peso de carga validado contra `max_payload_kg` del vehículo
 
+### Sesión 5 — Equipamiento normativo subcategorías
+
+- Equipamiento obligatorio para 5 clases ADR (2, 4, 5, 6, 7) según ADR 2025 + RD 97/2014
+- Equipamiento recomendado para 6 subcategorías GEN según práctica sector
+- Nuevo campo `elementosRecomendados` en estructura de equipamiento
+- Nueva función `getRecommendedEquipmentElements()` (no afecta compliance)
+- Las 27 subcategorías ahora tienen equipamiento definido
+- Tests: 402 passing
+
+### Sesión 6 — Integración vehicle_documents con compliance
+
+- `vehicle-document-types.js`: 8 tipos documentales (5 obligatorios, 3 opcionales)
+- `api-vehicle-documents.js`: servicio CRUD con getByVehicle, getByVehicleAndType
+- `use-vehicle-documents.js`: composable reactivo para estado de documentos
+- `VehicleDocuments.vue`: corregido (usa composable + labels de tipos)
+- `checkVehicleCompliance()`: extensión con validación documental (3er parámetro)
+- `RouteCompliancePanel.vue`: carga documentos y pasa al compliance check
+- CSVs semilla: 7 archivos en `seed/` con datos de prueba interconectados
+- Tests: 445 passing (37 nuevos). Skill `testing-patterns` aplicada.
+- Acciones pendientes: CRUD UI documentos, validación certificado ADR vehículo
+
 ### Sesiones anteriores
 
 <details>
@@ -284,8 +305,8 @@ _(Complementa las de AGENTS.md)_
    - `route-schema.js` actualizado con `subcategoria_id` opcional
    - Tipo legado eliminado del formulario (se deriva automáticamente de la subcategoría)
 2. **COMPLETADO**: Definir equipamiento para 11 subcategorías (sesión 5).
-3. **EN PROGRESO**: Integrar `vehicle_documents` con compliance real contra documentos vigentes.
-   - Acciones NO incluidas en este paso (pendientes futuro):
+3. **COMPLETADO**: Integrar `vehicle_documents` con compliance real contra documentos vigentes (sesión 6).
+   - Acciones NO incluidas (pendientes futuro):
      - CRUD completo de documentos en UI (formulario subida/edición/borrado)
      - Validación de certificado ADR vehículo en subcategorías ADR
 4. **PENDIENTE (bajo)**: Eliminar columnas de backup en BD si existen.
