@@ -26,8 +26,8 @@ import { supabase } from '@/services/supabase-client.js'
 const mockRecord = {
   id: '1',
   vehicle_id: 'v1',
-  maintenance_type: 'preventivo',
-  status: 'pendiente',
+  maintenance_type: 'preventive',
+  status: 'pending',
   description: 'Cambio de aceite',
   scheduled_date: '2026-04-15',
 }

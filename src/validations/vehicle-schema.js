@@ -42,10 +42,10 @@ export const vehicleSchema = z.object({
   first_registration_date: z.string().optional().or(z.literal('')),
 
   dgt_badge: z
-    .enum(['0', 'eco', 'c', 'b', 'sin_etiqueta'], {
+    .enum(['0', 'eco', 'c', 'b', 'no_label'], {
       errorMap: () => ({ message: 'Distintivo DGT inválido' }),
     })
-    .default('sin_etiqueta'),
+    .default('no_label'),
 
   euro_class: z
     .enum([
@@ -83,7 +83,7 @@ export const vehicleSchema = z.object({
 
   // ── Motor y Emisiones ──────────────────────────────────
   fuel_type: z
-    .enum(['diesel', 'gnc', 'gnl', 'hidrogeno', 'electrico', 'hibrido'], {
+    .enum(['diesel', 'gnc', 'gnl', 'hydrogen', 'electric', 'hybrid'], {
       errorMap: () => ({ message: 'Tipo de combustible inválido' }),
     })
     .default('diesel'),
@@ -107,10 +107,10 @@ export const vehicleSchema = z.object({
   }),
 
   status: z
-    .enum(['activo', 'en_ruta', 'en_mantenimiento', 'inactivo', 'dado_de_baja'], {
+    .enum(['active', 'on_route', 'in_maintenance', 'inactive', 'decommissioned'], {
       errorMap: () => ({ message: 'Estado inválido' }),
     })
-    .default('activo'),
+    .default('active'),
 
   associated_semitrailer_plate: z.string().optional().or(z.literal('')),
   box_length_m: z.number().positive().optional().nullable(),

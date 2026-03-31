@@ -23,7 +23,7 @@
         <span>{{ getBodyLabel(vehicle.body_type) }}</span>
         <span>
           <v-chip
-            v-if="vehicle.dgt_badge && vehicle.dgt_badge !== 'sin_etiqueta'"
+            v-if="vehicle.dgt_badge && vehicle.dgt_badge !== 'no_label'"
             :color="getDgtColor(vehicle.dgt_badge)"
             size="x-small"
             variant="flat"

@@ -34,7 +34,7 @@ export const apiDrivers = {
 
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.search) {
-      query = query.or(`full_name.ilike.%${filters.search}%,nif.ilike.%${filters.search}%`)
+      query = query.or(`full_name.ilike.%${filters.search}%,national_id.ilike.%${filters.search}%`)
     }
 
     const { data, error, count } = await query
@@ -46,7 +46,7 @@ export const apiDrivers = {
     const { data, error } = await supabase
       .from('drivers')
       .select('*')
-      .or(`full_name.ilike.%${term}%,nif.ilike.%${term}%`)
+      .or(`full_name.ilike.%${term}%,national_id.ilike.%${term}%`)
       .order('full_name')
 
     if (error) throw mapSupabaseError(error)
@@ -97,7 +97,7 @@ export const apiDrivers = {
         issue_date: metadata.issue_date || null,
         expiry_date: metadata.expiry_date || null,
         alert_days_before: metadata.alert_days_before || 30,
-        notas: metadata.notas || null,
+        notes: metadata.notes || null,
         file_url: publicUrl,
       })
       .select()

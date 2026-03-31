@@ -63,7 +63,7 @@
           </v-expansion-panel-text>
         </v-expansion-panel>
 
-        <v-expansion-panel v-if="record.cargo_type === 'peligrosa'" title="ADR" value="adr">
+        <v-expansion-panel v-if="record.cargo_type === 'dangerous'" title="ADR" value="adr">
           <v-expansion-panel-text>
             <v-row>
               <v-col cols="4">

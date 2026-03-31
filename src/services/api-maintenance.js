@@ -62,7 +62,7 @@ export const apiMaintenance = {
     const { data, error } = await supabase
       .from('maintenance_records')
       .select('*')
-      .eq('status', 'pendiente')
+      .eq('status', 'pending')
       .lte('scheduled_date', dateStr)
       .order('scheduled_date', { ascending: true })
 

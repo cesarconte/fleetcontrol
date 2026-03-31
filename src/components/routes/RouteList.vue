@@ -200,31 +200,31 @@ const headers = [
 ]
 
 const statusOptions = [
-  { title: 'Planificada', value: 'planificada' },
-  { title: 'En curso', value: 'en_curso' },
-  { title: 'Completada', value: 'completada' },
-  { title: 'Retrasada', value: 'retrasada' },
-  { title: 'Cancelada', value: 'cancelada' },
+  { title: 'Planificada', value: 'planned' },
+  { title: 'En curso', value: 'in_progress' },
+  { title: 'Completada', value: 'completed' },
+  { title: 'Retrasada', value: 'delayed' },
+  { title: 'Cancelada', value: 'cancelled' },
 ]
 
 function getStatusColor(status) {
   const map = {
-    planificada: 'info',
-    en_curso: 'success',
-    completada: 'grey',
-    retrasada: 'warning',
-    cancelada: 'grey-darken-2',
+    planned: 'info',
+    in_progress: 'success',
+    completed: 'grey',
+    delayed: 'warning',
+    cancelled: 'grey-darken-2',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    planificada: 'Planificada',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    retrasada: 'Retrasada',
-    cancelada: 'Cancelada',
+    planned: 'Planificada',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    delayed: 'Retrasada',
+    cancelled: 'Cancelada',
   }
   return map[status] ?? status
 }

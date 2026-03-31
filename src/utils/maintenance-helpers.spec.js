@@ -7,12 +7,12 @@ import {
 } from '@/utils/maintenance-helpers'
 
 describe('getTipoColor', () => {
-  it('"preventivo" → "info"', () => {
-    expect(getTipoColor('preventivo')).toBe('info')
+  it('"preventive" → "info"', () => {
+    expect(getTipoColor('preventive')).toBe('info')
   })
 
-  it('"correctivo" → "warning"', () => {
-    expect(getTipoColor('correctivo')).toBe('warning')
+  it('"corrective" → "warning"', () => {
+    expect(getTipoColor('corrective')).toBe('warning')
   })
 
   it('valor desconocido → "grey"', () => {
@@ -21,12 +21,12 @@ describe('getTipoColor', () => {
 })
 
 describe('getTipoLabel', () => {
-  it('"preventivo" → "Preventivo"', () => {
-    expect(getTipoLabel('preventivo')).toBe('Preventivo')
+  it('"preventive" → "Preventivo"', () => {
+    expect(getTipoLabel('preventive')).toBe('Preventivo')
   })
 
-  it('"correctivo" → "Correctivo"', () => {
-    expect(getTipoLabel('correctivo')).toBe('Correctivo')
+  it('"corrective" → "Correctivo"', () => {
+    expect(getTipoLabel('corrective')).toBe('Correctivo')
   })
 
   it('valor desconocido devuelve el propio valor', () => {
@@ -35,20 +35,20 @@ describe('getTipoLabel', () => {
 })
 
 describe('getMantenimientoStatusColor', () => {
-  it('"pendiente" → "info"', () => {
-    expect(getMantenimientoStatusColor('pendiente')).toBe('info')
+  it('"pending" → "info"', () => {
+    expect(getMantenimientoStatusColor('pending')).toBe('info')
   })
 
-  it('"en_curso" → "warning"', () => {
-    expect(getMantenimientoStatusColor('en_curso')).toBe('warning')
+  it('"in_progress" → "warning"', () => {
+    expect(getMantenimientoStatusColor('in_progress')).toBe('warning')
   })
 
-  it('"completada" → "success"', () => {
-    expect(getMantenimientoStatusColor('completada')).toBe('success')
+  it('"completed" → "success"', () => {
+    expect(getMantenimientoStatusColor('completed')).toBe('success')
   })
 
-  it('"cancelada" → "grey"', () => {
-    expect(getMantenimientoStatusColor('cancelada')).toBe('grey')
+  it('"cancelled" → "grey"', () => {
+    expect(getMantenimientoStatusColor('cancelled')).toBe('grey')
   })
 
   it('valor desconocido → "grey"', () => {
@@ -57,20 +57,20 @@ describe('getMantenimientoStatusColor', () => {
 })
 
 describe('getMantenimientoStatusLabel', () => {
-  it('"pendiente" → "Pendiente"', () => {
-    expect(getMantenimientoStatusLabel('pendiente')).toBe('Pendiente')
+  it('"pending" → "Pendiente"', () => {
+    expect(getMantenimientoStatusLabel('pending')).toBe('Pendiente')
   })
 
-  it('"en_curso" → "En curso"', () => {
-    expect(getMantenimientoStatusLabel('en_curso')).toBe('En curso')
+  it('"in_progress" → "En curso"', () => {
+    expect(getMantenimientoStatusLabel('in_progress')).toBe('En curso')
   })
 
-  it('"completada" → "Completada"', () => {
-    expect(getMantenimientoStatusLabel('completada')).toBe('Completada')
+  it('"completed" → "Completada"', () => {
+    expect(getMantenimientoStatusLabel('completed')).toBe('Completada')
   })
 
-  it('"cancelada" → "Cancelada"', () => {
-    expect(getMantenimientoStatusLabel('cancelada')).toBe('Cancelada')
+  it('"cancelled" → "Cancelada"', () => {
+    expect(getMantenimientoStatusLabel('cancelled')).toBe('Cancelada')
   })
 
   it('valor desconocido devuelve el propio valor', () => {

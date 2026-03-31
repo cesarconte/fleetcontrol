@@ -170,9 +170,9 @@ const headers = [
 ]
 
 const statusOptions = [
-  { title: 'Activo', value: 'activo' },
-  { title: 'Baja temporal', value: 'baja_temporal' },
-  { title: 'Baja definitiva', value: 'baja_definitiva' },
+  { title: 'Activo', value: 'active' },
+  { title: 'Baja temporal', value: 'temporary_leave' },
+  { title: 'Baja definitiva', value: 'permanently_off' },
 ]
 
 function debouncedSearch() {

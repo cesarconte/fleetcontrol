@@ -95,7 +95,7 @@
       </v-expansion-panel>
 
       <v-expansion-panel
-        v-if="form.cargo_type === 'peligrosa'"
+        v-if="form.cargo_type === 'dangerous'"
         title="Mercancía peligrosa (ADR)"
         value="adr"
       >

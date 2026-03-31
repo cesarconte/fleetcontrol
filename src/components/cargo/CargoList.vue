@@ -62,7 +62,7 @@
         </template>
 
         <template #item.adr="{ item }">
-          <template v-if="item.cargo_type === 'peligrosa'">
+          <template v-if="item.cargo_type === 'dangerous'">
             <v-chip color="error" size="x-small" variant="outlined">
               {{ item.adr_class }} · ONU {{ item.adr_un_number }}
             </v-chip>

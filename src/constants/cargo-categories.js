@@ -38,123 +38,123 @@ export const CARGO_CATEGORIES = deepFreeze([
   {
     id: 'adr',
     nombre: 'Mercancías Peligrosas (ADR)',
-    legacyType: 'peligrosa',
+    legacyType: 'dangerous',
     subcategorias: [
       {
         id: 'adr-clase-1',
         nombre: 'Clase 1: Materias y objetos explosivos',
         requisitosVehiculo: ['permiso_adr_explosivos', 'vehiculo_memu_ex'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-2',
         nombre: 'Clase 2: Gases',
         requisitosVehiculo: ['permiso_adr_basico', 'cisterna_o_botellero'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-3',
         nombre: 'Clase 3: Líquidos inflamables',
         requisitosVehiculo: ['permiso_adr_basico', 'camion_cisterna_at_fl'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-4',
         nombre: 'Clase 4: Sólidos inflamables',
         requisitosVehiculo: ['permiso_adr_basico'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-5',
         nombre: 'Clase 5: Materias comburentes y peróxidos',
         requisitosVehiculo: ['permiso_adr_basico'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-6',
         nombre: 'Clase 6: Materias tóxicas e infecciosas',
         requisitosVehiculo: ['permiso_adr_basico'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-7',
         nombre: 'Clase 7: Materias radiactivas',
         requisitosVehiculo: ['permiso_adr_radiactivos', 'vehiculo_autorizado_cuba'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-8',
         nombre: 'Clase 8: Materias corrosivas',
         requisitosVehiculo: ['permiso_adr_basico', 'cisterna_anticorrosiva'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
       {
         id: 'adr-clase-9',
         nombre: 'Clase 9: Materias y objetos peligrosos diversos',
         requisitosVehiculo: ['permiso_adr_basico'],
-        mapToLegacy: 'peligrosa',
+        mapToLegacy: 'dangerous',
       },
     ],
   },
   {
     id: 'atp',
     nombre: 'Mercancías Perecederas (ATP)',
-    legacyType: 'frigorifica',
+    legacyType: 'refrigerated',
     subcategorias: [
       {
         id: 'atp-congelados',
         nombre: 'Congelados / Ultracongelados (<-20°C)',
         requisitosVehiculo: ['certificado_atp', 'frigorifico_clase_c'],
-        mapToLegacy: 'frigorifica',
+        mapToLegacy: 'refrigerated',
       },
       {
         id: 'atp-refrig-fuerte',
         nombre: 'Refrigerados Fríos (0°C a +4°C)',
         requisitosVehiculo: ['certificado_atp', 'frigorifico_clase_b'],
-        mapToLegacy: 'frigorifica',
+        mapToLegacy: 'refrigerated',
       },
       {
         id: 'atp-refrig-suave',
         nombre: 'Refrigerados Suaves (+4°C a +12°C)',
         requisitosVehiculo: ['certificado_atp', 'frigorifico_clase_a'],
-        mapToLegacy: 'frigorifica',
+        mapToLegacy: 'refrigerated',
       },
       {
         id: 'atp-calorificos',
         nombre: 'Caloríficos (>+12°C)',
         requisitosVehiculo: ['certificado_atp', 'calorifico'],
-        mapToLegacy: 'frigorifica',
+        mapToLegacy: 'refrigerated',
       },
     ],
   },
   {
     id: 'ani',
     nombre: 'Animales Vivos',
-    legacyType: 'especial',
+    legacyType: 'special',
     subcategorias: [
       {
         id: 'ani-ganado-mayor',
         nombre: 'Ganado Mayor (Vacas, caballos...)',
         requisitosVehiculo: ['autorizacion_transporte_animales', 'camion_ganadero_alto'],
-        mapToLegacy: 'especial',
+        mapToLegacy: 'special',
       },
       {
         id: 'ani-ganado-menor',
         nombre: 'Ganado Menor (Cerdos, ovejas...)',
         requisitosVehiculo: ['autorizacion_transporte_animales', 'camion_ganadero_pisos'],
-        mapToLegacy: 'especial',
+        mapToLegacy: 'special',
       },
       {
         id: 'ani-aves-conejos',
         nombre: 'Aves de corral y conejos',
         requisitosVehiculo: ['autorizacion_transporte_animales', 'jaulas_modulares'],
-        mapToLegacy: 'especial',
+        mapToLegacy: 'special',
       },
       {
         id: 'ani-mascotas-otros',
         nombre: 'Mascotas y otros animales',
         requisitosVehiculo: ['autorizacion_transporte_animales'],
-        mapToLegacy: 'especial',
+        mapToLegacy: 'special',
       },
     ],
   },
@@ -283,7 +283,7 @@ export function getSubcategoriesByCategory(categoryId) {
 /**
  * Map a subcategory ID to the legacy cargo_type enum value.
  * @param {string} subcategoryId
- * @returns {'general' | 'frigorifica' | 'peligrosa' | 'especial'}
+ * @returns {'general' | 'refrigerated' | 'dangerous' | 'special'}
  */
 export function subcategoryToLegacyType(subcategoryId) {
   const sub = getSubcategoryById(subcategoryId)

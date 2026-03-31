@@ -73,11 +73,11 @@
       >
         <template #item.maintenance_type="{ item }">
           <v-chip
-            :color="item.maintenance_type === 'preventivo' ? 'info' : 'warning'"
+            :color="item.maintenance_type === 'preventive' ? 'info' : 'warning'"
             size="small"
             variant="outlined"
           >
-            {{ item.maintenance_type === 'preventivo' ? 'Preventivo' : 'Correctivo' }}
+            {{ item.maintenance_type === 'preventive' ? 'Preventivo' : 'Correctivo' }}
           </v-chip>
         </template>
 
@@ -193,33 +193,33 @@ const headers = [
 ]
 
 const typeOptions = [
-  { title: 'Preventivo', value: 'preventivo' },
-  { title: 'Correctivo', value: 'correctivo' },
+  { title: 'Preventivo', value: 'preventive' },
+  { title: 'Correctivo', value: 'corrective' },
 ]
 
 const statusOptions = [
-  { title: 'Pendiente', value: 'pendiente' },
-  { title: 'En curso', value: 'en_curso' },
-  { title: 'Completada', value: 'completada' },
-  { title: 'Cancelada', value: 'cancelada' },
+  { title: 'Pendiente', value: 'pending' },
+  { title: 'En curso', value: 'in_progress' },
+  { title: 'Completada', value: 'completed' },
+  { title: 'Cancelada', value: 'cancelled' },
 ]
 
 function getStatusColor(status) {
   const map = {
-    pendiente: 'info',
-    en_curso: 'warning',
-    completada: 'success',
-    cancelada: 'grey',
+    pending: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pendiente: 'Pendiente',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    cancelada: 'Cancelada',
+    pending: 'Pendiente',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
   }
   return map[status] ?? status
 }

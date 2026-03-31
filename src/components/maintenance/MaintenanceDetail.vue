@@ -48,7 +48,7 @@
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
                 <v-chip
-                  :color="record.maintenance_type === 'preventivo' ? 'info' : 'warning'"
+                  :color="record.maintenance_type === 'preventive' ? 'info' : 'warning'"
                   size="small"
                   variant="outlined"
                 >
@@ -192,20 +192,20 @@ onMounted(() => {
 })
 
 function getTipoLabel(tipo) {
-  return tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'
+  return tipo === 'preventive' ? 'Preventivo' : 'Correctivo'
 }
 
 function getStatusColor(status) {
-  const map = { pendiente: 'info', en_curso: 'warning', completada: 'success', cancelada: 'grey' }
+  const map = { pending: 'info', in_progress: 'warning', completed: 'success', cancelled: 'grey' }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pendiente: 'Pendiente',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    cancelada: 'Cancelada',
+    pending: 'Pendiente',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
   }
   return map[status] ?? status
 }

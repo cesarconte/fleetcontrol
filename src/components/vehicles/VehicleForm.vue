@@ -390,11 +390,11 @@ const form = reactive({
   year: null,
   transport_card_number: '',
   fecha_primera_matriculacion: '',
-  dgt_badge: 'sin_etiqueta',
+  dgt_badge: 'no_label',
   euro_class: null,
   eu_category: 'N3',
   body_type: 'lona',
-  status: 'activo',
+  status: 'active',
   fuel_type: 'diesel',
   associated_semitrailer_plate: '',
   hitch_type: '',
@@ -432,7 +432,7 @@ const dgtBadges = [
   { title: 'ECO', value: 'eco' },
   { title: 'C', value: 'c' },
   { title: 'B', value: 'b' },
-  { title: 'Sin distintivo', value: 'sin_etiqueta' },
+  { title: 'Sin distintivo', value: 'no_label' },
 ]
 
 const euroClasses = [
@@ -451,20 +451,20 @@ const euCategoriaOptions = getEUCategoriaOptions()
 const bodyTypeOptions = getBodyOptions()
 
 const vehicleStatuses = [
-  { title: 'Activo', value: 'activo' },
-  { title: 'En ruta', value: 'en_ruta' },
-  { title: 'En mantenimiento', value: 'en_mantenimiento' },
-  { title: 'Inactivo', value: 'inactivo' },
-  { title: 'Dado de baja', value: 'dado_de_baja' },
+  { title: 'Activo', value: 'active' },
+  { title: 'En ruta', value: 'on_route' },
+  { title: 'En mantenimiento', value: 'in_maintenance' },
+  { title: 'Inactivo', value: 'inactive' },
+  { title: 'Dado de baja', value: 'decommissioned' },
 ]
 
 const fuelTypes = [
   { title: 'Diésel', value: 'diesel' },
   { title: 'GNC', value: 'gnc' },
   { title: 'GNL', value: 'gnl' },
-  { title: 'Hidrógeno', value: 'hidrogeno' },
-  { title: 'Eléctrico', value: 'electrico' },
-  { title: 'Híbrido', value: 'hibrido' },
+  { title: 'Hidrógeno', value: 'hydrogen' },
+  { title: 'Eléctrico', value: 'electric' },
+  { title: 'Híbrido', value: 'hybrid' },
 ]
 
 async function handleSubmit() {

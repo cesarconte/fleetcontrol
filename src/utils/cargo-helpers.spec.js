@@ -11,11 +11,11 @@ describe('cargo-helpers', () => {
     it('debería retornar info para general', () => {
       expect(getCargoTypeColor('general')).toBe('info')
     })
-    it('debería retornar teal para frigorifica', () => {
-      expect(getCargoTypeColor('frigorifica')).toBe('teal')
+    it('debería retornar teal para refrigerated', () => {
+      expect(getCargoTypeColor('refrigerated')).toBe('teal')
     })
-    it('debería retornar error para peligrosa', () => {
-      expect(getCargoTypeColor('peligrosa')).toBe('error')
+    it('debería retornar error para dangerous', () => {
+      expect(getCargoTypeColor('dangerous')).toBe('error')
     })
     it('debería retornar grey para desconocido', () => {
       expect(getCargoTypeColor('unknown')).toBe('grey')
@@ -24,7 +24,7 @@ describe('cargo-helpers', () => {
 
   describe('getCargoTypeLabel', () => {
     it('debería retornar etiqueta en español', () => {
-      expect(getCargoTypeLabel('peligrosa')).toBe('Peligrosa')
+      expect(getCargoTypeLabel('dangerous')).toBe('Peligrosa')
     })
     it('debería retornar el valor para desconocido', () => {
       expect(getCargoTypeLabel('xyz')).toBe('xyz')

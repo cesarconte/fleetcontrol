@@ -75,10 +75,10 @@ export const routeSchema = z.object({
 
   // ── Resultado ───────────────────────────────────────
   status: z
-    .enum(['planificada', 'en_curso', 'completada', 'retrasada', 'cancelada'], {
+    .enum(['planned', 'in_progress', 'completed', 'delayed', 'cancelled'], {
       errorMap: () => ({ message: 'Estado inválido' }),
     })
-    .default('planificada'),
+    .default('planned'),
 
   delay_minutes: z.number().int().min(0).optional().nullable(),
   result_notes: z.string().optional().or(z.literal('')),

@@ -12,16 +12,16 @@ export const maintenanceSchema = z.object({
     .uuid('Vehículo inválido'),
 
   maintenance_type: z
-    .enum(['preventivo', 'correctivo'], {
+    .enum(['preventive', 'corrective'], {
       errorMap: () => ({ message: 'Tipo de mantenimiento inválido' }),
     })
-    .default('preventivo'),
+    .default('preventive'),
 
   status: z
-    .enum(['pendiente', 'en_curso', 'completada', 'cancelada'], {
+    .enum(['pending', 'in_progress', 'completed', 'cancelled'], {
       errorMap: () => ({ message: 'Estado inválido' }),
     })
-    .default('pendiente'),
+    .default('pending'),
 
   scheduled_date: z.string().optional().or(z.literal('')),
   actual_date: z.string().optional().or(z.literal('')),

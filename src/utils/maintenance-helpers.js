@@ -11,21 +11,21 @@
  */
 export function getTipoColor(tipo) {
   const map = {
-    preventivo: 'info',
-    correctivo: 'warning',
+    preventive: 'info',
+    corrective: 'warning',
   }
   return map[tipo] ?? 'grey'
 }
 
 /**
- * Get Spanish label for maintenance type.
+ * Get label for maintenance type.
  * @param {string} tipo
  * @returns {string}
  */
 export function getTipoLabel(tipo) {
   const map = {
-    preventivo: 'Preventivo',
-    correctivo: 'Correctivo',
+    preventive: 'Preventivo',
+    corrective: 'Correctivo',
   }
   return map[tipo] ?? tipo
 }
@@ -37,25 +37,25 @@ export function getTipoLabel(tipo) {
  */
 export function getMantenimientoStatusColor(status) {
   const map = {
-    pendiente: 'info',
-    en_curso: 'warning',
-    completada: 'success',
-    cancelada: 'grey',
+    pending: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 /**
- * Get Spanish label for maintenance status.
+ * Get label for maintenance status.
  * @param {string} status
  * @returns {string}
  */
 export function getMantenimientoStatusLabel(status) {
   const map = {
-    pendiente: 'Pendiente',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    cancelada: 'Cancelada',
+    pending: 'Pendiente',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
   }
   return map[status] ?? status
 }

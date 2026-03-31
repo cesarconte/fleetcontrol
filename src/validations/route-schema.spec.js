@@ -72,28 +72,28 @@ describe('routeSchema', () => {
   })
 
   describe('status', () => {
-    it('debería aceptar planificada', () => {
-      const result = routeSchema.safeParse({ ...validRoute, status: 'planificada' })
+    it('debería aceptar planned', () => {
+      const result = routeSchema.safeParse({ ...validRoute, status: 'planned' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar en_curso', () => {
-      const result = routeSchema.safeParse({ ...validRoute, status: 'en_curso' })
+    it('debería aceptar in_progress', () => {
+      const result = routeSchema.safeParse({ ...validRoute, status: 'in_progress' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar completada', () => {
-      const result = routeSchema.safeParse({ ...validRoute, status: 'completada' })
+    it('debería aceptar completed', () => {
+      const result = routeSchema.safeParse({ ...validRoute, status: 'completed' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar retrasada', () => {
-      const result = routeSchema.safeParse({ ...validRoute, status: 'retrasada' })
+    it('debería aceptar delayed', () => {
+      const result = routeSchema.safeParse({ ...validRoute, status: 'delayed' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar cancelada', () => {
-      const result = routeSchema.safeParse({ ...validRoute, status: 'cancelada' })
+    it('debería aceptar cancelled', () => {
+      const result = routeSchema.safeParse({ ...validRoute, status: 'cancelled' })
       expect(result.success).toBe(true)
     })
 
@@ -110,7 +110,7 @@ describe('routeSchema', () => {
     it('debería usar planificada por defecto', () => {
       const result = routeSchema.safeParse(validRoute)
       expect(result.success).toBe(true)
-      expect(result.data.status).toBe('planificada')
+      expect(result.data.status).toBe('planned')
     })
   })
 
@@ -156,7 +156,7 @@ describe('routeSchema', () => {
         fuel_cost_eur: 180,
         toll_cost_eur: 50,
         total_cost_eur: 230,
-        status: 'completada',
+        status: 'completed',
         delay_minutes: 30,
         linked_document_ref: 'CMR-2026-001',
       })
@@ -176,7 +176,7 @@ describe('routeSearchSchema', () => {
       search: 'Madrid',
       origin_city: 'Madrid',
       destination_city: 'Barcelona',
-      status: 'completada',
+      status: 'completed',
       driver_id: '550e8400-e29b-41d4-a716-446655440001',
       vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
       date_from: '2026-03-01',

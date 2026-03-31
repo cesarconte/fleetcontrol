@@ -37,7 +37,7 @@ const mockDriver = {
   full_name: 'Juan García López',
   nif: '12345678A',
   birth_date: '1985-03-15',
-  status: 'activo',
+  status: 'active',
   email: 'juan@test.com',
   phone: '612345678',
 }
@@ -85,9 +85,9 @@ describe('apiDrivers', () => {
       const mockRange = vi.fn().mockReturnValue({ order: mockOrder })
       supabase.from().select.mockReturnValue({ range: mockRange })
 
-      await apiDrivers.getPaginated({ filters: { status: 'activo' } })
+      await apiDrivers.getPaginated({ filters: { status: 'active' } })
 
-      expect(mockEq).toHaveBeenCalledWith('status', 'activo')
+      expect(mockEq).toHaveBeenCalledWith('status', 'active')
     })
   })
 

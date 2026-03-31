@@ -2,20 +2,20 @@ import { describe, it, expect } from 'vitest'
 import { getStatusColor, getStatusLabel, getDgtColor, getDgtLabel } from '@/utils/status-helpers'
 
 describe('getStatusColor', () => {
-  it('vehiculo/activo → "success"', () => {
-    expect(getStatusColor('activo', 'vehiculo')).toBe('success')
+  it('vehiculo/active → "success"', () => {
+    expect(getStatusColor('active', 'vehiculo')).toBe('success')
   })
 
-  it('ruta/en_curso → "success"', () => {
-    expect(getStatusColor('en_curso', 'ruta')).toBe('success')
+  it('ruta/in_progress → "success"', () => {
+    expect(getStatusColor('in_progress', 'ruta')).toBe('success')
   })
 
-  it('documento/vencido → "grey-darken-2"', () => {
-    expect(getStatusColor('vencido', 'documento')).toBe('grey-darken-2')
+  it('documento/expired → "grey-darken-2"', () => {
+    expect(getStatusColor('expired', 'documento')).toBe('grey-darken-2')
   })
 
   it('dominio desconocido → "grey"', () => {
-    expect(getStatusColor('activo', 'unknown')).toBe('grey')
+    expect(getStatusColor('active', 'unknown')).toBe('grey')
   })
 
   it('estado desconocido → "grey"', () => {
@@ -24,20 +24,20 @@ describe('getStatusColor', () => {
 })
 
 describe('getStatusLabel', () => {
-  it('vehiculo/activo → "Activo"', () => {
-    expect(getStatusLabel('activo', 'vehiculo')).toBe('Activo')
+  it('vehiculo/active → "Activo"', () => {
+    expect(getStatusLabel('active', 'vehiculo')).toBe('Activo')
   })
 
-  it('conductor/baja_temporal → "Baja temporal"', () => {
-    expect(getStatusLabel('baja_temporal', 'conductor')).toBe('Baja temporal')
+  it('conductor/temporary_leave → "Baja temporal"', () => {
+    expect(getStatusLabel('temporary_leave', 'conductor')).toBe('Baja temporal')
   })
 
-  it('ruta/completada → "Completada"', () => {
-    expect(getStatusLabel('completada', 'ruta')).toBe('Completada')
+  it('ruta/completed → "Completada"', () => {
+    expect(getStatusLabel('completed', 'ruta')).toBe('Completada')
   })
 
-  it('documento/critico → "Crítico"', () => {
-    expect(getStatusLabel('critico', 'documento')).toBe('Crítico')
+  it('documento/critical → "Crítico"', () => {
+    expect(getStatusLabel('critical', 'documento')).toBe('Crítico')
   })
 
   it('estado desconocido devuelve el propio valor', () => {
