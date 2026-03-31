@@ -4,8 +4,8 @@ import { maintenanceSchema, maintenanceSearchSchema } from './maintenance-schema
 describe('maintenanceSchema', () => {
   const validMaintenance = {
     vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
-    descripcion: 'Cambio de aceite y filtros',
-    tipo: 'preventivo',
+    description: 'Cambio de aceite y filtros',
+    maintenance_type: 'preventivo',
   }
 
   describe('campos obligatorios', () => {
@@ -19,37 +19,46 @@ describe('maintenanceSchema', () => {
       expect(result.success).toBe(false)
     })
 
-    it('debería requerir descripción', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, descripcion: '' })
+    it('debería requerir description', () => {
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, description: '' })
       expect(result.success).toBe(false)
     })
 
-    it('debería rechazar descripción corta', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, descripcion: 'AB' })
+    it('debería rechazar description corta', () => {
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, description: 'AB' })
       expect(result.success).toBe(false)
     })
   })
 
-  describe('tipo', () => {
+  describe('maintenance_type', () => {
     it('debería aceptar preventivo', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, tipo: 'preventivo' })
+      const result = maintenanceSchema.safeParse({
+        ...validMaintenance,
+        maintenance_type: 'preventivo',
+      })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar correctivo', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, tipo: 'correctivo' })
+      const result = maintenanceSchema.safeParse({
+        ...validMaintenance,
+        maintenance_type: 'correctivo',
+      })
       expect(result.success).toBe(true)
     })
 
-    it('debería rechazar tipo inválido', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, tipo: 'unknown' })
+    it('debería rechazar maintenance_type inválido', () => {
+      const result = maintenanceSchema.safeParse({
+        ...validMaintenance,
+        maintenance_type: 'unknown',
+      })
       expect(result.success).toBe(false)
     })
 
     it('debería usar preventivo por defecto', () => {
       const result = maintenanceSchema.safeParse(validMaintenance)
       expect(result.success).toBe(true)
-      expect(result.data.tipo).toBe('preventivo')
+      expect(result.data.maintenance_type).toBe('preventivo')
     })
   })
 
@@ -79,14 +88,13 @@ describe('maintenanceSchema', () => {
     it('debería aceptar coste positivo', () => {
       const result = maintenanceSchema.safeParse({
         ...validMaintenance,
-        coste_total_eur: 250.5,
-        coste_recambios_eur: 120.0,
+        cost_eur: 250.5,
       })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar coste negativo', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, coste_total_eur: -10 })
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, cost_eur: -10 })
       expect(result.success).toBe(false)
     })
   })
@@ -96,18 +104,16 @@ describe('maintenanceSchema', () => {
       const result = maintenanceSchema.safeParse({
         ...validMaintenance,
         status: 'completada',
-        fecha_programada: '2026-04-01',
-        fecha_fin: '2026-04-02',
-        km_al_momento: 120000,
-        diagnostico: 'Desgaste normal de filtros',
-        intervencion_realizada: 'Cambio de aceite 15W40 + filtro aceite + filtro aire',
-        recambios: 'Filtro aceite Mann W7309, Filtro aire C30168',
-        coste_recambios_eur: 85.5,
-        taller_nombre: 'Talleres Martínez',
-        taller_responsable: 'Antonio López',
-        inmovilizacion_horas: 4,
-        coste_total_eur: 245.5,
-        observations: 'Próxima revisión a 160.000 km',
+        scheduled_date: '2026-04-01',
+        actual_date: '2026-04-02',
+        scheduled_km: 120000,
+        diagnosis: 'Desgaste normal de filtros',
+        intervention: 'Cambio de aceite 15W40 + filtro aceite + filtro aire',
+        parts_used: 'Filtro aceite Mann W7309, Filtro aire C30168',
+        workshop_name: 'Talleres Martínez',
+        responsible_name: 'Antonio López',
+        downtime_hours: 4,
+        cost_eur: 245.5,
       })
       expect(result.success).toBe(true)
     })
@@ -123,7 +129,7 @@ describe('maintenanceSearchSchema', () => {
   it('debería aceptar filtros', () => {
     const result = maintenanceSearchSchema.safeParse({
       search: 'aceite',
-      tipo: 'preventivo',
+      maintenance_type: 'preventivo',
       status: 'pendiente',
       vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
     })

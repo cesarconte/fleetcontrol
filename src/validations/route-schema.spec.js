@@ -3,9 +3,9 @@ import { routeSchema, routeSearchSchema } from './route-schema.js'
 
 describe('routeSchema', () => {
   const validRoute = {
-    fecha_salida: '2026-04-01',
-    origen_municipio: 'Madrid',
-    destino_municipio: 'Barcelona',
+    planned_departure: '2026-04-01',
+    origin_city: 'Madrid',
+    destination_city: 'Barcelona',
     vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
     driver_id: '550e8400-e29b-41d4-a716-446655440001',
   }
@@ -17,17 +17,17 @@ describe('routeSchema', () => {
     })
 
     it('debería requerir fecha de salida', () => {
-      const result = routeSchema.safeParse({ ...validRoute, fecha_salida: '' })
+      const result = routeSchema.safeParse({ ...validRoute, planned_departure: '' })
       expect(result.success).toBe(false)
     })
 
     it('debería requerir origen', () => {
-      const result = routeSchema.safeParse({ ...validRoute, origen_municipio: '' })
+      const result = routeSchema.safeParse({ ...validRoute, origin_city: '' })
       expect(result.success).toBe(false)
     })
 
     it('debería requerir destino', () => {
-      const result = routeSchema.safeParse({ ...validRoute, destino_municipio: '' })
+      const result = routeSchema.safeParse({ ...validRoute, destination_city: '' })
       expect(result.success).toBe(false)
     })
 
@@ -54,19 +54,19 @@ describe('routeSchema', () => {
     })
   })
 
-  describe('peso_carga_kg', () => {
+  describe('cargo_weight_kg', () => {
     it('debería aceptar peso válido', () => {
-      const result = routeSchema.safeParse({ ...validRoute, peso_carga_kg: 15000 })
+      const result = routeSchema.safeParse({ ...validRoute, cargo_weight_kg: 15000 })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar peso negativo', () => {
-      const result = routeSchema.safeParse({ ...validRoute, peso_carga_kg: -100 })
+      const result = routeSchema.safeParse({ ...validRoute, cargo_weight_kg: -100 })
       expect(result.success).toBe(false)
     })
 
     it('debería aceptar null', () => {
-      const result = routeSchema.safeParse({ ...validRoute, peso_carga_kg: null })
+      const result = routeSchema.safeParse({ ...validRoute, cargo_weight_kg: null })
       expect(result.success).toBe(true)
     })
   })
@@ -114,46 +114,24 @@ describe('routeSchema', () => {
     })
   })
 
-  describe('tipo_carga', () => {
-    it('debería aceptar general', () => {
-      const result = routeSchema.safeParse({ ...validRoute, tipo_carga: 'general' })
-      expect(result.success).toBe(true)
-    })
-
-    it('debería aceptar peligrosa', () => {
-      const result = routeSchema.safeParse({ ...validRoute, tipo_carga: 'peligrosa' })
-      expect(result.success).toBe(true)
-    })
-
-    it('debería rechazar tipo inválido', () => {
-      const result = routeSchema.safeParse({ ...validRoute, tipo_carga: 'invalid' })
-      expect(result.success).toBe(false)
-    })
-
-    it('debería rechazar dangerous (nombre antiguo)', () => {
-      const result = routeSchema.safeParse({ ...validRoute, tipo_carga: 'dangerous' })
-      expect(result.success).toBe(false)
-    })
-  })
-
   describe('costes', () => {
     it('debería aceptar costes positivos', () => {
       const result = routeSchema.safeParse({
         ...validRoute,
-        coste_combustible_eur: 150.5,
-        coste_peajes_eur: 45.0,
-        coste_total_eur: 195.5,
+        fuel_cost_eur: 150.5,
+        toll_cost_eur: 45.0,
+        total_cost_eur: 195.5,
       })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar costes en 0', () => {
-      const result = routeSchema.safeParse({ ...validRoute, coste_combustible_eur: 0 })
+      const result = routeSchema.safeParse({ ...validRoute, fuel_cost_eur: 0 })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar costes negativos', () => {
-      const result = routeSchema.safeParse({ ...validRoute, coste_combustible_eur: -10 })
+      const result = routeSchema.safeParse({ ...validRoute, fuel_cost_eur: -10 })
       expect(result.success).toBe(false)
     })
   })
@@ -163,24 +141,24 @@ describe('routeSchema', () => {
       const result = routeSchema.safeParse({
         ...validRoute,
         departure_time: '08:00',
-        fecha_llegada_prevista: '2026-04-01',
+        planned_arrival: '2026-04-01',
         arrival_time: '16:00',
-        origen_provincia: 'Madrid',
-        destino_provincia: 'Barcelona',
-        distancia_total_km: 620,
-        distancia_recorrida_km: 635,
-        duracion_prevista_min: 360,
-        duracion_real_min: 390,
-        descripcion_carga: 'Electrodomésticos',
-        peso_carga_kg: 18000,
-        volumen_carga_m3: 45,
-        consumo_combustible_l: 120,
-        coste_combustible_eur: 180,
-        coste_peajes_eur: 50,
-        coste_total_eur: 230,
+        origin_province: 'Madrid',
+        destination_province: 'Barcelona',
+        planned_distance_km: 620,
+        actual_distance_km: 635,
+        planned_duration_min: 360,
+        actual_duration_min: 390,
+        cargo_description: 'Electrodomésticos',
+        cargo_weight_kg: 18000,
+        cargo_volume_m3: 45,
+        fuel_consumed_liters: 120,
+        fuel_cost_eur: 180,
+        toll_cost_eur: 50,
+        total_cost_eur: 230,
         status: 'completada',
-        retraso_minutos: 30,
-        cmr_numero: 'CMR-2026-001',
+        delay_minutes: 30,
+        linked_document_ref: 'CMR-2026-001',
       })
       expect(result.success).toBe(true)
     })
@@ -196,6 +174,8 @@ describe('routeSearchSchema', () => {
   it('debería aceptar todos los filtros', () => {
     const result = routeSearchSchema.safeParse({
       search: 'Madrid',
+      origin_city: 'Madrid',
+      destination_city: 'Barcelona',
       status: 'completada',
       driver_id: '550e8400-e29b-41d4-a716-446655440001',
       vehicle_id: '550e8400-e29b-41d4-a716-446655440000',

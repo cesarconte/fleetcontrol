@@ -7,14 +7,14 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
-          <div class="text-body-2 font-weight-medium">{{ record.descripcion }}</div>
+          <div class="text-body-2 font-weight-medium">{{ record.description }}</div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(record.fecha_programada) }}
+            {{ formatDate(record.scheduled_date) }}
           </div>
         </div>
         <div class="d-flex ga-1">
-          <v-chip :color="getTipoColor(record.tipo)" size="x-small" variant="outlined">
-            {{ getTipoLabel(record.tipo) }}
+          <v-chip :color="getTipoColor(record.maintenance_type)" size="x-small" variant="outlined">
+            {{ getTipoLabel(record.maintenance_type) }}
           </v-chip>
           <v-chip :color="getStatusColor(record.status)" size="x-small" variant="tonal">
             {{ getStatusLabel(record.status) }}
@@ -25,8 +25,8 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ record.taller_nombre || '—' }}</span>
-        <span>{{ record.coste_total_eur ? `${record.coste_total_eur.toFixed(2)} €` : '—' }}</span>
+        <span>{{ record.workshop_name || '—' }}</span>
+        <span>{{ record.cost_eur ? `${record.cost_eur.toFixed(2)} €` : '—' }}</span>
       </div>
     </v-card-text>
   </v-card>

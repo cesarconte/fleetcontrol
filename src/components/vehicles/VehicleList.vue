@@ -72,8 +72,8 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template v-slot:item.matricula="{ item }">
-          <span class="font-weight-medium">{{ item.matricula }}</span>
+        <template v-slot:item.plate="{ item }">
+          <span class="font-weight-medium">{{ item.plate }}</span>
         </template>
 
         <template v-slot:item.status="{ item }">
@@ -82,14 +82,14 @@
           </v-chip>
         </template>
 
-        <template v-slot:item.distintivo_ambiental="{ item }">
-          <v-chip :color="getDgtColor(item.distintivo_ambiental)" size="small" variant="flat">
-            {{ getDgtLabel(item.distintivo_ambiental) }}
+        <template v-slot:item.dgt_badge="{ item }">
+          <v-chip :color="getDgtColor(item.dgt_badge)" size="small" variant="flat">
+            {{ getDgtLabel(item.dgt_badge) }}
           </v-chip>
         </template>
 
-        <template v-slot:item.tipo_carroceria="{ item }">
-          {{ getBodyLabel(item.tipo_carroceria) }}
+        <template v-slot:item.body_type="{ item }">
+          {{ getBodyLabel(item.body_type) }}
         </template>
 
         <template v-slot:item.actions="{ item }">
@@ -169,17 +169,17 @@ const searchQuery = ref('')
 const filterStatus = ref(null)
 const filterType = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'matricula', order: 'asc' }])
+const sortBy = ref([{ key: 'plate', order: 'asc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Matrícula', key: 'matricula', sortable: true },
-  { title: 'Marca', key: 'marca', sortable: true },
-  { title: 'Modelo', key: 'modelo', sortable: true },
-  { title: 'Carrocería', key: 'tipo_carroceria', sortable: true },
+  { title: 'Matrícula', key: 'plate', sortable: true },
+  { title: 'Marca', key: 'brand', sortable: true },
+  { title: 'Modelo', key: 'model', sortable: true },
+  { title: 'Carrocería', key: 'body_type', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
-  { title: 'DGT', key: 'distintivo_ambiental', sortable: true },
+  { title: 'DGT', key: 'dgt_badge', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
@@ -202,7 +202,7 @@ function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
   if (filterStatus.value) f.status = filterStatus.value
-  if (filterType.value) f.tipo_carroceria = filterType.value
+  if (filterType.value) f.body_type = filterType.value
   setFilters(f)
 }
 

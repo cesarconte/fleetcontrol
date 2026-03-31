@@ -3,145 +3,145 @@ import { vehicleSchema, vehicleSearchSchema } from './vehicle-schema.js'
 
 describe('vehicleSchema', () => {
   const validVehicle = {
-    matricula: '1234ABC',
-    marca: 'Mercedes',
-    modelo: 'Actros',
-    categoria_ue: 'N3',
-    tipo_carroceria: 'lona',
-    tipo_combustible: 'diesel',
-    distintivo_ambiental: 'sin_etiqueta',
+    plate: '1234ABC',
+    brand: 'Mercedes',
+    model: 'Actros',
+    eu_category: 'N3',
+    body_type: 'curtain',
+    fuel_type: 'diesel',
+    dgt_badge: 'sin_etiqueta',
   }
 
-  describe('matricula', () => {
+  describe('plate', () => {
     it('debería aceptar matrícula española válida', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, matricula: '1234ABC' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, plate: '1234ABC' })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar matrícula corta', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, matricula: '12A' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, plate: '12A' })
       expect(result.success).toBe(false)
       expect(result.error.issues[0].message).toContain('mínimo')
     })
 
     it('debería rechazar matrícula sin números', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, matricula: 'ABCDEFG' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, plate: 'ABCDEFG' })
       expect(result.success).toBe(false)
     })
 
     it('debería rechazar matrícula vacía', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, matricula: '' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, plate: '' })
       expect(result.success).toBe(false)
     })
   })
 
-  describe('marca y modelo', () => {
-    it('debería requerir marca', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, marca: '' })
+  describe('brand y model', () => {
+    it('debería requerir brand', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, brand: '' })
       expect(result.success).toBe(false)
     })
 
-    it('debería requerir modelo', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, modelo: '' })
+    it('debería requerir model', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, model: '' })
       expect(result.success).toBe(false)
     })
   })
 
-  describe('categoria_ue', () => {
+  describe('eu_category', () => {
     it('debería aceptar N3', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'N3' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, eu_category: 'N3' })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar N1', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'N1' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, eu_category: 'N1' })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar O4', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'O4' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, eu_category: 'O4' })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar categoría inválida', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, categoria_ue: 'X9' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, eu_category: 'X9' })
       expect(result.success).toBe(false)
     })
   })
 
-  describe('tipo_carroceria', () => {
-    it('debería aceptar lona', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'lona' })
+  describe('body_type', () => {
+    it('debería aceptar curtain (lona)', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, body_type: 'curtain' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar cisterna', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'cisterna' })
+    it('debería aceptar tanker (cisterna)', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, body_type: 'tanker' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar frigorifico', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'frigorifico' })
+    it('debería aceptar refrigerated (frigorífico)', () => {
+      const result = vehicleSchema.safeParse({ ...validVehicle, body_type: 'refrigerated' })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar carrocería inválida', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, tipo_carroceria: 'spaceship' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, body_type: 'spaceship' })
       expect(result.success).toBe(false)
     })
   })
 
-  describe('distintivo_ambiental', () => {
+  describe('dgt_badge', () => {
     it('debería aceptar 0', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, distintivo_ambiental: '0' })
+      const result = vehicleSchema.safeParse({ ...validVehicle, dgt_badge: '0' })
       expect(result.success).toBe(true)
     })
 
     it('debería usar sin_etiqueta por defecto', () => {
       const result = vehicleSchema.safeParse(validVehicle)
       expect(result.success).toBe(true)
-      expect(result.data.distintivo_ambiental).toBe('sin_etiqueta')
+      expect(result.data.dgt_badge).toBe('sin_etiqueta')
     })
   })
 
-  describe('mma_kg', () => {
+  describe('gross_weight_kg', () => {
     it('debería aceptar peso válido', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, mma_kg: 40000 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, gross_weight_kg: 40000 })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar peso mayor a 44000', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, mma_kg: 50000 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, gross_weight_kg: 50000 })
       expect(result.success).toBe(false)
       expect(result.error.issues[0].message).toContain('44.000')
     })
 
     it('debería rechazar peso negativo', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, mma_kg: -100 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, gross_weight_kg: -100 })
       expect(result.success).toBe(false)
     })
 
     it('debería aceptar null', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, mma_kg: null })
+      const result = vehicleSchema.safeParse({ ...validVehicle, gross_weight_kg: null })
       expect(result.success).toBe(true)
     })
   })
 
   describe('dimensiones', () => {
     it('debería rechazar ancho mayor a 2.60', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, anchura_max_m: 3.0 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, width_m: 3.0 })
       expect(result.success).toBe(false)
       expect(result.error.issues[0].message).toContain('2,60')
     })
 
     it('debería rechazar altura mayor a 4.00', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, altura_max_m: 5.0 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, height_m: 5.0 })
       expect(result.success).toBe(false)
       expect(result.error.issues[0].message).toContain('4,00')
     })
 
     it('debería rechazar largo mayor a 16.50', () => {
-      const result = vehicleSchema.safeParse({ ...validVehicle, longitud_total_m: 18.0 })
+      const result = vehicleSchema.safeParse({ ...validVehicle, length_m: 18.0 })
       expect(result.success).toBe(false)
       expect(result.error.issues[0].message).toContain('16,50')
     })
@@ -175,9 +175,9 @@ describe('vehicleSearchSchema', () => {
     const result = vehicleSearchSchema.safeParse({
       search: '1234',
       status: 'activo',
-      categoria_ue: 'N3',
-      tipo_carroceria: 'lona',
-      distintivo_ambiental: 'eco',
+      eu_category: 'N3',
+      body_type: 'curtain',
+      dgt_badge: 'eco',
     })
     expect(result.success).toBe(true)
   })

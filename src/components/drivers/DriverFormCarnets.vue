@@ -6,44 +6,44 @@
       <v-row>
         <v-col cols="12" sm="6" md="3">
           <v-select
-            :model-value="modelValue.carnet_clase"
+            :model-value="modelValue.carnet_class"
             :items="clasesCarnet"
             label="Clase"
             variant="outlined"
             clearable
             data-testid="driver-carnet-clase"
-            @update:model-value="updateField('carnet_clase', $event)"
+            @update:model-value="updateField('carnet_class', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_numero"
+            :model-value="modelValue.carnet_number"
             label="Número de carnet"
             variant="outlined"
             maxlength="20"
-            :error-messages="errors.carnet_numero"
+            :error-messages="errors.carnet_number"
             data-testid="driver-carnet-numero"
-            @update:model-value="updateField('carnet_numero', $event)"
+            @update:model-value="updateField('carnet_number', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_fecha_expedicion"
+            :model-value="modelValue.carnet_issue_date"
             label="Fecha de expedición"
             type="date"
             variant="outlined"
             data-testid="driver-carnet-fecha-expedicion"
-            @update:model-value="updateField('carnet_fecha_expedicion', $event)"
+            @update:model-value="updateField('carnet_issue_date', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_fecha_vencimiento"
+            :model-value="modelValue.carnet_expiry_date"
             label="Fecha de vencimiento"
             type="date"
             variant="outlined"
             data-testid="driver-carnet-fecha-vencimiento"
-            @update:model-value="updateField('carnet_fecha_vencimiento', $event)"
+            @update:model-value="updateField('carnet_expiry_date', $event)"
           />
         </v-col>
       </v-row>
@@ -57,35 +57,35 @@
       <v-row>
         <v-col cols="12" sm="6" md="4">
           <v-text-field
-            :model-value="modelValue.cap_numero"
+            :model-value="modelValue.cap_number"
             label="Número CAP"
             variant="outlined"
             maxlength="20"
-            :error-messages="errors.cap_numero"
+            :error-messages="errors.cap_number"
             data-testid="driver-cap-numero"
-            @update:model-value="updateField('cap_numero', $event)"
+            @update:model-value="updateField('cap_number', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="4">
           <v-text-field
-            :model-value="modelValue.cap_fecha_vencimiento"
+            :model-value="modelValue.cap_expiry_date"
             label="Fecha de vencimiento"
             type="date"
             variant="outlined"
             data-testid="driver-cap-vencimiento"
-            @update:model-value="updateField('cap_fecha_vencimiento', $event)"
+            @update:model-value="updateField('cap_expiry_date', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="4">
           <v-text-field
-            :model-value="modelValue.cap_horas_formacion"
+            :model-value="modelValue.cap_training_hours"
             label="Horas de formación"
             type="number"
             variant="outlined"
             :min="35"
-            :error-messages="errors.cap_horas_formacion"
+            :error-messages="errors.cap_training_hours"
             data-testid="driver-cap-horas"
-            @update:model-value="updateField('cap_horas_formacion', Number($event))"
+            @update:model-value="updateField('cap_training_hours', Number($event))"
           />
         </v-col>
       </v-row>
@@ -99,23 +99,23 @@
       <v-row>
         <v-col cols="12" sm="6">
           <v-text-field
-            :model-value="modelValue.tarjeta_tacografo_numero"
+            :model-value="modelValue.tachograph_card_number"
             label="Número de tarjeta"
             variant="outlined"
             maxlength="20"
-            :error-messages="errors.tarjeta_tacografo_numero"
+            :error-messages="errors.tachograph_card_number"
             data-testid="driver-tacografo-numero"
-            @update:model-value="updateField('tarjeta_tacografo_numero', $event)"
+            @update:model-value="updateField('tachograph_card_number', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field
-            :model-value="modelValue.tarjeta_tacografo_vencimiento"
+            :model-value="modelValue.tachograph_card_expiry"
             label="Fecha de vencimiento"
             type="date"
             variant="outlined"
             data-testid="driver-tacografo-vencimiento"
-            @update:model-value="updateField('tarjeta_tacografo_vencimiento', $event)"
+            @update:model-value="updateField('tachograph_card_expiry', $event)"
           />
         </v-col>
       </v-row>
@@ -127,22 +127,22 @@
       <v-row>
         <v-col cols="12" sm="6">
           <v-text-field
-            :model-value="modelValue.reconocimiento_medico_fecha"
+            :model-value="modelValue.medical_exam_date"
             label="Fecha de reconocimiento"
             type="date"
             variant="outlined"
             data-testid="driver-medico-fecha"
-            @update:model-value="updateField('reconocimiento_medico_fecha', $event)"
+            @update:model-value="updateField('medical_exam_date', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6">
           <v-text-field
-            :model-value="modelValue.reconocimiento_medico_vencimiento"
+            :model-value="modelValue.medical_exam_expiry"
             label="Fecha de vencimiento"
             type="date"
             variant="outlined"
             data-testid="driver-medico-vencimiento"
-            @update:model-value="updateField('reconocimiento_medico_vencimiento', $event)"
+            @update:model-value="updateField('medical_exam_expiry', $event)"
           />
         </v-col>
       </v-row>
@@ -154,32 +154,32 @@
       <v-row>
         <v-col cols="12" sm="6" md="4">
           <v-checkbox
-            :model-value="modelValue.adr_certificado"
+            :model-value="modelValue.adr_certificate"
             label="¿Posee certificado ADR?"
             data-testid="driver-adr-check"
-            @update:model-value="updateField('adr_certificado', $event)"
+            @update:model-value="updateField('adr_certificate', $event)"
           />
         </v-col>
-        <template v-if="modelValue.adr_certificado">
+        <template v-if="modelValue.adr_certificate">
           <v-col cols="12" sm="6" md="4">
             <v-text-field
-              :model-value="modelValue.adr_numero"
+              :model-value="modelValue.adr_number"
               label="Número de certificado ADR"
               variant="outlined"
               maxlength="20"
-              :error-messages="errors.adr_numero"
+              :error-messages="errors.adr_number"
               data-testid="driver-adr-numero"
-              @update:model-value="updateField('adr_numero', $event)"
+              @update:model-value="updateField('adr_number', $event)"
             />
           </v-col>
           <v-col cols="12" sm="6" md="4">
             <v-text-field
-              :model-value="modelValue.adr_fecha_vencimiento"
+              :model-value="modelValue.adr_expiry_date"
               label="Fecha de vencimiento"
               type="date"
               variant="outlined"
               data-testid="driver-adr-vencimiento"
-              @update:model-value="updateField('adr_fecha_vencimiento', $event)"
+              @update:model-value="updateField('adr_expiry_date', $event)"
             />
           </v-col>
         </template>

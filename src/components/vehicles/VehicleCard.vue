@@ -7,9 +7,9 @@
     <v-card-text>
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
-          <div class="text-h6 font-weight-bold">{{ vehicle.matricula }}</div>
+          <div class="text-h6 font-weight-bold">{{ vehicle.plate }}</div>
           <div class="text-body-2 text-medium-emphasis">
-            {{ vehicle.marca }} {{ vehicle.modelo }}
+            {{ vehicle.brand }} {{ vehicle.model }}
           </div>
         </div>
         <v-chip :color="getStatusColor(vehicle.status, 'vehiculo')" size="small" variant="tonal">
@@ -20,15 +20,15 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ getBodyLabel(vehicle.tipo_carroceria) }}</span>
+        <span>{{ getBodyLabel(vehicle.body_type) }}</span>
         <span>
           <v-chip
-            v-if="vehicle.distintivo_ambiental && vehicle.distintivo_ambiental !== 'sin_etiqueta'"
-            :color="getDgtColor(vehicle.distintivo_ambiental)"
+            v-if="vehicle.dgt_badge && vehicle.dgt_badge !== 'sin_etiqueta'"
+            :color="getDgtColor(vehicle.dgt_badge)"
             size="x-small"
             variant="flat"
           >
-            {{ getDgtLabel(vehicle.distintivo_ambiental) }}
+            {{ getDgtLabel(vehicle.dgt_badge) }}
           </v-chip>
         </span>
       </div>

@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-30
+> **Última actualización:** 2026-03-31 (sesión 4)
 > **Actualizado por:** AI Agent
 
 ---
@@ -104,7 +104,7 @@ Automatización:       [PENDIENTE]
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🔴 Sin empezar | Vitest + Cypress                                                             |
+| Testing (TDD)              | 🟡 En progreso | 392 tests (Vitest), lint + typecheck, Cypress pendiente                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -194,6 +194,7 @@ Automatización:       [PENDIENTE]
 
 _(Complementa las de AGENTS.md)_
 
+- **Nombres de columna en la BD: SIEMPRE en inglés** (fuente de verdad). El código JS/Vue usa los nombres en inglés de la BD. Las etiquetas de UI se mantienen en español para el usuario.
 - Los mockups de referencia están en `/docs/mockups/`.
 - Los colores se definen como tokens CSS en `/src/styles/tokens.css`.
 - Las constantes legales van en `/src/constants/legal-limits.js`.
@@ -203,17 +204,60 @@ _(Complementa las de AGENTS.md)_
 - Los documentos de transporte se generan desde `/src/services/document-*.js`.
 - Los workflows del agente están en `.opencode/workflows/`.
 - Los skills del agente están en `/home/cesar/.agents/skills/`.
+- El MCP de Supabase está configurado en `~/.config/opencode/opencode.json` con PAT.
 
 ---
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-03-30
-**Branch:** dev (feature/taxonomia-cargas merged)
+**Fecha:** 2026-03-30 (sesión 3)
+**Branch:** dev
+**Tests:** 392 pasando, 0 errores lint, typecheck limpio
 
 **Trabajo realizado:**
 
-### Sesión 1 — Taxonomía de Cargas (completada)
+### Sesión 3 — Refactor completo: Alineación código → BD (inglés)
+
+**Problema resuelto:** La BD Supabase usaba nombres en inglés pero todo el código usaba español. Se realizó un refactor completo de ~60 archivos para alinearlos al esquema real de la BD.
+
+**Migraciones aplicadas:**
+
+- M015: `subcategoria_id` en cargo_records + 11 nuevos valores vehicle_type enum (inglés)
+- M016: Nuevos enums `eu_category` (7 valores) y `body_type` (21 valores), columnas en vehicles
+
+**Archivos refactorizados (resumen):**
+
+- **Constantes:** `vehicle-types.js` + spec (values español → inglés)
+- **Utils:** `cargo-compliance.js` + spec (tipo_carroceria → body_type, status activo → active)
+- **Schemas Zod:** 6 módulos (vehicle, driver, route, fuel, maintenance, cargo) + specs
+- **Servicios API:** 6 módulos (api-vehicles, api-drivers, api-routes, api-fuel, api-maintenance, api-cargo) + specs
+- **Composables:** use-vehicles, use-drivers, use-driver-documents, use-routes, use-fuel, use-maintenance
+- **Componentes Vue:** ~25 archivos (Form, Detail, List, Card × 6 módulos + DriverDetailCarnets, DriverFormCarnets, DriverDocumentUploader)
+
+**Reglas de idioma establecidas:**
+
+- Columnas BD: inglés (plate, brand, body_type, eu_category...)
+- Etiquetas UI: español ("Matrícula", "Marca", "Cisterna"...)
+- Enums BD: inglés (rigid, tractor, curtain, tanker...)
+- Labels JS: español (Rígido, Cabeza Tractora, Lona/Tauliner, Cisterna...)
+
+**Conexión MCP Supabase:** Configurada exitosamente con PAT en `~/.config/opencode/opencode.json`.
+
+### Sesión 4 — Compliance en planificación de rutas
+
+- `RouteCompliancePanel.vue` creado: banner reactivo que muestra compliance vehículo-carga
+- `RouteForm.vue` actualizado:
+  - Guarda objeto vehículo completo (`selectedVehicle`) al seleccionar
+  - Selector de subcategoría agrupado (elimina paso intermedio de tipo legado)
+  - Panel de compliance reactivo (aparece al seleccionar vehículo + subcategoría)
+  - Form reactivo renombrado a inglés (corrección del refactor sesión 3)
+- `route-schema.js`: campo `subcategoria_id` opcional añadido
+- Peso de carga validado contra `max_payload_kg` del vehículo
+
+### Sesiones anteriores
+
+<details>
+<summary>Sesión 1 — Taxonomía de Cargas (completada)</summary>
 
 - Taxonomía jerárquica completa: 4 categorías, 27 subcategorías con requisitos de vehículo
 - Equipamiento normativo por subcategoría (ADR, ATP, Animales, Carga General) con referencias legales
@@ -221,82 +265,58 @@ _(Complementa las de AGENTS.md)_
 - Selector jerárquico en CargoForm (categoría → subcategoría)
 - Sección "Requisitos y Normativa" en CargoDetail
 - Validación Zod con `subcategoria_id` y cross-validation
-- Migración `20260330_015_cargo_taxonomia.sql` (11 nuevos vehicle_type + subcategoria_id)
-- 375 tests pasando
+</details>
 
-### Sesión 2 — Reestructuración Modelo Vehículos (EU)
+<details>
+<summary>Sesión 2 — Reestructuración Modelo Vehículos (EU)</summary>
 
-- **Nuevo modelo de 3 campos** según normativa UE/RD 2822/1998:
-  - `categoria_ue` (eu_categoria enum): N1, N2, N3, O1, O2, O3, O4
-  - `tipo_carroceria` (vehicle_body_type enum): 21 valores de utilización
-  - Campo antiguo `tipo_vehiculo` renombrado a `tipo_vehiculo_deprecated`
-- **Nuevas constantes**: `vehicle-types.js` con 3 enums congeladas + 30 tests
-- **Migración SQL creada**: `20260330_016_vehicle_types.sql` (252 líneas)
-  - Crea 2 enums nuevos, migra datos existentes, índices nuevos
-- **Schema Zod actualizado**: `vehicle-schema.js` derivado de constantes (DRY)
-- **4 componentes UI actualizados**: VehicleForm (2 selects), VehicleDetail (2 campos), VehicleList (filtro carrocería), VehicleCard (label carrocería)
-- **Compliance actualizado**: `cargo-compliance.js` usa `tipo_carroceria` para compatibilidad
-- **Eliminados**: 4 copias de `getTypeLabel()` hardcodeado, 2 copias de `typeOptions` hardcodeado
-- **411 tests pasando**, lint 0 errores, typecheck OK
-
-**Archivos creados (esta sesión):**
-
-- `src/constants/vehicle-types.js` + `.spec.js` (3 enums UE + helpers + 30 tests)
-- `supabase/migrations/20260330_016_vehicle_types.sql`
-
-**Archivos modificados (esta sesión):**
-
-- `src/validations/vehicle-schema.js` + `.spec.js` (3 campos UE)
-- `src/components/vehicles/VehicleForm.vue` (3 selects: UE + carrocería + estado)
-- `src/components/vehicles/VehicleDetail.vue` (2 campos + imports)
-- `src/components/vehicles/VehicleList.vue` (filtro carrocería + imports)
-- `src/components/vehicles/VehicleCard.vue` (label carrocería + imports)
-- `src/utils/cargo-compliance.js` + `.spec.js` (compatibilidad por carrocería)
-- `src/services/api-vehicles.js` (filtros por categoria_ue y tipo_carroceria)
+- Nuevo modelo de 3 campos según normativa UE/RD 2822/1998
+- Constantes `vehicle-types.js` con 3 enums congeladas
+- Migración SQL `20260330_016_vehicle_types.sql`
+- Schema Zod, componentes UI, compliance actualizados
+</details>
 
 **Próximos pasos (tareas pendientes):**
 
-1. **PENDIENTE URGENTE: Aplicar migraciones a Supabase**
-   - `20260330_015_cargo_taxonomia.sql` (subcategoria_id + vehicle_type ampliado)
-   - `20260330_016_vehicle_types.sql` (reestructuración 3 campos UE)
-   - Conexión no disponible en estas sesiones. Ejecutar manualmente o cuando la conexión esté activa.
-2. **PENDIENTE**: Eliminar columnas de backup en futura migración (`tipo_vehiculo_deprecated`, `tipo_vehiculo_old_value`) una vez verificado que todo funciona con los nuevos campos.
-3. **PENDIENTE Fase 5.1**: Integrar `checkVehicleCompliance()` en la planificación de rutas (§4.4.3 PRD).
-4. **PENDIENTE**: Definir equipamiento para 6 subcategorías gen sin equipamiento específico.
-5. **PENDIENTE**: Crear tabla `vehicle_documents` para compliance real contra documentos vigentes.
-6. **PENDIENTE**: Actualizar `CargoList.vue` y `CargoCard.vue` para mostrar subcategoría y badge de compliance.
-7. **PENDIENTE**: Actualizar `api-vehicles.spec.js` para usar los nuevos campos en fixtures.
+1. **COMPLETADO**: Integrar `checkVehicleCompliance()` en planificación de rutas.
+   - `RouteCompliancePanel.vue` creado (banner reactivo de compliance)
+   - `RouteForm.vue` actualizado: guarda objeto vehículo, selector subcategoría agrupado, panel compliance
+   - `route-schema.js` actualizado con `subcategoria_id` opcional
+   - Tipo legado eliminado del formulario (se deriva automáticamente de la subcategoría)
+2. **PENDIENTE**: Definir equipamiento para 6 subcategorías gen sin equipamiento específico.
+3. **PENDIENTE**: Tabla `vehicle_documents` ya existe en BD — integrar con compliance real contra documentos vigentes.
+4. **PENDIENTE**: Eliminar columnas de backup en BD si existen (`tipo_vehiculo_deprecated`, `tipo_vehiculo_old_value`) — verificar si se aplicaron en alguna migración anterior.
 
 **Bloqueos activos:**
 
-- Conexión a Supabase no disponible para aplicar migraciones (no bloqueante para desarrollo local)
+- Ninguno. Conexión Supabase operativa.
 
 ---
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                                              |
-| ------------------------------- | ------------ | ------------------------------------------------------ |
-| PRD completo                    | Documento    | `PRD.md`                                               |
-| Reglas del agente               | Documento    | `AGENTS.md`                                            |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                   |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                          |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`                        |
-| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                    |
-| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                   |
-| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                       |
-| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
-| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
-| Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
-| Schema BD                       | SQL          | `supabase/migrations/`                                 |
-| Migración taxonomía cargas      | SQL          | `supabase/migrations/20260330_015_cargo_taxonomia.sql` |
-| Migración tipos vehículo UE     | SQL          | `supabase/migrations/20260330_016_vehicle_types.sql`   |
-| Material Design 3               | Docs         | https://m3.material.io                                 |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                              |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                    |
-| ADR 2025                        | Normativa    | UNECE                                                  |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                         |
+| Recurso                         | Tipo         | Ubicación                                  |
+| ------------------------------- | ------------ | ------------------------------------------ |
+| PRD completo                    | Documento    | `PRD.md`                                   |
+| Reglas del agente               | Documento    | `AGENTS.md`                                |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)       |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`              |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`            |
+| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`        |
+| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`       |
+| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`           |
+| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`            |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`   |
+| Tipos de documentos             | Código       | `src/constants/document-types.js`          |
+| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)    |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-016 aplicadas) |
+| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`         |
+| Material Design 3               | Docs         | https://m3.material.io                     |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                      |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                  |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                        |
+| ADR 2025                        | Normativa    | UNECE                                      |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                             |
 
 ---
 

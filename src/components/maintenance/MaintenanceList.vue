@@ -71,18 +71,18 @@
         data-testid="maintenance-table"
         @click:row="handleRowClick"
       >
-        <template #item.tipo="{ item }">
+        <template #item.maintenance_type="{ item }">
           <v-chip
-            :color="item.tipo === 'preventivo' ? 'info' : 'warning'"
+            :color="item.maintenance_type === 'preventivo' ? 'info' : 'warning'"
             size="small"
             variant="outlined"
           >
-            {{ item.tipo === 'preventivo' ? 'Preventivo' : 'Correctivo' }}
+            {{ item.maintenance_type === 'preventivo' ? 'Preventivo' : 'Correctivo' }}
           </v-chip>
         </template>
 
-        <template #item.fecha_programada="{ item }">
-          {{ formatDate(item.fecha_programada) }}
+        <template #item.scheduled_date="{ item }">
+          {{ formatDate(item.scheduled_date) }}
         </template>
 
         <template #item.status="{ item }">
@@ -91,8 +91,8 @@
           </v-chip>
         </template>
 
-        <template #item.coste_total_eur="{ item }">
-          {{ item.coste_total_eur ? `${item.coste_total_eur.toFixed(2)} €` : '—' }}
+        <template #item.cost_eur="{ item }">
+          {{ item.cost_eur ? `${item.cost_eur.toFixed(2)} €` : '—' }}
         </template>
 
         <template #item.actions="{ item }">
@@ -178,17 +178,17 @@ const searchQuery = ref('')
 const filterType = ref(null)
 const filterStatus = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'fecha_programada', order: 'desc' }])
+const sortBy = ref([{ key: 'scheduled_date', order: 'desc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Tipo', key: 'tipo', sortable: true },
-  { title: 'Descripción', key: 'descripcion', sortable: false },
-  { title: 'Fecha prevista', key: 'fecha_programada', sortable: true },
-  { title: 'Taller', key: 'taller_nombre', sortable: false },
+  { title: 'Tipo', key: 'maintenance_type', sortable: true },
+  { title: 'Descripción', key: 'description', sortable: false },
+  { title: 'Fecha prevista', key: 'scheduled_date', sortable: true },
+  { title: 'Taller', key: 'workshop_name', sortable: false },
   { title: 'Estado', key: 'status', sortable: true },
-  { title: 'Coste', key: 'coste_total_eur', sortable: true },
+  { title: 'Coste', key: 'cost_eur', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
 
@@ -237,7 +237,7 @@ function debouncedSearch() {
 function applyFilters() {
   const f = {}
   if (searchQuery.value) f.search = searchQuery.value
-  if (filterType.value) f.tipo = filterType.value
+  if (filterType.value) f.maintenance_type = filterType.value
   if (filterStatus.value) f.status = filterStatus.value
   setFilters(f)
 }

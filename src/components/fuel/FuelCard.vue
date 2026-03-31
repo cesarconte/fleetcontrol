@@ -4,21 +4,21 @@
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
           <div class="text-body-2 font-weight-medium">
-            {{ record.litros_kg }} L · {{ formatPrice(record.precio_por_litro_eur) }}/L
+            {{ record.quantity }} L · {{ formatPrice(record.unit_price) }}/L
           </div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(record.fecha) }} · {{ formatKm(record.km_al_momento) }}
+            {{ formatDate(record.refuel_date) }} · {{ formatKm(record.odometer_km) }}
           </div>
         </div>
         <div class="text-body-1 font-weight-bold">
-          {{ record.importe_total_eur ? `${record.importe_total_eur.toFixed(2)} €` : '—' }}
+          {{ record.total_eur ? `${record.total_eur.toFixed(2)} €` : '—' }}
         </div>
       </div>
 
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ record.estacion_servicio || '—' }}</span>
+        <span>{{ record.station_name || '—' }}</span>
       </div>
     </v-card-text>
   </v-card>

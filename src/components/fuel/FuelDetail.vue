@@ -15,15 +15,13 @@
     <div v-else>
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">Repostaje — {{ formatDate(record.fecha) }}</h1>
+          <h1 class="text-h5">Repostaje — {{ formatDate(record.refuel_date) }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ record.litros_kg }} L a {{ record.precio_por_litro_eur?.toFixed(3) }} €/L
+            {{ record.quantity }} L a {{ record.unit_price?.toFixed(3) }} €/L
           </p>
         </div>
         <div class="d-flex ga-2">
-          <v-chip color="primary" variant="tonal">
-            {{ record.importe_total_eur?.toFixed(2) }} €
-          </v-chip>
+          <v-chip color="primary" variant="tonal">{{ record.total_eur?.toFixed(2) }} €</v-chip>
           <v-btn
             icon="mdi-pencil"
             variant="outlined"
@@ -40,29 +38,29 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha</div>
-                <div class="text-body-1">{{ formatDate(record.fecha) }}</div>
+                <div class="text-body-1">{{ formatDate(record.refuel_date) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Km</div>
-                <div class="text-body-1">{{ record.km_al_momento?.toLocaleString('es-ES') }}</div>
+                <div class="text-body-1">{{ record.odometer_km?.toLocaleString('es-ES') }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Litros</div>
-                <div class="text-body-1">{{ record.litros_kg?.toFixed(1) }} L</div>
+                <div class="text-body-1">{{ record.quantity?.toFixed(1) }} L</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Precio/L</div>
-                <div class="text-body-1">{{ record.precio_por_litro_eur?.toFixed(3) }} €</div>
+                <div class="text-body-1">{{ record.unit_price?.toFixed(3) }} €</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Total</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ record.importe_total_eur?.toFixed(2) }} €
+                  {{ record.total_eur?.toFixed(2) }} €
                 </div>
               </v-col>
               <v-col cols="12" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Estación</div>
-                <div class="text-body-1">{{ record.estacion_servicio || '—' }}</div>
+                <div class="text-body-1">{{ record.station_name || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>

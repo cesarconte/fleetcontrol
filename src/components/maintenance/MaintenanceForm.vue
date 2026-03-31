@@ -18,7 +18,7 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-select
-                v-model="form.tipo"
+                v-model="form.maintenance_type"
                 :items="typeOptions"
                 label="Tipo *"
                 variant="outlined"
@@ -36,9 +36,9 @@
             </v-col>
             <v-col cols="12">
               <v-text-field
-                v-model="form.descripcion"
+                v-model="form.description"
                 label="Descripción *"
-                :error-messages="errors.descripcion"
+                :error-messages="errors.description"
                 variant="outlined"
                 required
                 data-testid="maintenance-description"
@@ -46,7 +46,7 @@
             </v-col>
             <v-col cols="6" sm="4">
               <v-text-field
-                v-model="form.fecha_programada"
+                v-model="form.scheduled_date"
                 label="Fecha prevista"
                 type="date"
                 variant="outlined"
@@ -55,7 +55,7 @@
             </v-col>
             <v-col cols="6" sm="4">
               <v-text-field
-                v-model="form.fecha_fin"
+                v-model="form.actual_date"
                 label="Fecha realización"
                 type="date"
                 variant="outlined"
@@ -64,7 +64,7 @@
             </v-col>
             <v-col cols="12" sm="4">
               <v-text-field
-                v-model.number="form.km_al_momento"
+                v-model.number="form.scheduled_km"
                 label="Km en el momento"
                 type="number"
                 variant="outlined"
@@ -81,7 +81,7 @@
           <v-row>
             <v-col cols="12">
               <v-textarea
-                v-model="form.diagnostico"
+                v-model="form.diagnosis"
                 label="Diagnóstico"
                 variant="outlined"
                 rows="2"
@@ -90,7 +90,7 @@
             </v-col>
             <v-col cols="12">
               <v-textarea
-                v-model="form.intervencion_realizada"
+                v-model="form.intervention"
                 label="Intervención realizada"
                 variant="outlined"
                 rows="2"
@@ -99,7 +99,7 @@
             </v-col>
             <v-col cols="12">
               <v-textarea
-                v-model="form.recambios"
+                v-model="form.parts_used"
                 label="Recambios utilizados"
                 variant="outlined"
                 rows="2"
@@ -116,7 +116,7 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.taller_nombre"
+                v-model="form.workshop_name"
                 label="Taller"
                 variant="outlined"
                 data-testid="maintenance-workshop"
@@ -124,7 +124,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.taller_responsable"
+                v-model="form.responsible_name"
                 label="Responsable"
                 variant="outlined"
                 data-testid="maintenance-responsible"
@@ -132,17 +132,7 @@
             </v-col>
             <v-col cols="6" sm="4" md="2">
               <v-text-field
-                v-model.number="form.coste_recambios_eur"
-                label="Coste piezas (€)"
-                type="number"
-                step="0.01"
-                variant="outlined"
-                data-testid="maintenance-parts-cost"
-              />
-            </v-col>
-            <v-col cols="6" sm="4" md="2">
-              <v-text-field
-                v-model.number="form.coste_total_eur"
+                v-model.number="form.cost_eur"
                 label="Coste total (€)"
                 type="number"
                 step="0.01"
@@ -152,7 +142,7 @@
             </v-col>
             <v-col cols="12" sm="4" md="2">
               <v-text-field
-                v-model.number="form.inmovilizacion_horas"
+                v-model.number="form.downtime_hours"
                 label="Inmovilización (h)"
                 type="number"
                 variant="outlined"
@@ -203,21 +193,19 @@ const notifications = useNotificationStore()
 
 const form = reactive({
   vehicle_id: '',
-  tipo: 'preventivo',
+  maintenance_type: 'preventivo',
   status: 'pendiente',
-  fecha_programada: '',
-  fecha_fin: '',
-  km_al_momento: null,
-  descripcion: '',
-  diagnostico: '',
-  intervencion_realizada: '',
-  recambios: '',
-  coste_recambios_eur: null,
-  taller_nombre: '',
-  taller_responsable: '',
-  inmovilizacion_horas: null,
-  coste_total_eur: null,
-  observations: '',
+  scheduled_date: '',
+  actual_date: '',
+  scheduled_km: null,
+  description: '',
+  diagnosis: '',
+  intervention: '',
+  parts_used: '',
+  workshop_name: '',
+  responsible_name: '',
+  downtime_hours: null,
+  cost_eur: null,
   ...props.initialValues,
 })
 

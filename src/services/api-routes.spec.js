@@ -27,9 +27,9 @@ import { supabase } from '@/services/supabase-client.js'
 
 const mockRoute = {
   id: '1',
-  fecha_salida: '2026-04-01',
-  origen_municipio: 'Madrid',
-  destino_municipio: 'Barcelona',
+  planned_departure: '2026-04-01',
+  origin_city: 'Madrid',
+  destination_city: 'Barcelona',
   vehicle_id: 'v1',
   driver_id: 'd1',
   status: 'planificada',

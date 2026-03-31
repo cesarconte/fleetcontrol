@@ -118,12 +118,12 @@ export function useDriverDocuments(driverId) {
   function documentosPorTipo() {
     const grouped = {}
     for (const doc of documentos.value) {
-      const tipo = doc.tipo_documento
+      const tipo = doc.doc_type
       if (!grouped[tipo]) grouped[tipo] = []
       grouped[tipo].push({
         ...doc,
         tipo_label: getDriverDocumentTypeLabel(tipo),
-        estado: getEstadoDocumento(doc.fecha_vencimiento),
+        estado: getEstadoDocumento(doc.expiry_date),
       })
     }
     return grouped

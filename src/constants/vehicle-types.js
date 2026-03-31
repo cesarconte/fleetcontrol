@@ -1,12 +1,15 @@
 /**
- * FleetControl — Vehicle Types (Categorías UE + Estructura + Carrocería)
+ * FleetControl — Vehicle Types (EU Category + Structure + Body Type)
  *
  * Three-field vehicle classification per EU Homologation Categories
  * and Spanish Reglamento General de Vehículos (Anexo II).
  *
- * @see EU Regulation (UE) 2018/858 — Categorías de homologación
- * @see RD 2822/1998 — Reglamento General de Vehículos (Anexo II)
- * @see PRD §4.2.1 — Ficha de Vehículo
+ * IMPORTANT: `value` fields MUST match DB enum values (English).
+ * `label` fields remain in Spanish for UI display.
+ *
+ * @see EU Regulation (UE) 2018/858
+ * @see RD 2822/1998 — Annex II
+ * @see PRD §4.2.1
  */
 
 /** @param {object} obj */
@@ -18,12 +21,9 @@ function deepFreeze(obj) {
   return Object.freeze(obj)
 }
 
-// ── 1. Categoría UE de Homologación (Masa) ──────────────────────────────────
+// ── 1. EU Homologation Category (Mass) ──────────────────────────────────────
 
 /**
- * EU homologation categories by mass.
- * Determines driving license, tachograph, and speed limits.
- *
  * @typedef {{ value: string, label: string, description: string, mmaRange: string, licencia: string }} EUCategoria
  */
 export const EU_CATEGORIAS = deepFreeze([
@@ -78,26 +78,25 @@ export const EU_CATEGORIAS = deepFreeze([
   },
 ])
 
-// ── 2. Tipo de Vehículo (Estructura física) ────────────────────────────────
+// ── 2. Vehicle Structure (physical type) ────────────────────────────────────
+// Values match DB `vehicle_type` enum.
 
 /**
- * Physical vehicle structure — what the driver and client see.
- *
  * @typedef {{ value: string, label: string, description: string }} VehicleStructure
  */
 export const VEHICLE_STRUCTURE_TYPES = deepFreeze([
   {
-    value: 'rigido',
+    value: 'rigid',
     label: 'Rígido',
     description: 'Cabina y estructura de carga sobre el mismo chasis (indivisible)',
   },
   {
-    value: 'cab_tractora',
+    value: 'tractor',
     label: 'Cabeza Tractora',
     description: 'Vehículo de motor concebido exclusivamente para arrastrar un semirremolque',
   },
   {
-    value: 'tren_carretera',
+    value: 'road_train',
     label: 'Tren de Carretera',
     description: 'Camión rígido + remolque arrastrado (conjunto de vehículos)',
   },
@@ -107,63 +106,62 @@ export const VEHICLE_STRUCTURE_TYPES = deepFreeze([
     description: 'Cabeza tractora + semirremolque apoyado sobre ella',
   },
   {
-    value: 'semirremolque',
+    value: 'semitrailer',
     label: 'Semirremolque',
     description: 'Unidad de carga sin motor, apoyada sobre la tractora (categoría O)',
   },
   {
-    value: 'remolque',
+    value: 'trailer_unit',
     label: 'Remolque',
     description: 'Unidad de carga sin motor, arrastrada por un vehículo de motor (categoría O)',
   },
   {
-    value: 'pick_up',
+    value: 'pickup',
     label: 'Pick-up',
     description: 'Plataforma abierta de carga separada de la cabina (MMA habitualmente ≤ 3.500 kg)',
   },
 ])
 
-// ── 3. Tipo de Carrocería (Criterio de utilización) ────────────────────────
+// ── 3. Body Type (utilization criterion) ────────────────────────────────────
+// Values match DB `body_type` enum.
 
 /**
- * Body type — what the vehicle carries. "Dialogues" directly with cargo type.
- *
  * @typedef {{ value: string, label: string, description: string }} VehicleBodyType
  */
 export const VEHICLE_BODY_TYPES = deepFreeze([
   {
-    value: 'caja_abierta',
+    value: 'open_box',
     label: 'Caja Abierta',
     description: 'Para materiales de construcción o mercancía que no teme a las inclemencias',
   },
   {
-    value: 'lona',
+    value: 'curtain',
     label: 'Lona / Tauliner',
     description:
       'Estándar europeo. Cerrado con lonas laterales correderas para carga lateral o desde arriba',
   },
   {
-    value: 'caja_cerrada',
+    value: 'closed_box',
     label: 'Furgón Cerrado (Caja Rígida)',
     description: 'Mayor seguridad contra robos. Típico de paquetería express',
   },
   {
-    value: 'frigorifico',
+    value: 'refrigerated',
     label: 'Frigorífico',
     description: 'Aislamiento + motor de frío para mercancía perecedera (ATP)',
   },
   {
-    value: 'isotermo',
+    value: 'insulated',
     label: 'Isotermo',
     description: 'Aislamiento térmico sin motor de frío activo (mantiene temperatura)',
   },
   {
-    value: 'calorifico',
+    value: 'heated',
     label: 'Calorífico',
     description: 'Capaz de elevar y mantener la temperatura de la carga',
   },
   {
-    value: 'cisterna',
+    value: 'tanker',
     label: 'Cisterna',
     description: 'Transporte de líquidos (combustibles, leche, químicos) o gases a granel',
   },
@@ -173,73 +171,73 @@ export const VEHICLE_BODY_TYPES = deepFreeze([
     description: 'Transporte de polvos o granulados (cemento, harina) descargados por presión',
   },
   {
-    value: 'basculante',
+    value: 'dump',
     label: 'Basculante / Bañera',
     description: 'La caja se eleva mediante pistón hidráulico para volcar la carga',
   },
   {
-    value: 'portavehiculos',
+    value: 'car_carrier',
     label: 'Portavehículos (Góndola/Mosquito)',
     description: 'Específico para transportar coches, camiones u otra maquinaria',
   },
   {
-    value: 'portacontenedores',
+    value: 'container_carrier',
     label: 'Portacontenedores',
     description: 'Chasis para anclar contenedores multimodales de 20, 40 o 45 pies',
   },
   {
-    value: 'jaula',
+    value: 'cage',
     label: 'Jaula',
     description: 'Carrocería con ventilación para transporte de animales vivos',
   },
   {
-    value: 'ganadero',
+    value: 'livestock',
     label: 'Ganadero',
     description: 'Vehículo especializado para transporte de ganado mayor y menor',
   },
   {
-    value: 'capitone',
+    value: 'padded',
     label: 'Capitoné',
     description: 'Furgón acolchado interiormente para mudanzas de mobiliario',
   },
   {
-    value: 'portabobinas',
+    value: 'coil_carrier',
     label: 'Portabobinas',
     description: 'Semirremolque con fosa longitudinal para bobinas de acero',
   },
   {
-    value: 'plataforma_abierta',
+    value: 'open_platform',
     label: 'Plataforma Abierta',
     description: 'Superficie plana sin laterales para maquinaria pesada o carga sobredimensionada',
   },
   {
-    value: 'furgon',
+    value: 'delivery_truck',
     label: 'Furgón',
     description: 'Vehículo rígido de categoría N2 donde cabina y carga comparten chasis',
   },
   {
-    value: 'furgoneta',
+    value: 'van',
     label: 'Furgoneta',
     description: 'Vehículo ligero N1 con cabina integrada en la carrocería de carga',
   },
   {
-    value: 'grua',
+    value: 'crane',
     label: 'Grúa',
     description: 'Vehículo equipado con brazo grúa para carga/descarga de mercancías pesadas',
   },
   {
-    value: 'tolva',
+    value: 'hopper',
     label: 'Tolva',
     description: 'Depósito inclinado para transporte de graneles sólidos (cereales, áridos)',
   },
   {
-    value: 'especial',
+    value: 'special',
     label: 'Especial',
     description: 'Otras carrocerías no contempladas en las categorías anteriores',
   },
 ])
 
-// ── Lookup maps (string → label) ───────────────────────────────────────────
+// ── Lookup maps ─────────────────────────────────────────────────────────────
 
 const EU_CATEGORIA_MAP = new Map(EU_CATEGORIAS.map(c => [c.value, c]))
 const STRUCTURE_MAP = new Map(VEHICLE_STRUCTURE_TYPES.map(s => [s.value, s]))
@@ -247,72 +245,47 @@ const BODY_MAP = new Map(VEHICLE_BODY_TYPES.map(b => [b.value, b]))
 
 // ── Public helpers ──────────────────────────────────────────────────────────
 
-/**
- * @param {string} value
- * @returns {string}
- */
+/** @param {string} value @returns {string} */
 export function getEUCategoriaLabel(value) {
   return EU_CATEGORIA_MAP.get(value)?.label ?? value
 }
 
-/**
- * @param {string} value
- * @returns {string}
- */
+/** @param {string} value @returns {string} */
 export function getStructureLabel(value) {
   return STRUCTURE_MAP.get(value)?.label ?? value
 }
 
-/**
- * @param {string} value
- * @returns {string}
- */
+/** @param {string} value @returns {string} */
 export function getBodyLabel(value) {
   return BODY_MAP.get(value)?.label ?? value
 }
 
-/**
- * @param {string} value
- * @returns {string | null}
- */
+/** @param {string} value @returns {string | null} */
 export function getEUCategoriaDescription(value) {
   return EU_CATEGORIA_MAP.get(value)?.description ?? null
 }
 
-/**
- * @param {string} value
- * @returns {string | null}
- */
+/** @param {string} value @returns {string | null} */
 export function getBodyDescription(value) {
   return BODY_MAP.get(value)?.description ?? null
 }
 
-/**
- * Options for Vuetify v-select.
- * @returns {Array<{ title: string, value: string }>}
- */
+/** @returns {Array<{ title: string, value: string }>} */
 export function getEUCategoriaOptions() {
   return EU_CATEGORIAS.map(c => ({ title: c.label, value: c.value }))
 }
 
-/**
- * @returns {Array<{ title: string, value: string }>}
- */
+/** @returns {Array<{ title: string, value: string }>} */
 export function getStructureOptions() {
   return VEHICLE_STRUCTURE_TYPES.map(s => ({ title: s.label, value: s.value }))
 }
 
-/**
- * @returns {Array<{ title: string, value: string }>}
- */
+/** @returns {Array<{ title: string, value: string }>} */
 export function getBodyOptions() {
   return VEHICLE_BODY_TYPES.map(b => ({ title: b.label, value: b.value }))
 }
 
-/**
- * Get all valid values for each enum.
- * @returns {{ euCategorias: string[], structures: string[], bodyTypes: string[] }}
- */
+/** @returns {{ euCategorias: string[], structures: string[], bodyTypes: string[] }} */
 export function getValidVehicleValues() {
   return {
     euCategorias: EU_CATEGORIAS.map(c => c.value),

@@ -16,9 +16,9 @@
       <!-- Header -->
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ driver.nombre_completo }}</h1>
+          <h1 class="text-h5">{{ driver.full_name }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ driver.nif_nie }}
+            {{ driver.nif }}
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -43,19 +43,19 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Nombre</div>
-                <div class="text-body-1 font-weight-medium">{{ driver.nombre_completo }}</div>
+                <div class="text-body-1 font-weight-medium">{{ driver.full_name }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">NIF/NIE</div>
-                <div class="text-body-1">{{ driver.nif_nie }}</div>
+                <div class="text-body-1">{{ driver.nif }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha nacimiento</div>
-                <div class="text-body-1">{{ formatDate(driver.fecha_nacimiento) }}</div>
+                <div class="text-body-1">{{ formatDate(driver.birth_date) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Nacionalidad</div>
-                <div class="text-body-1">{{ driver.nacionalidad || '—' }}</div>
+                <div class="text-body-1">{{ driver.nationality || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Email</div>
@@ -63,7 +63,7 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Teléfono</div>
-                <div class="text-body-1">{{ driver.telefono || '—' }}</div>
+                <div class="text-body-1">{{ driver.phone || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -75,19 +75,19 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <div class="text-caption text-medium-emphasis">Dirección</div>
-                <div class="text-body-1">{{ driver.direccion || '—' }}</div>
+                <div class="text-body-1">{{ driver.address || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="3" md="2">
                 <div class="text-caption text-medium-emphasis">Ciudad</div>
-                <div class="text-body-1">{{ driver.ciudad || '—' }}</div>
+                <div class="text-body-1">{{ driver.city || '—' }}</div>
               </v-col>
               <v-col cols="3" sm="2" md="1">
                 <div class="text-caption text-medium-emphasis">C.P.</div>
-                <div class="text-body-1">{{ driver.codigo_postal || '—' }}</div>
+                <div class="text-body-1">{{ driver.postal_code || '—' }}</div>
               </v-col>
               <v-col cols="3" sm="2" md="1">
                 <div class="text-caption text-medium-emphasis">Provincia</div>
-                <div class="text-body-1">{{ driver.provincia || '—' }}</div>
+                <div class="text-body-1">{{ driver.province || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -99,7 +99,7 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha incorporación</div>
-                <div class="text-body-1">{{ formatDate(driver.fecha_incorporacion) }}</div>
+                <div class="text-body-1">{{ formatDate(driver.hire_date) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Estado</div>
@@ -153,8 +153,8 @@
       <v-card>
         <v-card-title>¿Eliminar conductor?</v-card-title>
         <v-card-text>
-          Se eliminará el conductor {{ driver?.nombre_completo }} permanentemente. Esta acción no se
-          puede deshacer.
+          Se eliminará el conductor {{ driver?.full_name }} permanentemente. Esta acción no se puede
+          deshacer.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
