@@ -15,6 +15,9 @@ dist/
 *.swp
 *.swo
 
+# Agent planning
+.opencode/
+
 # OS
 .DS_Store
 Thumbs.db
