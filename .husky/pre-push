@@ -1,0 +1,22 @@
+#!/bin/sh
+
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+# Validar formato de nombre de rama
+case "$branch" in
+  main|dev|feature/*|fix/*|chore/*|docs/*|ci/*|refactor/*|test/*) ;;
+  *)
+    echo "❌ Nombre de rama inválido: '$branch'"
+    echo "   Formato permitido: feature/*, fix/*, chore/*, docs/*, ci/*, refactor/*, test/*"
+    echo "   Ramas permitidas sin prefijo: main, dev"
+    exit 1
+    ;;
+esac
+
+# Evitar push directo a main (debe ser via PR desde dev)
+if [ "$branch" = "main" ]; then
+  echo "⚠️  No se permite push directo a main. Usa Pull Request desde dev."
+  exit 1
+fi
+
+npm test
