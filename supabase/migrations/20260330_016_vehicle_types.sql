@@ -2,7 +2,7 @@
 -- Migration: 20260330_016_vehicle_types.sql
 -- Description: Vehicle restructuring — EU category + body type columns
 --              EU Homologation Categories + RD 2822/1998 Annex II
---              All column names and enum values in English to match existing DB.
+--              New enum types (eu_category, body_type) use English values.
 -- =============================================================================
 
 -- ── 1. Create new enums (English values) ─────────────────────────────────────
@@ -29,48 +29,49 @@ ALTER TABLE vehicles
 -- ── 3. Migrate existing data from vehicle_type ──────────────────────────────
 -- Map existing vehicle_type values → body_type + eu_category.
 -- vehicle_type column is preserved (represents physical structure).
+-- NOTE: vehicle_type enum values are in Spanish (migration 001).
 
 DO $$
 BEGIN
-  -- tractor → special body, N3
+  -- tractora → special body, N3
   UPDATE vehicles SET body_type = 'special', eu_category = 'N3'
-  WHERE vehicle_type = 'tractor' AND body_type IS NULL;
+  WHERE vehicle_type = 'tractora' AND body_type IS NULL;
 
-  -- rigid → closed_box, N3
+  -- vehiculo_rigido → closed_box, N3
   UPDATE vehicles SET body_type = 'closed_box', eu_category = 'N3'
-  WHERE vehicle_type = 'rigid' AND body_type IS NULL;
+  WHERE vehicle_type = 'vehiculo_rigido' AND body_type IS NULL;
 
-  -- semitrailer → curtain, O4
+  -- semirremolque → curtain, O4
   UPDATE vehicles SET body_type = 'curtain', eu_category = 'O4'
-  WHERE vehicle_type = 'semitrailer' AND body_type IS NULL;
+  WHERE vehicle_type = 'semirremolque' AND body_type IS NULL;
 
-  -- trailer → open_box, O3
+  -- remolque → open_box, O3
   UPDATE vehicles SET body_type = 'open_box', eu_category = 'O3'
-  WHERE vehicle_type = 'trailer' AND body_type IS NULL;
+  WHERE vehicle_type = 'remolque' AND body_type IS NULL;
 
-  -- tanker → tanker, N3
+  -- cisterna → tanker, N3
   UPDATE vehicles SET body_type = 'tanker', eu_category = 'N3'
-  WHERE vehicle_type = 'tanker' AND body_type IS NULL;
+  WHERE vehicle_type = 'cisterna' AND body_type IS NULL;
 
-  -- refrigerated → refrigerated, N3
+  -- frigorifico → refrigerated, N3
   UPDATE vehicles SET body_type = 'refrigerated', eu_category = 'N3'
-  WHERE vehicle_type = 'refrigerated' AND body_type IS NULL;
+  WHERE vehicle_type = 'frigorifico' AND body_type IS NULL;
 
-  -- dump → dump, N3
+  -- basculante → dump, N3
   UPDATE vehicles SET body_type = 'dump', eu_category = 'N3'
-  WHERE vehicle_type = 'dump' AND body_type IS NULL;
+  WHERE vehicle_type = 'basculante' AND body_type IS NULL;
 
-  -- curtain → curtain, N3
+  -- lona → curtain, N3
   UPDATE vehicles SET body_type = 'curtain', eu_category = 'N3'
-  WHERE vehicle_type = 'curtain' AND body_type IS NULL;
+  WHERE vehicle_type = 'lona' AND body_type IS NULL;
 
-  -- box → closed_box, N3
+  -- caja_cerrada → closed_box, N3
   UPDATE vehicles SET body_type = 'closed_box', eu_category = 'N3'
-  WHERE vehicle_type = 'box' AND body_type IS NULL;
+  WHERE vehicle_type = 'caja_cerrada' AND body_type IS NULL;
 
-  -- special → special, N3
+  -- especial → special, N3
   UPDATE vehicles SET body_type = 'special', eu_category = 'N3'
-  WHERE vehicle_type = 'special' AND body_type IS NULL;
+  WHERE vehicle_type = 'especial' AND body_type IS NULL;
 
   -- Any remaining NULL → special, N3 (fallback)
   UPDATE vehicles SET body_type = 'special', eu_category = 'N3'

@@ -66,7 +66,7 @@ describe('cargo-categories', () => {
     })
 
     it('mapToLegacy debería ser un valor del enum cargo_type', () => {
-      const validTypes = ['general', 'frigorifica', 'peligrosa', 'especial']
+      const validTypes = ['general', 'refrigerated', 'dangerous', 'special']
       CARGO_CATEGORIES.forEach(cat => {
         cat.subcategorias.forEach(sub => {
           expect(validTypes).toContain(sub.mapToLegacy)
@@ -147,16 +147,16 @@ describe('cargo-categories', () => {
   })
 
   describe('subcategoryToLegacyType', () => {
-    it('ADR debería mapear a peligrosa', () => {
-      expect(subcategoryToLegacyType('adr-clase-1')).toBe('peligrosa')
+    it('ADR debería mapear a dangerous', () => {
+      expect(subcategoryToLegacyType('adr-clase-1')).toBe('dangerous')
     })
 
-    it('ATP debería mapear a frigorifica', () => {
-      expect(subcategoryToLegacyType('atp-congelados')).toBe('frigorifica')
+    it('ATP debería mapear a refrigerated', () => {
+      expect(subcategoryToLegacyType('atp-congelados')).toBe('refrigerated')
     })
 
-    it('Animales debería mapear a especial', () => {
-      expect(subcategoryToLegacyType('ani-ganado-mayor')).toBe('especial')
+    it('Animales debería mapear a special', () => {
+      expect(subcategoryToLegacyType('ani-ganado-mayor')).toBe('special')
     })
 
     it('General debería mapear a general', () => {

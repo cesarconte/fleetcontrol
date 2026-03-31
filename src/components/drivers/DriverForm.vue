@@ -186,7 +186,7 @@ const form = reactive({
   email: '',
   photo_url: '',
   hire_date: '',
-  status: 'activo',
+  status: 'active',
   carnet_class: '',
   carnet_number: '',
   carnet_issue_date: '',
@@ -213,9 +213,9 @@ watch(
 )
 
 const estadosConductor = [
-  { title: 'Activo', value: 'activo' },
-  { title: 'Baja temporal', value: 'baja_temporal' },
-  { title: 'Baja definitiva', value: 'baja_definitiva' },
+  { title: 'Activo', value: 'active' },
+  { title: 'Baja temporal', value: 'temporary_leave' },
+  { title: 'Baja definitiva', value: 'permanently_off' },
 ]
 
 function onFieldChange({ field, value }) {

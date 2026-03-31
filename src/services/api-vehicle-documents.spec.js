@@ -25,11 +25,10 @@ import { supabase } from '@/services/supabase-client.js'
 const mockDoc = {
   id: 'doc-1',
   vehicle_id: 'v-1',
-  doc_type: 'itv',
-  doc_name: 'ITV',
-  status: 'valid',
-  expiry_date: '2027-03-15',
-  alert_days_before: 30,
+  tipo_documento: 'itv',
+  status: 'en_regla',
+  fecha_vencimiento: '2027-03-15',
+  alerta_dias_anticipacion: 30,
 }
 
 describe('apiVehicleDocuments', () => {
@@ -102,7 +101,7 @@ describe('apiVehicleDocuments', () => {
 
   describe('getExpiredOrCritical', () => {
     it('debería retornar solo documentos vencidos o críticos', async () => {
-      const expiredDoc = { ...mockDoc, status: 'expired' }
+      const expiredDoc = { ...mockDoc, status: 'vencido' }
       const mockIn = vi.fn().mockResolvedValue({
         data: [expiredDoc],
         error: null,

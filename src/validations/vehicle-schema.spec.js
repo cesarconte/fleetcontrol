@@ -9,7 +9,7 @@ describe('vehicleSchema', () => {
     eu_category: 'N3',
     body_type: 'curtain',
     fuel_type: 'diesel',
-    dgt_badge: 'sin_etiqueta',
+    dgt_badge: 'no_label',
   }
 
   describe('plate', () => {
@@ -100,7 +100,7 @@ describe('vehicleSchema', () => {
     it('debería usar sin_etiqueta por defecto', () => {
       const result = vehicleSchema.safeParse(validVehicle)
       expect(result.success).toBe(true)
-      expect(result.data.dgt_badge).toBe('sin_etiqueta')
+      expect(result.data.dgt_badge).toBe('no_label')
     })
   })
 
@@ -174,7 +174,7 @@ describe('vehicleSearchSchema', () => {
   it('debería aceptar filtros con nuevos campos', () => {
     const result = vehicleSearchSchema.safeParse({
       search: '1234',
-      status: 'activo',
+      status: 'active',
       eu_category: 'N3',
       body_type: 'curtain',
       dgt_badge: 'eco',

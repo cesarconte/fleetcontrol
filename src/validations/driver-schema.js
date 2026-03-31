@@ -44,10 +44,10 @@ const baseFields = {
   hire_date: z.string().optional().or(z.literal('')),
 
   status: z
-    .enum(['activo', 'baja_temporal', 'baja_definitiva'], {
+    .enum(['active', 'temporary_leave', 'permanently_off'], {
       errorMap: () => ({ message: 'Estado inválido' }),
     })
-    .default('activo'),
+    .default('active'),
 }
 
 export const driverSchema = z.object({

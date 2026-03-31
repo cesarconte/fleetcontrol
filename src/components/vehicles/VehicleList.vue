@@ -72,27 +72,27 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template v-slot:item.plate="{ item }">
+        <template #item.plate="{ item }">
           <span class="font-weight-medium">{{ item.plate }}</span>
         </template>
 
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <v-chip :color="getStatusColor(item.status, 'vehiculo')" size="small" variant="tonal">
             {{ getStatusLabel(item.status, 'vehiculo') }}
           </v-chip>
         </template>
 
-        <template v-slot:item.dgt_badge="{ item }">
+        <template #item.dgt_badge="{ item }">
           <v-chip :color="getDgtColor(item.dgt_badge)" size="small" variant="flat">
             {{ getDgtLabel(item.dgt_badge) }}
           </v-chip>
         </template>
 
-        <template v-slot:item.body_type="{ item }">
+        <template #item.body_type="{ item }">
           {{ getBodyLabel(item.body_type) }}
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <v-btn
             icon="mdi-eye"
             size="small"
@@ -184,11 +184,11 @@ const headers = [
 ]
 
 const statusOptions = [
-  { title: 'Activo', value: 'activo' },
-  { title: 'En ruta', value: 'en_ruta' },
-  { title: 'En mantenimiento', value: 'en_mantenimiento' },
-  { title: 'Inactivo', value: 'inactivo' },
-  { title: 'Dado de baja', value: 'dado_de_baja' },
+  { title: 'Activo', value: 'active' },
+  { title: 'En ruta', value: 'on_route' },
+  { title: 'En mantenimiento', value: 'in_maintenance' },
+  { title: 'Inactivo', value: 'inactive' },
+  { title: 'Dado de baja', value: 'decommissioned' },
 ]
 
 const typeOptions = getBodyOptions()

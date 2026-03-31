@@ -42,18 +42,18 @@ describe('cargoSchema', () => {
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar frigorifica', () => {
-      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'frigorifica' })
+    it('debería aceptar refrigerated', () => {
+      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'refrigerated' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar peligrosa', () => {
-      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'peligrosa' })
+    it('debería aceptar dangerous', () => {
+      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'dangerous' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar especial', () => {
-      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'especial' })
+    it('debería aceptar special', () => {
+      const result = cargoSchema.safeParse({ ...validCargo, cargo_type: 'special' })
       expect(result.success).toBe(true)
     })
 
@@ -74,7 +74,7 @@ describe('cargoSchema', () => {
     it('debería aceptar clase ADR válida', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'peligrosa',
+        cargo_type: 'dangerous',
         adr_class: '3',
         adr_un_number: '1203',
         adr_packing_group: 'II',
@@ -101,7 +101,7 @@ describe('cargoSchema', () => {
       for (const cls of classes) {
         const result = cargoSchema.safeParse({
           ...validCargo,
-          cargo_type: 'peligrosa',
+          cargo_type: 'dangerous',
           adr_class: cls,
           adr_un_number: '1203',
         })
@@ -112,7 +112,7 @@ describe('cargoSchema', () => {
     it('debería rechazar clase ADR inválida', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'peligrosa',
+        cargo_type: 'dangerous',
         adr_class: '99',
       })
       expect(result.success).toBe(false)
@@ -121,7 +121,7 @@ describe('cargoSchema', () => {
     it('debería validar formato de número ONU (4 dígitos)', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'peligrosa',
+        cargo_type: 'dangerous',
         adr_class: '3',
         adr_un_number: '123',
       })
@@ -131,7 +131,7 @@ describe('cargoSchema', () => {
     it('debería aceptar número ONU válido', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'peligrosa',
+        cargo_type: 'dangerous',
         adr_class: '3',
         adr_un_number: '1203',
       })
@@ -142,7 +142,7 @@ describe('cargoSchema', () => {
       for (const pg of ['I', 'II', 'III']) {
         const result = cargoSchema.safeParse({
           ...validCargo,
-          cargo_type: 'peligrosa',
+          cargo_type: 'dangerous',
           adr_class: '3',
           adr_un_number: '1203',
           adr_packing_group: pg,
@@ -166,7 +166,7 @@ describe('cargoSchema', () => {
     it('debería aceptar subcategoría válida con tipo compatible', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'peligrosa',
+        cargo_type: 'dangerous',
         subcategoria_id: 'adr-clase-3',
       })
       expect(result.success).toBe(true)
@@ -197,10 +197,10 @@ describe('cargoSchema', () => {
       expect(result.success).toBe(false)
     })
 
-    it('debería aceptar subcategoría ATP con tipo frigorifica', () => {
+    it('debería aceptar subcategoría ATP con tipo refrigerated', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'frigorifica',
+        cargo_type: 'refrigerated',
         subcategoria_id: 'atp-congelados',
       })
       expect(result.success).toBe(true)
@@ -215,10 +215,10 @@ describe('cargoSchema', () => {
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar subcategoría ani con tipo especial', () => {
+    it('debería aceptar subcategoría ani con tipo special', () => {
       const result = cargoSchema.safeParse({
         ...validCargo,
-        cargo_type: 'especial',
+        cargo_type: 'special',
         subcategoria_id: 'ani-ganado-mayor',
       })
       expect(result.success).toBe(true)

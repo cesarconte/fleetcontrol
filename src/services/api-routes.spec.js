@@ -27,12 +27,12 @@ import { supabase } from '@/services/supabase-client.js'
 
 const mockRoute = {
   id: '1',
-  planned_departure: '2026-04-01',
+  departure_date: '2026-04-01',
   origin_city: 'Madrid',
   destination_city: 'Barcelona',
   vehicle_id: 'v1',
   driver_id: 'd1',
-  status: 'planificada',
+  status: 'planned',
 }
 
 describe('apiRoutes', () => {
@@ -80,7 +80,7 @@ describe('apiRoutes', () => {
       const result = await apiRoutes.getActive()
 
       expect(supabase.from).toHaveBeenCalledWith('routes')
-      expect(mockIn).toHaveBeenCalledWith('status', ['planificada', 'en_curso'])
+      expect(mockIn).toHaveBeenCalledWith('status', ['planned', 'in_progress'])
       expect(result).toEqual([mockRoute])
     })
   })

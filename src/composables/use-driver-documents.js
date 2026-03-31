@@ -90,25 +90,25 @@ export function useDriverDocuments(driverId) {
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 
     if (diffDays < 0) {
-      return { status: 'vencido', label: 'Vencido', color: 'error' }
+      return { status: 'expired', label: 'Vencido', color: 'error' }
     }
 
     const criticalDays = LEGAL_LIMITS.ALERT_THRESHOLDS.DOCUMENT_EXPIRY_CRITICAL_DAYS
     const warningDays = LEGAL_LIMITS.ALERT_THRESHOLDS.DOCUMENT_EXPIRY_WARNING_DAYS
 
     if (diffDays <= criticalDays) {
-      return { status: 'critico', label: `Crítico (${diffDays}d)`, color: 'error' }
+      return { status: 'critical', label: `Crítico (${diffDays}d)`, color: 'error' }
     }
 
     if (diffDays <= warningDays) {
       return {
-        status: 'proximo_a_vencer',
+        status: 'expiring_soon',
         label: `Próximo a vencer (${diffDays}d)`,
         color: 'warning',
       }
     }
 
-    return { status: 'en_regla', label: 'En regla', color: 'success' }
+    return { status: 'valid', label: 'En regla', color: 'success' }
   }
 
   /**

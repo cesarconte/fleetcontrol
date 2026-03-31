@@ -70,42 +70,42 @@ describe('useDriverDocuments', () => {
       expect(result).toEqual({ status: 'sin_fecha', label: 'Sin fecha', color: 'grey' })
     })
 
-    it('debería retornar vencido si la fecha ya pasó', () => {
+    it('debería retornar expired si la fecha ya pasó', () => {
       const { getEstadoDocumento } = useDriverDocuments(DRIVER_ID)
       const pastDate = '2020-01-01'
       const result = getEstadoDocumento(pastDate)
 
-      expect(result.status).toBe('vencido')
+      expect(result.status).toBe('expired')
       expect(result.color).toBe('error')
     })
 
-    it('debería retornar critico si quedan 7 días o menos', () => {
+    it('debería retornar critical si quedan 7 días o menos', () => {
       const { getEstadoDocumento } = useDriverDocuments(DRIVER_ID)
       const nearDate = new Date()
       nearDate.setDate(nearDate.getDate() + 5)
       const result = getEstadoDocumento(nearDate.toISOString())
 
-      expect(result.status).toBe('critico')
+      expect(result.status).toBe('critical')
       expect(result.color).toBe('error')
     })
 
-    it('debería retornar proximo_a_vencer si quedan entre 8 y 30 días', () => {
+    it('debería retornar expiring_soon si quedan entre 8 y 30 días', () => {
       const { getEstadoDocumento } = useDriverDocuments(DRIVER_ID)
       const futureDate = new Date()
       futureDate.setDate(futureDate.getDate() + 20)
       const result = getEstadoDocumento(futureDate.toISOString())
 
-      expect(result.status).toBe('proximo_a_vencer')
+      expect(result.status).toBe('expiring_soon')
       expect(result.color).toBe('warning')
     })
 
-    it('debería retornar en_regla si quedan más de 30 días', () => {
+    it('debería retornar valid si quedan más de 30 días', () => {
       const { getEstadoDocumento } = useDriverDocuments(DRIVER_ID)
       const farDate = new Date()
       farDate.setDate(farDate.getDate() + 90)
       const result = getEstadoDocumento(farDate.toISOString())
 
-      expect(result.status).toBe('en_regla')
+      expect(result.status).toBe('valid')
       expect(result.color).toBe('success')
     })
   })

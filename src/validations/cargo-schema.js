@@ -29,7 +29,7 @@ const cargoBaseSchema = z.object({
   volume_m3: z.number().positive().optional().nullable(),
 
   cargo_type: z
-    .enum(['general', 'frigorifica', 'peligrosa', 'especial'], {
+    .enum(['general', 'refrigerated', 'dangerous', 'special'], {
       errorMap: () => ({ message: 'Tipo de carga inválido' }),
     })
     .default('general'),
@@ -41,7 +41,7 @@ const cargoBaseSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  // ── ADR (solo si cargo_type === 'peligrosa') ─────────
+  // ── ADR (solo si cargo_type === 'dangerous') ─────────
   adr_class: z
     .enum(ADR_CLASSES, {
       errorMap: () => ({ message: 'Clase ADR inválida' }),

@@ -38,29 +38,29 @@ defineProps({
 })
 
 function getTipoColor(tipo) {
-  return tipo === 'preventivo' ? 'info' : 'warning'
+  return tipo === 'preventive' ? 'info' : 'warning'
 }
 
 function getTipoLabel(tipo) {
-  return tipo === 'preventivo' ? 'Preventivo' : 'Correctivo'
+  return tipo === 'preventive' ? 'Preventivo' : 'Correctivo'
 }
 
 function getStatusColor(status) {
   const map = {
-    pendiente: 'info',
-    en_curso: 'warning',
-    completada: 'success',
-    cancelada: 'grey',
+    pending: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'grey',
   }
   return map[status] ?? 'grey'
 }
 
 function getStatusLabel(status) {
   const map = {
-    pendiente: 'Pendiente',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    cancelada: 'Cancelada',
+    pending: 'Pendiente',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
   }
   return map[status] ?? status
 }

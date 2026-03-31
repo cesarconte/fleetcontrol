@@ -27,10 +27,10 @@ const mockVehicle = {
   plate: '1234ABC',
   brand: 'Mercedes',
   model: 'Actros',
-  vehicle_type: 'tractora',
-  status: 'activo',
+  vehicle_type: 'tractor',
+  status: 'active',
   fuel_type: 'diesel',
-  dgt_badge: 'sin_etiqueta',
+  dgt_badge: 'no_label',
 }
 
 describe('apiVehicles', () => {

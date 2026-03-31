@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-31 (sesión 7)
+> **Última actualización:** 2026-03-31 (sesión 10)
 > **Actualizado por:** AI Agent
 
 ---
@@ -210,22 +210,79 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-03-31 (sesión 8)
+**Fecha:** 2026-03-31 (sesión 10)
 **Branch:** dev
-**Tests:** 677 pasando, 0 errores lint, typecheck limpio
+**Tests:** 699 pasando, 0 errores lint, typecheck limpio
 
 **Trabajo realizado:**
 
-### Sesión 8 — Automatización CI/CD completa
+### Sesión 10 — Recreación completa de BD Supabase desde migraciones locales
 
-- **Husky** v9: git hooks manager configurado
-- **lint-staged** v16: ESLint + Prettier automáticos en archivos staged (pre-commit)
-- **commitlint**: validación de conventional commits (`feat(scope): desc`)
-- **Cypress** v15: instalado, `cypress.config.js`, smoke test semilla
-- **GitHub Actions CI**: pipeline 3 jobs (`branch-check` → `quality` → `e2e`)
-- **Validación de ramas**: pre-push hook + CI verifican formato (`feature/*`, `fix/*`, etc.) y bloquean push directo a `main`
-- 11 archivos creados/modificados
-- Hooks verificados: commit inválido rechazado, commit válido aceptado, nombres de rama validados
+**Problema:** La BD desplegada en Supabase tenía diferencias significativas con las migraciones locales y con el código:
+
+- Enums de la BD real usaban valores diferentes a los del código (ej: `in_route` vs `on_route`, `archived` vs `decommissioned`)
+- Algunas columnas tenían nombres diferentes (ej: `planned_departure` vs `departure_date`)
+
+**Solución:**
+
+1. Eliminadas TODAS las tablas, tipos, funciones e índices de Supabase
+2. Re-aplicadas migraciones 001-018 desde archivos locales en orden
+3. Migración 017 aplicada (estandarización a inglés: columnas + enums + índices + funciones)
+4. Migración 018 aplicada (bucket Storage `vehicle-documents`)
+5. Verificación: BD coincide exactamente con el código fuente
+
+**Estado final BD Supabase:**
+
+- 12 tablas con RLS habilitado
+- Todas las columnas en inglés
+- Todos los valores de enum en inglés
+- 2 buckets Storage: `documentos-conductores` + `vehicle-documents`
+- 18 migraciones aplicadas
+- Código y BD 100% sincronizados
+
+**Problema 1: BD en español vs código en inglés**
+
+- Se descubrió que TODAS las columnas de la BD estaban en español (migraciones 001-009) mientras los servicios API usaban inglés
+- **Migración 017** creada: renombra ~200 columnas, ~30 valores de enum, ~20 índices, 2 funciones SQL y 3 políticas storage a inglés
+- **Migración 016** corregida: WHERE clauses usaban valores enum ingleses inexistentes ('tractor') en vez de españoles ('tractora')
+- Servicios API actualizados: api-drivers, api-routes, api-maintenance (column names + enum values)
+- Todos los componentes Vue, schemas Zod, utils, composables y tests actualizados para usar valores enum ingles
+- **Regla confirmada**: Columnas BD = inglés, Valores enum = inglés, Etiquetas UI = español
+
+**Problema 2: CRUD documentos vehículo**
+
+- `api-vehicle-documents.js` corregido: nombres de columna alineados con BD (doc_type, expiry_date, file_url)
+- `use-vehicle-documents.js` extendido: createDocument, updateDocument, deleteDocument, uploadFile
+- `VehicleDocumentFormDialog.vue` creado: formulario CRUD con VDialog, VForm, VFileInput
+- `vehicle-document-schema.js` creado: schema Zod para validación de documentos
+- `VehicleDocuments.vue` reescrito: tabla CRUD completa con añadir/editar/eliminar/descargar
+- Migración 018: bucket `vehicle-documents` en Supabase Storage con políticas RLS
+
+**Archivos creados (7):**
+
+- `supabase/migrations/20260331_017_standardize_english.sql`
+- `supabase/migrations/20260331_018_vehicle_documents_storage.sql`
+- `src/validations/vehicle-document-schema.js`
+- `src/validations/vehicle-document-schema.spec.js`
+- `src/components/vehicles/VehicleDocumentFormDialog.vue`
+
+**Archivos modificados (~35):**
+
+- `supabase/migrations/20260330_016_vehicle_types.sql` (fix WHERE clauses)
+- `src/services/api-vehicle-documents.js` (fix column names)
+- `src/services/api-drivers.js` (fix column names, notes field)
+- `src/services/api-routes.js` (departure_date, English enum values)
+- `src/services/api-maintenance.js` (English enum values)
+- `src/services/api-vehicles.spec.js`, `api-drivers.spec.js`, `api-routes.spec.js`, `api-maintenance.spec.js`, `api-vehicle-documents.spec.js`
+- `src/composables/use-vehicle-documents.js` (CRUD + upload)
+- `src/composables/use-vehicle-documents.spec.js` (11 new tests)
+- `src/components/vehicles/VehicleDocuments.vue` (CRUD UI)
+- `src/validations/maintenance-schema.spec.js` (fix syntax error)
+- `src/utils/cargo-helpers.js`, `src/utils/cargo-helpers.spec.js` (English enum keys)
+- Todos los componentes Vue (~15) con valores enum ingles
+- Todos los schemas Zod y utils ya estaban en inglés (no cambios necesarios)
+
+**Resultado**: Sistema completamente alineado — BD inglés, código inglés, UI español.
 
 ### Sesión 3 — Refactor completo: Alineación código → BD (inglés)
 
@@ -320,47 +377,43 @@ _(Complementa las de AGENTS.md)_
 **Próximos pasos (tareas pendientes):**
 
 1. **COMPLETADO**: Integrar `checkVehicleCompliance()` en planificación de rutas.
-   - `RouteCompliancePanel.vue` creado (banner reactivo de compliance)
-   - `RouteForm.vue` actualizado: guarda objeto vehículo, selector subcategoría agrupado, panel compliance
-   - `route-schema.js` actualizado con `subcategoria_id` opcional
-   - Tipo legado eliminado del formulario (se deriva automáticamente de la subcategoría)
 2. **COMPLETADO**: Definir equipamiento para 11 subcategorías (sesión 5).
 3. **COMPLETADO**: Integrar `vehicle_documents` con compliance real contra documentos vigentes (sesión 6).
-   - Acciones NO incluidas (pendientes futuro):
-     - CRUD completo de documentos en UI (formulario subida/edición/borrado)
-     - Validación de certificado ADR vehículo en subcategorías ADR
-4. **PENDIENTE (bajo)**: Eliminar columnas de backup en BD si existen.
+4. **COMPLETADO (sesión 9)**: CRUD completo de documentos en UI (formulario subida/edición/borrado).
+5. **COMPLETADO (sesión 9)**: Validación de certificado ADR vehículo en subcategorías ADR (ya implementado en sesiones anteriores, verificado).
+6. **COMPLETADO (sesión 9)**: Eliminar columnas de backup en BD — verificado que no existen columnas backup.
+7. **COMPLETADO (sesión 9)**: Estandarizar TODOS los identificadores de BD a inglés (columnas, enums, índices, funciones, políticas).
 
 **Bloqueos activos:**
 
-- Ninguno. Conexión Supabase operativa.
+- Ninguno. Conexión Supabase operativa. BD completamente en inglés.
 
 ---
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                                  |
-| ------------------------------- | ------------ | ------------------------------------------ |
-| PRD completo                    | Documento    | `PRD.md`                                   |
-| Reglas del agente               | Documento    | `AGENTS.md`                                |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)       |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`              |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`            |
-| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`        |
-| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`       |
-| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`           |
-| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`            |
-| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`   |
-| Tipos de documentos             | Código       | `src/constants/document-types.js`          |
-| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)    |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-016 aplicadas) |
-| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`         |
-| Material Design 3               | Docs         | https://m3.material.io                     |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                      |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                  |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                        |
-| ADR 2025                        | Normativa    | UNECE                                      |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                             |
+| Recurso                         | Tipo         | Ubicación                                              |
+| ------------------------------- | ------------ | ------------------------------------------------------ |
+| PRD completo                    | Documento    | `PRD.md`                                               |
+| Reglas del agente               | Documento    | `AGENTS.md`                                            |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                   |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                          |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`                        |
+| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                    |
+| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                   |
+| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                       |
+| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
+| Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
+| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-018 aplicadas en Supabase) |
+| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                     |
+| Material Design 3               | Docs         | https://m3.material.io                                 |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                              |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                    |
+| ADR 2025                        | Normativa    | UNECE                                                  |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                         |
 
 ---
 

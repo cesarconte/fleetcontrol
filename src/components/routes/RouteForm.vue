@@ -385,7 +385,7 @@ const form = reactive({
   fuel_cost_eur: null,
   toll_cost_eur: null,
   total_cost_eur: null,
-  status: 'planificada',
+  status: 'planned',
   delay_minutes: null,
   result_notes: '',
   linked_document_ref: '',
@@ -405,11 +405,11 @@ watch(
 )
 
 const routeStatuses = [
-  { title: 'Planificada', value: 'planificada' },
-  { title: 'En curso', value: 'en_curso' },
-  { title: 'Completada', value: 'completada' },
-  { title: 'Retrasada', value: 'retrasada' },
-  { title: 'Cancelada', value: 'cancelada' },
+  { title: 'Planificada', value: 'planned' },
+  { title: 'En curso', value: 'in_progress' },
+  { title: 'Completada', value: 'completed' },
+  { title: 'Retrasada', value: 'delayed' },
+  { title: 'Cancelada', value: 'cancelled' },
 ]
 
 function onVehicleChange(vehicleId) {

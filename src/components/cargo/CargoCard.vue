@@ -14,7 +14,7 @@
         </v-chip>
       </div>
 
-      <template v-if="record.cargo_type === 'peligrosa'">
+      <template v-if="record.cargo_type === 'dangerous'">
         <v-divider class="my-2" />
         <div class="d-flex justify-space-between text-caption text-medium-emphasis">
           <span>Clase ADR: {{ record.adr_class || '—' }}</span>

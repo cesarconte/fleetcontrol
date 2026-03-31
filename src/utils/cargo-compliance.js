@@ -46,9 +46,9 @@ const VEHICLE_COMPATIBILITY = {
     'padded',
     'special',
   ],
-  frigorifica: ['refrigerated', 'insulated', 'heated'],
-  peligrosa: ['tanker', 'closed_box', 'special'],
-  especial: [
+  refrigerated: ['refrigerated', 'insulated', 'heated'],
+  dangerous: ['tanker', 'closed_box', 'special'],
+  special: [
     'livestock',
     'open_platform',
     'dump',

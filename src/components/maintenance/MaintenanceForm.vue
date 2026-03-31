@@ -193,8 +193,8 @@ const notifications = useNotificationStore()
 
 const form = reactive({
   vehicle_id: '',
-  maintenance_type: 'preventivo',
-  status: 'pendiente',
+  maintenance_type: 'preventive',
+  status: 'pending',
   scheduled_date: '',
   actual_date: '',
   scheduled_km: null,
@@ -218,15 +218,15 @@ watch(
 )
 
 const typeOptions = [
-  { title: 'Preventivo', value: 'preventivo' },
-  { title: 'Correctivo', value: 'correctivo' },
+  { title: 'Preventivo', value: 'preventive' },
+  { title: 'Correctivo', value: 'corrective' },
 ]
 
 const statusOptions = [
-  { title: 'Pendiente', value: 'pendiente' },
-  { title: 'En curso', value: 'en_curso' },
-  { title: 'Completada', value: 'completada' },
-  { title: 'Cancelada', value: 'cancelada' },
+  { title: 'Pendiente', value: 'pending' },
+  { title: 'En curso', value: 'in_progress' },
+  { title: 'Completada', value: 'completed' },
+  { title: 'Cancelada', value: 'cancelled' },
 ]
 
 onMounted(async () => {

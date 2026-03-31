@@ -9,7 +9,7 @@ import { createCrudService } from './create-crud-service.js'
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 
-const base = createCrudService('routes', { orderBy: 'planned_departure', ascending: false })
+const base = createCrudService('routes', { orderBy: 'departure_date', ascending: false })
 
 export const apiRoutes = {
   ...base,
@@ -18,7 +18,7 @@ export const apiRoutes = {
     page = 1,
     pageSize = 25,
     filters = {},
-    sort = { col: 'planned_departure', asc: false },
+    sort = { col: 'departure_date', asc: false },
   } = {}) {
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
@@ -32,8 +32,8 @@ export const apiRoutes = {
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.driver_id) query = query.eq('driver_id', filters.driver_id)
     if (filters.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id)
-    if (filters.date_from) query = query.gte('planned_departure', filters.date_from)
-    if (filters.date_to) query = query.lte('planned_departure', filters.date_to)
+    if (filters.date_from) query = query.gte('departure_date', filters.date_from)
+    if (filters.date_to) query = query.lte('departure_date', filters.date_to)
     if (filters.search) {
       query = query.or(
         `origin_city.ilike.%${filters.search}%,destination_city.ilike.%${filters.search}%`,
@@ -49,8 +49,8 @@ export const apiRoutes = {
     const { data, error } = await supabase
       .from('routes')
       .select('*')
-      .in('status', ['planificada', 'en_curso'])
-      .order('planned_departure', { ascending: true })
+      .in('status', ['planned', 'in_progress'])
+      .order('departure_date', { ascending: true })
 
     if (error) throw mapSupabaseError(error)
     return data
@@ -61,10 +61,10 @@ export const apiRoutes = {
       .from('routes')
       .select('*')
       .eq('driver_id', driverId)
-      .order('planned_departure', { ascending: false })
+      .order('departure_date', { ascending: false })
 
-    if (dateFrom) query = query.gte('planned_departure', dateFrom)
-    if (dateTo) query = query.lte('planned_departure', dateTo)
+    if (dateFrom) query = query.gte('departure_date', dateFrom)
+    if (dateTo) query = query.lte('departure_date', dateTo)
 
     const { data, error } = await query
     if (error) throw mapSupabaseError(error)
@@ -76,10 +76,10 @@ export const apiRoutes = {
       .from('routes')
       .select('*')
       .eq('vehicle_id', vehicleId)
-      .order('planned_departure', { ascending: false })
+      .order('departure_date', { ascending: false })
 
-    if (dateFrom) query = query.gte('planned_departure', dateFrom)
-    if (dateTo) query = query.lte('planned_departure', dateTo)
+    if (dateFrom) query = query.gte('departure_date', dateFrom)
+    if (dateTo) query = query.lte('departure_date', dateTo)
 
     const { data, error } = await query
     if (error) throw mapSupabaseError(error)

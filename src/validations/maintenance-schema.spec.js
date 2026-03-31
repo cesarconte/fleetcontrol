@@ -5,7 +5,7 @@ describe('maintenanceSchema', () => {
   const validMaintenance = {
     vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
     description: 'Cambio de aceite y filtros',
-    maintenance_type: 'preventivo',
+    maintenance_type: 'preventive',
   }
 
   describe('campos obligatorios', () => {
@@ -31,18 +31,18 @@ describe('maintenanceSchema', () => {
   })
 
   describe('maintenance_type', () => {
-    it('debería aceptar preventivo', () => {
+    it('debería aceptar preventive', () => {
       const result = maintenanceSchema.safeParse({
         ...validMaintenance,
-        maintenance_type: 'preventivo',
+        maintenance_type: 'preventive',
       })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar correctivo', () => {
+    it('debería aceptar corrective', () => {
       const result = maintenanceSchema.safeParse({
         ...validMaintenance,
-        maintenance_type: 'correctivo',
+        maintenance_type: 'corrective',
       })
       expect(result.success).toBe(true)
     })
@@ -58,23 +58,23 @@ describe('maintenanceSchema', () => {
     it('debería usar preventivo por defecto', () => {
       const result = maintenanceSchema.safeParse(validMaintenance)
       expect(result.success).toBe(true)
-      expect(result.data.maintenance_type).toBe('preventivo')
+      expect(result.data.maintenance_type).toBe('preventive')
     })
   })
 
   describe('status', () => {
-    it('debería aceptar pendiente', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'pendiente' })
+    it('debería aceptar pending', () => {
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'pending' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar en_curso', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'en_curso' })
+    it('debería aceptar in_progress', () => {
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'in_progress' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar completada', () => {
-      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'completada' })
+    it('debería aceptar completed', () => {
+      const result = maintenanceSchema.safeParse({ ...validMaintenance, status: 'completed' })
       expect(result.success).toBe(true)
     })
 
@@ -103,7 +103,7 @@ describe('maintenanceSchema', () => {
     it('debería aceptar mantenimiento completo', () => {
       const result = maintenanceSchema.safeParse({
         ...validMaintenance,
-        status: 'completada',
+        status: 'completed',
         scheduled_date: '2026-04-01',
         actual_date: '2026-04-02',
         scheduled_km: 120000,
@@ -129,8 +129,8 @@ describe('maintenanceSearchSchema', () => {
   it('debería aceptar filtros', () => {
     const result = maintenanceSearchSchema.safeParse({
       search: 'aceite',
-      maintenance_type: 'preventivo',
-      status: 'pendiente',
+      maintenance_type: 'preventive',
+      status: 'pending',
       vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
     })
     expect(result.success).toBe(true)

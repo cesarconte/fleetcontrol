@@ -6,7 +6,7 @@ describe('driverSchema', () => {
     full_name: 'Juan García López',
     nif: '12345678A',
     birth_date: '1985-03-15',
-    status: 'activo',
+    status: 'active',
   }
 
   describe('full_name', () => {
@@ -72,18 +72,18 @@ describe('driverSchema', () => {
   })
 
   describe('status', () => {
-    it('debería aceptar activo', () => {
-      const result = driverSchema.safeParse({ ...validDriver, status: 'activo' })
+    it('debería aceptar active', () => {
+      const result = driverSchema.safeParse({ ...validDriver, status: 'active' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar baja_temporal', () => {
-      const result = driverSchema.safeParse({ ...validDriver, status: 'baja_temporal' })
+    it('debería aceptar temporary_leave', () => {
+      const result = driverSchema.safeParse({ ...validDriver, status: 'temporary_leave' })
       expect(result.success).toBe(true)
     })
 
-    it('debería aceptar baja_definitiva', () => {
-      const result = driverSchema.safeParse({ ...validDriver, status: 'baja_definitiva' })
+    it('debería aceptar permanently_off', () => {
+      const result = driverSchema.safeParse({ ...validDriver, status: 'permanently_off' })
       expect(result.success).toBe(true)
     })
 
@@ -95,7 +95,7 @@ describe('driverSchema', () => {
     it('debería usar activo por defecto', () => {
       const result = driverSchema.safeParse(validDriver)
       expect(result.success).toBe(true)
-      expect(result.data.status).toBe('activo')
+      expect(result.data.status).toBe('active')
     })
   })
 
@@ -162,7 +162,7 @@ describe('driverSearchSchema', () => {
   it('debería aceptar filtros', () => {
     const result = driverSearchSchema.safeParse({
       search: 'Juan',
-      status: 'activo',
+      status: 'active',
     })
     expect(result.success).toBe(true)
   })

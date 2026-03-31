@@ -8,74 +8,74 @@
 /** @type {Record<string, Record<string, string>>} */
 const STATUS_COLORS = {
   vehiculo: {
-    activo: 'success',
-    en_ruta: 'info',
-    en_mantenimiento: 'warning',
-    inactivo: 'grey',
-    dado_de_baja: 'grey-darken-2',
+    active: 'success',
+    on_route: 'info',
+    in_maintenance: 'warning',
+    inactive: 'grey',
+    decommissioned: 'grey-darken-2',
   },
   conductor: {
-    activo: 'success',
-    baja_temporal: 'warning',
-    baja_definitiva: 'grey',
+    active: 'success',
+    temporary_leave: 'warning',
+    permanently_off: 'grey',
   },
   ruta: {
-    planificada: 'info',
-    en_curso: 'success',
-    completada: 'grey',
-    retrasada: 'warning',
-    cancelada: 'grey-darken-2',
+    planned: 'info',
+    in_progress: 'success',
+    completed: 'grey',
+    delayed: 'warning',
+    cancelled: 'grey-darken-2',
   },
   mantenimiento: {
-    pendiente: 'info',
-    en_curso: 'warning',
-    completada: 'success',
-    cancelada: 'grey',
+    pending: 'info',
+    in_progress: 'warning',
+    completed: 'success',
+    cancelled: 'grey',
   },
   documento: {
-    en_regla: 'success',
-    proximo_a_vencer: 'warning',
-    critico: 'error',
-    vencido: 'grey-darken-2',
+    valid: 'success',
+    expiring_soon: 'warning',
+    critical: 'error',
+    expired: 'grey-darken-2',
     sin_fecha: 'grey',
-    no_aplica: 'grey',
+    not_applicable: 'grey',
   },
 }
 
 /** @type {Record<string, Record<string, string>>} */
 const STATUS_LABELS = {
   vehiculo: {
-    activo: 'Activo',
-    en_ruta: 'En ruta',
-    en_mantenimiento: 'En mantenimiento',
-    inactivo: 'Inactivo',
-    dado_de_baja: 'Dado de baja',
+    active: 'Activo',
+    on_route: 'En ruta',
+    in_maintenance: 'En mantenimiento',
+    inactive: 'Inactivo',
+    decommissioned: 'Dado de baja',
   },
   conductor: {
-    activo: 'Activo',
-    baja_temporal: 'Baja temporal',
-    baja_definitiva: 'Baja definitiva',
+    active: 'Activo',
+    temporary_leave: 'Baja temporal',
+    permanently_off: 'Baja definitiva',
   },
   ruta: {
-    planificada: 'Planificada',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    retrasada: 'Retrasada',
-    cancelada: 'Cancelada',
+    planned: 'Planificada',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    delayed: 'Retrasada',
+    cancelled: 'Cancelada',
   },
   mantenimiento: {
-    pendiente: 'Pendiente',
-    en_curso: 'En curso',
-    completada: 'Completada',
-    cancelada: 'Cancelada',
+    pending: 'Pendiente',
+    in_progress: 'En curso',
+    completed: 'Completada',
+    cancelled: 'Cancelada',
   },
   documento: {
-    en_regla: 'En regla',
-    proximo_a_vencer: 'Próximo a vencer',
-    critico: 'Crítico',
-    vencido: 'Vencido',
+    valid: 'En regla',
+    expiring_soon: 'Próximo a vencer',
+    critical: 'Crítico',
+    expired: 'Vencido',
     sin_fecha: 'Sin fecha',
-    no_aplica: 'No aplica',
+    not_applicable: 'No aplica',
   },
 }
 
@@ -90,7 +90,7 @@ export function getStatusColor(status, domain) {
 }
 
 /**
- * Get Spanish label for a status in a given domain.
+ * Get label for a status in a given domain.
  * @param {string} status
  * @param {'vehiculo'|'conductor'|'ruta'|'mantenimiento'|'documento'} domain
  * @returns {string}

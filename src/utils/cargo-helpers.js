@@ -9,9 +9,9 @@ import { CARGO_CATEGORIES } from '@/constants/cargo-categories.js'
 
 const LEGACY_LABELS = {
   general: 'General',
-  frigorifica: 'Frigorífica',
-  peligrosa: 'Peligrosa',
-  especial: 'Especial',
+  refrigerated: 'Frigorífica',
+  dangerous: 'Peligrosa',
+  special: 'Especial',
 }
 
 /** @type {Array<{ title: string, value: string }>} */
@@ -21,7 +21,7 @@ export const CARGO_TYPE_OPTIONS = CARGO_CATEGORIES.map(c => ({
 }))
 
 export function getCargoTypeColor(tipo) {
-  const map = { general: 'info', frigorifica: 'teal', peligrosa: 'error', especial: 'warning' }
+  const map = { general: 'info', refrigerated: 'teal', dangerous: 'error', special: 'warning' }
   return map[tipo] ?? 'grey'
 }
 
