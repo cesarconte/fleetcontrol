@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-03-31 (sesión 10)
+> **Última actualización:** 2026-04-01 (sesión 11)
 > **Actualizado por:** AI Agent
 
 ---
@@ -98,13 +98,13 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance |
 | Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                     |
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
-| Módulo Alertas             | 🔴 Sin empezar | Tabla, filtros, acciones, compliance                                         |
+| Módulo Alertas             | 🟡 En progreso | CRUD, filtros, acciones, dismiss. Pendiente: generación automática, realtime |
 | Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                                    |
 | Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                                             |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟡 En progreso | 677 tests (Vitest), Cypress configurado, E2E smoke test                      |
+| Testing (TDD)              | 🟡 En progreso | 789 tests (Vitest), Cypress configurado, E2E smoke test                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -210,13 +210,40 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-03-31 (sesión 10)
-**Branch:** dev
-**Tests:** 699 pasando, 0 errores lint, typecheck limpio
+**Fecha:** 2026-04-01 (sesión 11)
+**Branch:** feature/alertas
+**Tests:** 789 pasando, 0 errores lint, typecheck limpio
 
 **Trabajo realizado:**
 
-### Sesión 10 — Recreación completa de BD Supabase desde migraciones locales
+### Sesión 11 — Módulo Alertas (CRUD + UI)
+
+**Alcance:** CRUD completo de alertas con filtros, acciones (leer, silenciar, eliminar) y página UI.
+Pendiente para futuras sesiones: generación automática de alertas, realtime subscriptions, badge sidebar.
+
+**Archivos creados (11):**
+
+- `src/constants/alert-types.spec.js` — 31 tests (tipos, severidades, helpers)
+- `src/constants/alert-types.js` — 9 tipos alerta + 3 severidades + helpers (label, icon, color)
+- `src/validations/alert-schema.spec.js` — 19 tests (dismiss + filter validation)
+- `src/validations/alert-schema.js` — Schemas Zod para dismiss y filtros
+- `src/services/api-alerts.spec.js` — 13 tests (CRUD + alert-specific queries)
+- `src/services/api-alerts.js` — Servicio: getPaginated, getActiveCount, markAsRead, markAllAsRead, dismiss, getByVehicle, getByDriver
+- `src/composables/use-alerts.spec.js` — 27 tests (estado, fetch, acciones, paginación)
+- `src/composables/use-alerts.js` — Composable reactivo con 3-layer state + acciones alerta
+- `src/components/alerts/AlertDismissDialog.vue` — Diálogo silenciar con justificación (VDialog + VTextarea)
+- `src/components/alerts/AlertList.vue` — Tabla desktop (VDataTableServer) + cards mobile + filtros por tipo/severidad/estado
+- `src/pages/AlertsListPage.vue` — Página principal (reescribida desde placeholder)
+
+**Resultado:** 789 tests (699 + 90 nuevos). Lint + typecheck limpios.
+
+**Tareas pendientes documentadas:**
+
+1. Generación automática de alertas (detección vencimientos, HOS, consumo)
+2. Realtime subscriptions en tabla alerts (Tier 1)
+3. Badge de alertas activas en sidebar/navegación
+4. Notificaciones por email (integración Brevo)
+5. Configuración de umbrales desde UI (company_settings)
 
 **Problema:** La BD desplegada en Supabase tenía diferencias significativas con las migraciones locales y con el código:
 
@@ -404,6 +431,7 @@ _(Complementa las de AGENTS.md)_
 | Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                       |
 | Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
 | Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
+| Tipos de alerta                 | Código       | `src/constants/alert-types.js`                         |
 | Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
 | Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                |
 | Migraciones SQL                 | SQL          | `supabase/migrations/` (001-018 aplicadas en Supabase) |
