@@ -26,6 +26,15 @@ vi.mock('@/services/supabase-client.js', () => ({
             },
             error: null,
           }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: {
+              id: '1',
+              email: 'test@test.com',
+              full_name: 'Test User',
+              role: 'traffic_manager',
+            },
+            error: null,
+          }),
         }),
       }),
     }),

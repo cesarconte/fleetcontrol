@@ -72,11 +72,15 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchProfile() {
     if (!currentUser.value) return
-    const { data } = await supabase
+    const { data, error: fetchError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', currentUser.value.id)
-      .single()
+      .maybeSingle()
+    if (fetchError) {
+      console.error('Error fetching profile:', fetchError.message)
+      return
+    }
     if (data) profile.value = data
   }
 
