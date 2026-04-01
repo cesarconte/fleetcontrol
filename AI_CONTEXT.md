@@ -100,11 +100,11 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
 | Módulo Alertas             | 🟡 En progreso | CRUD, filtros, acciones, dismiss. Pendiente: generación automática, realtime |
 | Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                                    |
-| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                                             |
+| Configuración              | 🟡 En progreso | Empresa (form), Usuarios (tabla), Alertas (umbrales), Integraciones (GPS)    |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟡 En progreso | 789 tests (Vitest), Cypress configurado, E2E smoke test                      |
+| Testing (TDD)              | 🟡 En progreso | 852 tests (Vitest), Cypress configurado, E2E smoke test                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -210,9 +210,31 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-01 (sesión 11)
+**Fecha:** 2026-04-01 (sesión 12)
 **Branch:** feature/alertas
-**Tests:** 789 pasando, 0 errores lint, typecheck limpio
+**Tests:** 852 pasando, 0 errores lint, typecheck limpio
+
+**Trabajo realizado:**
+
+### Sesión 12 — Módulo Configuración (Settings UI)
+
+**Alcance:** 5 componentes Vue para el módulo de configuración con RBAC integrado. Formularios de empresa, tabla de usuarios, umbrales de alerta e integraciones GPS. Control de acceso por rol (administrador edita, otros roles solo lectura, usuarios solo visible por admin).
+
+**Archivos creados (5):**
+
+- `src/components/settings/CompanyForm.vue` — Formulario datos empresa (editable/readonly según rol)
+- `src/components/settings/UsersTable.vue` — Tabla usuarios con VDataTable, cambio de rol y activación/desactivación
+- `src/components/settings/AlertThresholdsForm.vue` — 6 umbrales numéricos con validación Zod
+- `src/components/settings/IntegrationsForm.vue` — Config GPS (Webfleet/Frotcom/Geotab/Otro) con campos password
+- `src/pages/SettingsPage.vue` — Página principal con VTabs (Empresa, Usuarios, Alertas, Integraciones)
+
+**Patrones aplicados:** Composition API + `<script setup>`, Vuetify 4 (variant="outlined"), `data-testid` en elementos interactivos, mobile-first responsive, `useSettings()` composable, helpers RBAC de `role-permissions.js`, schemas Zod de `settings-schema.js`.
+
+**Resultado:** 852 tests pasando. Lint + typecheck limpios.
+
+**Trabajo realizado anterior:**
+
+### Sesión 11 — Módulo Alertas (CRUD + UI)
 
 **Trabajo realizado:**
 

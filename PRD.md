@@ -396,6 +396,34 @@ Todos los informes son exportables en PDF y CSV.
 - Personalización de la aplicación (logo de la empresa).
 - Gestión de plantillas de documentos de transporte.
 
+#### 4.10.1 Política de Acceso RBAC
+
+Roles definidos (enum `user_role` en BD): `administrador`, `jefe_trafico`, `agente_trafico`, `tecnico_mantenimiento`, `solo_lectura`.
+
+| Recurso           | administrador                             | jefe_trafico   | agente_trafico | tecnico_mantenimiento | solo_lectura  |
+| ----------------- | ----------------------------------------- | -------------- | -------------- | --------------------- | ------------- |
+| Datos empresa     | ver + editar                              | ver            | ver            | ver                   | ver           |
+| Usuarios          | ver + crear + editar rol + desactivar     | —              | —              | —                     | —             |
+| Umbrales alerta   | ver + editar                              | ver            | ver            | ver                   | ver           |
+| Integraciones GPS | ver + editar API keys                     | —              | —              | —                     | —             |
+| Perfil propio     | editar (nombre, teléfono, avatar; no rol) | editar (idem)  | editar (idem)  | editar (idem)         | editar (idem) |
+| Vehículos         | CRUD                                      | CRUD           | R              | R                     | R             |
+| Conductores       | CRUD                                      | CRUD           | R              | R                     | R             |
+| Rutas             | CRUD                                      | CRUD           | CRUD           | R                     | R             |
+| Cargas            | CRUD                                      | CRUD           | CRUD           | R                     | R             |
+| Mantenimiento     | CRUD                                      | R              | R              | CRUD                  | R             |
+| Alertas           | R + dismiss                               | R + dismiss    | R + dismiss    | R                     | R             |
+| Informes          | ver + exportar                            | ver + exportar | ver            | ver                   | ver           |
+
+Reglas de seguridad:
+
+1. Solo `administrador` puede gestionar usuarios, editar empresa, umbrales e integraciones.
+2. Todo usuario autenticado puede ver datos de empresa y umbrales (contexto operativo).
+3. Cada usuario puede editar su propio perfil (nombre, teléfono, avatar) pero no su rol.
+4. `administrador` no puede auto-degradarse a otro rol.
+5. No se puede eliminar la configuración de empresa (tabla singleton).
+6. Implementación en 3 niveles: BD (RLS policies), Frontend (v-if + router guards), Service (verificación de rol).
+
 ---
 
 ## 5. Requisitos No Funcionales
