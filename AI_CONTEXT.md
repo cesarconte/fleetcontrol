@@ -108,11 +108,11 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
 | Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                            |
 | Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera          |
-| Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                                             |
+| Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS                  |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟢 Completado  | 920 tests (Vitest), Cypress configurado, E2E smoke test                      |
+| Testing (TDD)              | 🟢 Completado  | 852 tests (Vitest), Cypress configurado, E2E smoke test                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -218,54 +218,42 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-01 (sesión 12)
-**Branch:** feature/informes
-**Tests:** 920 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Fecha:** 2026-04-01 (sesión 13)
+**Branch:** feature/configuracion (múltiples módulos en esta sesión)
+**Tests:** 852 pasando, 0 errores lint, 0 warnings, typecheck limpio
 
 **Trabajo realizado:**
 
+### Sesión 13 — Módulo Configuración (RBAC + Settings UI)
+
+**Alcance:** Módulo configuración completo con política RBAC definida en PRD §4.10.1. Solo administrador puede editar empresa, gestionar usuarios, configurar umbrales e integraciones. Otros roles solo lectura.
+
+**Migración BD aplicada (1):**
+
+- 025: `settings_enhancements` — company_settings (gps_provider, gps_api_key, gps_api_secret, alert_critical_doc_days, fuel_anomaly_percent)
+
+**Archivos creados (16):**
+
+- `src/constants/role-permissions.js` + spec — 5 roles, matriz permisos, helpers RBAC (29 tests)
+- `src/validations/settings-schema.js` + spec — Zod para empresa, umbrales, usuarios
+- `src/services/api-company-settings.js` + spec — getSettings, updateSettings
+- `src/services/api-profiles.js` + spec — getAll, getById, updateRole, deactivate, reactivate
+- `src/composables/use-settings.js` + spec — isAdmin, currentRole, acciones con RBAC check
+- `src/components/settings/CompanyForm.vue` — Form empresa (editable/readonly por rol)
+- `src/components/settings/UsersTable.vue` — Tabla usuarios con cambio rol y activación
+- `src/components/settings/AlertThresholdsForm.vue` — 6 umbrales con validación Zod
+- `src/components/settings/IntegrationsForm.vue` — GPS provider + API keys
+- `src/pages/SettingsPage.vue` — VTabs con RBAC gate (4 pestañas)
+- PRD.md actualizado §4.10.1 — Política RBAC completa
+
 ### Sesión 12 — Módulo Informes (completo)
 
-**Alcance:** Sistema de informes profesional con 9 tipos, gráficos ECharts, exportación PDF/Excel, y esquema BD financiera completo.
+**Alcance:** Sistema de informes profesional con 9 tipos, gráficos ECharts, exportación PDF/Excel, y esquema BD financiera completa.
 
-**Migraciones BD aplicadas (6):**
+**Migraciones BD aplicadas (6):** 019-024 (routes_financials, vehicle_annual_costs, driver_compensation, financial_functions, financial_indexes, financial_rls)
 
-- 019: `route_financials` — 11 columnas nuevas en routes (revenue, costs, margins, client, incidents)
-- 020: `vehicle_annual_costs` — Tabla costes fijos anuales por vehículo (seguro, IVTM, ITV, depreciación, neumáticos, GPS, etc.) con `total_fixed_cost_eur` GENERATED
-- 021: `driver_compensation` — Tabla compensación mensual por conductor (salario, plus, dietas, SS, con `total_company_cost_eur` GENERATED)
-- 022: `financial_functions` — Función `calculate_route_fixed_cost()` + vista `v_route_financials`
-- 023: `financial_indexes` — 4 índices para queries financieras
-- 024: `financial_rls` — RLS restrictivo (created_by = auth.uid()) en tablas nuevas
+**Archivos creados (~40):** 10 tipos informe, 7 componentes UI, 10 páginas, servicios, agregaciones, export utils
 
-**Dependencias instaladas:**
-
-- `echarts` + `vue-echarts` — Gráficos
-- `jspdf` + `jspdf-autotable` — Exportación PDF
-- `exceljs` — Exportación Excel
-
-**Archivos creados (~40):**
-
-Infraestructura:
-
-- `src/constants/report-types.js` + spec — 10 tipos de informe (flota, conductores, rutas, combustible, mantenimiento, cumplimiento, tacografos, cargas, económico, dashboard)
-- `src/validations/report-schema.js` + spec — Zod para filtros
-- `src/services/api-reports.js` + spec — getReportData, getComplianceData
-- `src/utils/report-aggregations.js` + spec — 18 funciones de agregación (KPIs, breakdowns, trends)
-- `src/utils/export-pdf.js` + spec — PDF con jsPDF + autoTable
-- `src/utils/export-xlsx.js` + spec — Excel con ExcelJS
-- `src/composables/use-reports.js` + spec — Estado reactivo con aggregación por tipo
-
-Componentes UI compartidos (7):
-
-- `ReportKpiCard.vue`, `ReportChartCard.vue`, `ReportBarChart.vue`, `ReportLineChart.vue`, `ReportPieChart.vue`, `ReportPeriodFilter.vue`, `ReportExportBar.vue`
-
-Páginas (10):
-
-- `ReportsHubPage.vue` — Grid 9 tarjetas navegables
-- `EconomicoReportPage.vue` — KPIs + 4 gráficos + tabla detalle rutas
-- `FleetReportPage.vue` — Flota con composición, estado, km
-- `DriversReportPage.vue` — Conductores con actividad, docs
-- `RoutesReportPage.vue` — Rutas con incidencias, tendencia, costes
 - `FuelReportPage.vue` — Combustible con precio/L, consumo, CO2
 - `MaintenanceReportPage.vue` — Mantenimiento costes, preventivo/correctivo
 - `ComplianceReportPage.vue` — Cumplimiento doc vehículos + conductores
