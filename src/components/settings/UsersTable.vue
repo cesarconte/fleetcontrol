@@ -40,7 +40,7 @@
 
         <template #item.actions="{ item }">
           <div class="d-flex align-center ga-2">
-            <VSelect
+            <v-select
               v-if="canManage"
               :model-value="item.role"
               :items="roleOptions"
@@ -51,7 +51,7 @@
               data-testid="user-role-select"
               @update:model-value="val => handleRoleChange(item.id, val)"
             />
-            <VBtn
+            <v-btn
               v-if="canManage"
               :color="item.is_active ? 'error' : 'success'"
               variant="tonal"
@@ -60,7 +60,7 @@
               @click="confirmToggleActive(item)"
             >
               {{ item.is_active ? 'Desactivar' : 'Reactivar' }}
-            </VBtn>
+            </v-btn>
           </div>
         </template>
 
@@ -74,7 +74,7 @@
       </VDataTable>
     </VCardText>
 
-    <!-- Confirm deactivate/reactivate dialog -->
+    <!-- Confirm dialog -->
     <VDialog v-model="confirmOpen" max-width="400" persistent data-testid="user-confirm-dialog">
       <VCard>
         <VCardTitle>
@@ -102,13 +102,13 @@
       </VCard>
     </VDialog>
 
-    <!-- Create user dialog -->
+    <!-- Create dialog -->
     <VDialog v-model="createOpen" max-width="500" persistent data-testid="user-create-dialog">
       <VCard>
         <VCardTitle>Nuevo usuario</VCardTitle>
         <VCardText>
           <VForm ref="createFormRef" @submit.prevent="handleCreate">
-            <VTextField
+            <v-text-field
               v-model="createForm.email"
               label="Email *"
               type="email"
@@ -120,7 +120,7 @@
               class="mb-3"
               data-testid="user-create-email"
             />
-            <VTextField
+            <v-text-field
               v-model="createForm.full_name"
               label="Nombre completo *"
               :rules="[v => !!v || 'Nombre obligatorio']"
@@ -128,7 +128,7 @@
               class="mb-3"
               data-testid="user-create-name"
             />
-            <VSelect
+            <v-select
               v-model="createForm.role"
               :items="roleOptions"
               label="Rol *"
@@ -189,7 +189,6 @@ const headers = computed(() => {
 
 const roleOptions = Object.values(USER_ROLES).map(r => ({ title: r.label, value: r.value }))
 
-// Confirm dialog
 const confirmOpen = ref(false)
 const confirmUser = ref(null)
 const isToggling = ref(false)
@@ -215,7 +214,6 @@ async function executeToggle() {
   }
 }
 
-// Create dialog
 const createOpen = ref(false)
 const createFormRef = ref(null)
 const isCreating = ref(false)
@@ -233,10 +231,7 @@ async function handleCreate() {
   if (!valid) return
   isCreating.value = true
   try {
-    // In MVP, user creation is done via Supabase Auth invite
-    // For now, show a notification that the feature requires Supabase Admin API
-    // The profile will be created when the user signs up
-    // User creation requires Supabase Admin API
+    // User creation requires Supabase Admin API (invite user)
   } finally {
     isCreating.value = false
     createOpen.value = false
