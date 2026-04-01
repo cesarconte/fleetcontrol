@@ -181,8 +181,14 @@ export const routes = [
   },
   {
     path: '/informes',
-    name: 'Reports',
-    component: () => import('@/pages/ReportsListPage.vue'),
+    name: 'ReportsHub',
+    component: () => import('@/pages/ReportsHubPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/informes/economico',
+    name: 'ReportEconomico',
+    component: () => import('@/pages/EconomicoReportPage.vue'),
     meta: { requiresAuth: true },
   },
   {
