@@ -113,3 +113,5 @@ LEFT JOIN drivers d ON r.driver_id = d.id
 WHERE r.status = 'completed';
 
 COMMENT ON VIEW v_route_financials IS 'Vista de resumen financiero por ruta completada.';
+
+ALTER VIEW v_route_financials SET (security_invoker = on);
