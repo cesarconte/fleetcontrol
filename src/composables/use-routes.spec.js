@@ -118,7 +118,7 @@ describe('useRoutes', () => {
         page: 1,
         pageSize: 25,
         filters: {},
-        sort: { col: 'planned_departure', asc: false },
+        sort: { col: 'departure_date', asc: false },
       })
     })
   })

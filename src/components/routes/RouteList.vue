@@ -72,28 +72,28 @@
         @click:row="handleRowClick"
       >
         <!-- eslint-disable vue/valid-v-slot -->
-        <template #item.fecha_salida="{ item }">
-          {{ formatDate(item.fecha_salida) }}
+        <template #item.departure_date="{ item }">
+          {{ formatDate(item.departure_date) }}
         </template>
 
         <template #item.ruta="{ item }">
           <span class="font-weight-medium">
-            {{ item.origen_municipio }} → {{ item.destino_municipio }}
+            {{ item.origin_city }} → {{ item.destination_city }}
           </span>
         </template>
 
-        <template #item.distancia_total_km="{ item }">
+        <template #item.distance_total_km="{ item }">
           {{
-            item.distancia_total_km ? `${item.distancia_total_km.toLocaleString('es-ES')} km` : '—'
+            item.distance_total_km ? `${item.distance_total_km.toLocaleString('es-ES')} km` : '—'
           }}
         </template>
 
-        <template #item.peso_carga_kg="{ item }">
-          {{ item.peso_carga_kg ? `${item.peso_carga_kg.toLocaleString('es-ES')} kg` : '—' }}
+        <template #item.cargo_weight_kg="{ item }">
+          {{ item.cargo_weight_kg ? `${item.cargo_weight_kg.toLocaleString('es-ES')} kg` : '—' }}
         </template>
 
-        <template #item.coste_total_eur="{ item }">
-          {{ item.coste_total_eur ? `${item.coste_total_eur.toFixed(2)} €` : '—' }}
+        <template #item.total_cost_eur="{ item }">
+          {{ item.total_cost_eur ? `${item.total_cost_eur.toFixed(2)} €` : '—' }}
         </template>
 
         <template #item.status="{ item }">
@@ -178,6 +178,7 @@ const {
   pageSize,
   fetch,
   setFilters,
+  setSort,
   resetFilters: resetFn,
 } = useRoutes()
 
@@ -185,16 +186,16 @@ const searchQuery = ref('')
 const filterStatus = ref(null)
 const filterDateFrom = ref(null)
 const tablePage = ref(1)
-const sortBy = ref([{ key: 'fecha_salida', order: 'desc' }])
+const sortBy = ref([{ key: 'departure_date', order: 'desc' }])
 
 let searchTimer = null
 
 const headers = [
-  { title: 'Fecha', key: 'fecha_salida', sortable: true },
+  { title: 'Fecha', key: 'departure_date', sortable: true },
   { title: 'Ruta', key: 'ruta', sortable: false },
-  { title: 'Distancia', key: 'distancia_total_km', sortable: true },
-  { title: 'Carga (kg)', key: 'peso_carga_kg', sortable: true },
-  { title: 'Coste', key: 'coste_total_eur', sortable: true },
+  { title: 'Distancia', key: 'distance_total_km', sortable: true },
+  { title: 'Carga (kg)', key: 'cargo_weight_kg', sortable: true },
+  { title: 'Coste', key: 'total_cost_eur', sortable: true },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
 ]
@@ -262,6 +263,12 @@ function handleRowClick(_event, { item }) {
 watch(tablePage, newPage => {
   page.value = newPage
   fetch()
+})
+
+watch(sortBy, newSort => {
+  if (newSort.length > 0) {
+    setSort(newSort[0].key, newSort[0].order === 'asc')
+  }
 })
 
 onMounted(() => {

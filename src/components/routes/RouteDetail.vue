@@ -16,10 +16,10 @@
       <!-- Header -->
       <div class="d-flex justify-space-between align-center mb-4 flex-wrap ga-2">
         <div>
-          <h1 class="text-h5">{{ route.origen_municipio }} → {{ route.destino_municipio }}</h1>
+          <h1 class="text-h5">{{ route.origin_city }} → {{ route.destination_city }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ formatDate(route.fecha_salida) }}
-            {{ extractTime(route.fecha_salida) ? ` · ${extractTime(route.fecha_salida)}` : '' }}
+            {{ formatDate(route.departure_date) }}
+            {{ extractTime(route.departure_date) ? ` · ${extractTime(route.departure_date)}` : '' }}
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -45,37 +45,37 @@
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha salida</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ formatDate(route.fecha_salida) }}
+                  {{ formatDate(route.departure_date) }}
                 </div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Hora salida</div>
-                <div class="text-body-1">{{ extractTime(route.fecha_salida) || '—' }}</div>
+                <div class="text-body-1">{{ extractTime(route.departure_date) || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha llegada</div>
-                <div class="text-body-1">{{ formatDate(route.fecha_llegada_prevista) }}</div>
+                <div class="text-body-1">{{ formatDate(route.planned_arrival_date) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Hora llegada</div>
                 <div class="text-body-1">
-                  {{ extractTime(route.fecha_llegada_prevista) || '—' }}
+                  {{ extractTime(route.planned_arrival_date) || '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Origen</div>
-                <div class="text-body-1">{{ route.origen_municipio }}</div>
+                <div class="text-body-1">{{ route.origin_city }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Destino</div>
-                <div class="text-body-1">{{ route.destino_municipio }}</div>
+                <div class="text-body-1">{{ route.destination_city }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Distancia</div>
                 <div class="text-body-1">
                   {{
-                    route.distancia_total_km
-                      ? `${route.distancia_total_km.toLocaleString('es-ES')} km`
+                    route.distance_total_km
+                      ? `${route.distance_total_km.toLocaleString('es-ES')} km`
                       : '—'
                   }}
                 </div>
@@ -83,7 +83,7 @@
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Duración</div>
                 <div class="text-body-1">
-                  {{ formatDuration(route.duracion_prevista_min) }}
+                  {{ formatDuration(route.planned_duration_min) }}
                 </div>
               </v-col>
             </v-row>
@@ -96,19 +96,21 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <div class="text-caption text-medium-emphasis">Descripción</div>
-                <div class="text-body-1">{{ route.descripcion_carga || '—' }}</div>
+                <div class="text-body-1">{{ route.cargo_description || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Peso</div>
                 <div class="text-body-1">
                   {{
-                    route.peso_carga_kg ? `${route.peso_carga_kg.toLocaleString('es-ES')} kg` : '—'
+                    route.cargo_weight_kg
+                      ? `${route.cargo_weight_kg.toLocaleString('es-ES')} kg`
+                      : '—'
                   }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getCargoTypeLabel(route.tipo_carga) }}</div>
+                <div class="text-body-1">{{ getCargoTypeLabel(route.cargo_type) }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -121,35 +123,31 @@
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Combustible</div>
                 <div class="text-body-1">
-                  {{ route.consumo_combustible_l ? `${route.consumo_combustible_l} L` : '—' }}
+                  {{ route.fuel_consumption_l ? `${route.fuel_consumption_l} L` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste combustible</div>
                 <div class="text-body-1">
-                  {{
-                    route.coste_combustible_eur
-                      ? `${route.coste_combustible_eur.toFixed(2)} €`
-                      : '—'
-                  }}
+                  {{ route.fuel_cost_eur ? `${route.fuel_cost_eur.toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Peajes</div>
                 <div class="text-body-1">
-                  {{ route.coste_peajes_eur ? `${route.coste_peajes_eur.toFixed(2)} €` : '—' }}
+                  {{ route.toll_cost_eur ? `${route.toll_cost_eur.toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste total</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ route.coste_total_eur ? `${route.coste_total_eur.toFixed(2)} €` : '—' }}
+                  {{ route.total_cost_eur ? `${route.total_cost_eur.toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Retraso</div>
                 <div class="text-body-1">
-                  {{ route.retraso_minutos ? `${route.retraso_minutos} min` : '—' }}
+                  {{ route.delay_minutes ? `${route.delay_minutes} min` : '—' }}
                 </div>
               </v-col>
             </v-row>
@@ -162,17 +160,17 @@
             <v-row>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Nº CMR</div>
-                <div class="text-body-1">{{ route.cmr_numero || '—' }}</div>
+                <div class="text-body-1">{{ route.cmr_number || '—' }}</div>
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Nº Albarán</div>
-                <div class="text-body-1">{{ route.albaran_numero || '—' }}</div>
+                <div class="text-body-1">{{ route.delivery_note_number || '—' }}</div>
               </v-col>
             </v-row>
-            <v-row v-if="route.observaciones">
+            <v-row v-if="route.notes">
               <v-col cols="12">
                 <div class="text-caption text-medium-emphasis">Observaciones</div>
-                <div class="text-body-1">{{ route.observaciones }}</div>
+                <div class="text-body-1">{{ route.notes }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
