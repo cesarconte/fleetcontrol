@@ -1,56 +1,56 @@
 <template>
-  <div>
+  <VContainer fluid>
     <h1 class="text-h4 mb-4">Configuración</h1>
 
-    <v-tabs v-model="activeTab" color="primary" class="mb-4" data-testid="settings-tabs">
-      <v-tab
+    <VTabs v-model="activeTab" color="primary" class="mb-4" data-testid="settings-tabs">
+      <VTab
         v-if="hasSettingsAccess(currentRole, 'empresa')"
         value="empresa"
         data-testid="settings-tab-empresa"
       >
         Empresa
-      </v-tab>
-      <v-tab
+      </VTab>
+      <VTab
         v-if="hasSettingsAccess(currentRole, 'usuarios')"
         value="usuarios"
         data-testid="settings-tab-usuarios"
       >
         Usuarios
-      </v-tab>
-      <v-tab
+      </VTab>
+      <VTab
         v-if="hasSettingsAccess(currentRole, 'alertas')"
         value="alertas"
         data-testid="settings-tab-alertas"
       >
         Alertas
-      </v-tab>
-      <v-tab
+      </VTab>
+      <VTab
         v-if="hasSettingsAccess(currentRole, 'integraciones')"
         value="integraciones"
         data-testid="settings-tab-integraciones"
       >
         Integraciones
-      </v-tab>
-    </v-tabs>
+      </VTab>
+    </VTabs>
 
-    <v-window v-model="activeTab">
-      <v-window-item v-if="hasSettingsAccess(currentRole, 'empresa')" value="empresa">
+    <VWindow v-model="activeTab">
+      <VWindowItem value="empresa">
         <CompanyForm :settings="companySettings" @saved="handleSaved" />
-      </v-window-item>
+      </VWindowItem>
 
-      <v-window-item v-if="hasSettingsAccess(currentRole, 'usuarios')" value="usuarios">
+      <VWindowItem value="usuarios">
         <UsersTable />
-      </v-window-item>
+      </VWindowItem>
 
-      <v-window-item v-if="hasSettingsAccess(currentRole, 'alertas')" value="alertas">
+      <VWindowItem value="alertas">
         <AlertThresholdsForm :settings="companySettings" @saved="handleSaved" />
-      </v-window-item>
+      </VWindowItem>
 
-      <v-window-item v-if="hasSettingsAccess(currentRole, 'integraciones')" value="integraciones">
+      <VWindowItem value="integraciones">
         <IntegrationsForm :settings="companySettings" @saved="handleSaved" />
-      </v-window-item>
-    </v-window>
-  </div>
+      </VWindowItem>
+    </VWindow>
+  </VContainer>
 </template>
 
 <script setup>
