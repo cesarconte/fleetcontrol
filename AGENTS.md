@@ -190,7 +190,7 @@ Load the relevant skill when the task matches:
 | ----------------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------- |
 | UI components, layout, responsive   | `ui-ux-pro-max`                                      | `file:///home/cesar/.agents/skills/ui-ux-pro-max`                     |
 | Frontend patterns, a11y, testing    | `senior-frontend`                                    | `file:///home/cesar/.agents/skills/senior-frontend`                   |
-| Testing TDD, factories, mocking     | `testing-patterns`                                   | `file:///home/cesar/.agents/skills/testing-patterns`                  |
+| Testing TDD, factories, mocking     | `testing-patterns`,                                  | `file:///home/cesar/.agents/skills/testing-patterns`                  |
 | Supabase/Postgres schema, RLS, perf | `supabase-postgres-best-practices`                   | `file:///home/cesar/.agents/skills/supabase-postgres-best-practices`  |
 | Vue patterns, Composition API       | `vue-best-practices` (ref AGENTS.md §4 Vue Patterns) | —                                                                     |
 | Git workflows, PRs, branching       | `git-advanced-workflows`                             | `file:///home/cesar/.agents/skills/git-advanced-workflows`            |

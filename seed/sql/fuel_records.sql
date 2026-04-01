@@ -1,0 +1,9 @@
+INSERT INTO fuel_records (id, vehicle_id, route_id, refuel_date, odometer_km, quantity, unit_price_eur, total_eur, station_name, consumption_l100km, co2_emissions_kg, deviation_from_avg_pct) VALUES
+('e90568df-bb95-5be7-a47e-3eb5b46bbdb8', 'e6d4ff15-ccac-5d53-bbc3-635d351756d8', '4f824bbe-807c-5e77-bca6-e237e07cba60', '2026-03-29T08:15:00Z', '62100', '125.3', '1.56', '195.47', 'Repsol A-4 Córdoba km 398', '23.30', '330.80', '8.7'),
+('9e3093e3-b5af-56a3-8c5e-d4ba776b2ea1', 'e6d4ff15-ccac-5d53-bbc3-635d351756d8', NULL, '2026-03-27T16:30:00Z', '61970', '88.7', '1.58', '140.15', 'Cepsa M-40 Madrid', '22.15', '234.10', '-2.8'),
+('cc14f1fa-3237-5713-8a86-55975a48c769', 'c81b725e-4d3e-5f94-83e3-72e3dc532397', '6f59ac5f-96a0-52e8-9f46-0828b18b1a4e', '2026-03-28T10:30:00Z', '98350', '88.6', '1.56', '138.22', 'BP Autopista A-8 Cantabria', '28.38', '234.10', '4.2'),
+('2a291769-6d73-56ea-a8d7-76b6ffaacb6f', 'c81b725e-4d3e-5f94-83e3-72e3dc532397', NULL, '2026-03-26T14:00:00Z', '98260', '95.2', '1.54', '146.61', 'Galp A-66 León', '31.12', '251.30', '7.1'),
+('2d67b87a-ee07-552d-b110-c4cac008fcdf', '0b46324d-141c-5b10-a267-de2ad9336da5', 'dc90f322-9e1c-58ce-8dc4-7d098467d0c4', '2026-03-28T07:00:00Z', '87100', '98.4', '1.56', '153.50', 'Repsol A-66 Benavente', '13.12', '260.00', '-5.2'),
+('b03d3772-e3d1-5f13-a704-ad67719d5204', '0b46324d-141c-5b10-a267-de2ad9336da5', NULL, '2026-03-26T18:00:00Z', '87010', '75.2', '1.58', '118.82', 'Cepsa A-66 Campomanes', '30.12', '198.50', '2.1'),
+('58eb6761-950d-5280-afb9-c4d27ad6f283', 'e6e87042-5fc9-5af6-ab5a-a3ba3af8ae85', NULL, '2026-03-30T09:00:00Z', '142150', '145.8', '1.54', '224.53', 'Shell AP-7 Girona', '28.62', '385.00', '1.5'),
+('e6f328f5-5e8a-51a1-935e-c868bc18b1f9', '60ca3ae6-8647-57de-93e1-f7084abcc947', NULL, '2026-03-29T12:00:00Z', '18550', '62.4', '1.60', '99.84', 'Repsol A-8 Gijón', '21.82', '164.70', '-0.3');
