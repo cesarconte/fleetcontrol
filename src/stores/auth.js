@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref(null)
 
   const isAuthenticated = computed(() => currentUser.value !== null)
-  const userRole = computed(() => profile.value?.role ?? 'readonly')
+  const userRole = computed(() => profile.value?.role ?? 'read_only')
   const userName = computed(() => profile.value?.full_name ?? currentUser.value?.email ?? '')
   const userInitials = computed(() => {
     const name = userName.value

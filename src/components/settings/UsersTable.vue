@@ -160,6 +160,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useSettings } from '@/composables/use-settings.js'
+import { useAuthStore } from '@/stores/auth.js'
 import {
   canManageUsers,
   getUserRoleLabel,
@@ -167,10 +168,10 @@ import {
   USER_ROLES,
 } from '@/constants/role-permissions.js'
 
-const { profiles, isLoading, currentRole, updateUserRole, deactivateUser, reactivateUser } =
-  useSettings()
+const { profiles, isLoading, updateUserRole, deactivateUser, reactivateUser } = useSettings()
+const authStore = useAuthStore()
 
-const canManage = computed(() => canManageUsers(currentRole.value))
+const canManage = computed(() => canManageUsers(authStore.userRole))
 
 const headers = computed(() => {
   const base = [
