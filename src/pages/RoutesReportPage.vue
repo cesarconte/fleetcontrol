@@ -7,7 +7,7 @@
           <VIcon>mdi-arrow-left</VIcon>
         </VBtn>
         <div>
-          <h1 class="text-h4">Informe Económico</h1>
+          <h1 class="text-h4">Informe de Rutas</h1>
           <span class="text-body-2 text-medium-emphasis">{{ dateFrom }} — {{ dateTo }}</span>
         </div>
       </div>
@@ -43,25 +43,14 @@
           />
         </VCol>
         <VCol cols="12" md="6">
-          <ReportPieChart
-            title="Desglose de costes por categoría"
-            :data="chartData.costBreakdown"
-            doughnut
-          />
+          <ReportPieChart title="Desglose de incidencias" :data="chartData.incidents" doughnut />
         </VCol>
       </VRow>
 
       <VRow class="mb-4">
         <VCol cols="12" md="6">
           <ReportBarChart
-            title="Rentabilidad por vehículo"
-            :categories="vehicleCategories"
-            :series="vehicleSeries"
-          />
-        </VCol>
-        <VCol cols="12" md="6">
-          <ReportBarChart
-            title="Top 10 rutas más rentables"
+            title="Top 10 rutas por coste"
             :categories="topRoutesCategories"
             :series="topRoutesSeries"
           />
@@ -76,20 +65,30 @@
           :items="rawData"
           :items-per-page="25"
           hover
-          data-testid="economico-table"
+          data-testid="routes-table"
         >
+          <template #item.departure_date="{ item }">
+            {{ formatDate(item.departure_date) }}
+          </template>
+          <template #item.route_label="{ item }">
+            {{ item.origin_city ?? '' }} → {{ item.destination_city ?? '' }}
+          </template>
+          <template #item.revenue_eur="{ item }">
+            {{ formatEur(item.revenue_eur) }}
+          </template>
+          <template #item.total_variable_cost_eur="{ item }">
+            {{ formatEur(item.total_variable_cost_eur) }}
+          </template>
           <template #item.gross_margin_eur="{ item }">
             <span :class="item.gross_margin_eur >= 0 ? 'text-success' : 'text-error'">
               {{ formatEur(item.gross_margin_eur) }}
             </span>
           </template>
-          <template #item.net_margin_eur="{ item }">
-            <span :class="item.net_margin_eur >= 0 ? 'text-success' : 'text-error'">
-              {{ formatEur(item.net_margin_eur) }}
-            </span>
-          </template>
-          <template #item.revenue_eur="{ item }">
-            {{ formatEur(item.revenue_eur) }}
+          <template #item.delay_minutes="{ item }">{{ item.delay_minutes ?? 0 }} min</template>
+          <template #item.incidents_count="{ item }">
+            <VChip :color="incidentColor(item.incidents_count ?? 0)" size="small">
+              {{ item.incidents_count ?? 0 }}
+            </VChip>
           </template>
         </VDataTable>
       </VCard>
@@ -116,13 +115,14 @@ const {
   period,
   dateFrom,
   dateTo,
+  setReportType,
   setPeriod,
   exportPdf,
   exportXlsx,
 } = useReports()
 
 onMounted(() => {
-  setPeriod('este_mes')
+  setReportType('rutas')
 })
 
 function formatEur(v) {
@@ -130,15 +130,30 @@ function formatEur(v) {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(v)
 }
 
+function formatDate(v) {
+  if (!v) return '—'
+  return new Date(v).toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+function incidentColor(count) {
+  if (count === 0) return 'success'
+  if (count <= 2) return 'warning'
+  return 'error'
+}
+
 const tableHeaders = [
   { title: 'Fecha', key: 'departure_date', sortable: true },
   { title: 'Ruta', key: 'route_label', sortable: false },
   { title: 'Km', key: 'distance_covered_km', sortable: true },
   { title: 'Ingreso', key: 'revenue_eur', sortable: true },
-  { title: 'Coste Variable', key: 'total_variable_cost_eur', sortable: true },
-  { title: 'Coste Fijo', key: 'allocated_fixed_cost_eur', sortable: true },
-  { title: 'Margen Bruto', key: 'gross_margin_eur', sortable: true },
-  { title: 'Margen Neto', key: 'net_margin_eur', sortable: true },
+  { title: 'Coste', key: 'total_variable_cost_eur', sortable: true },
+  { title: 'Margen', key: 'gross_margin_eur', sortable: true },
+  { title: 'Retraso', key: 'delay_minutes', sortable: true },
+  { title: 'Incidencias', key: 'incidents_count', sortable: true },
 ]
 
 const monthlyCategories = computed(() => (chartData.value.monthlyTrend ?? []).map(m => m.month))
@@ -160,25 +175,16 @@ const monthlySeries = computed(() => [
   },
 ])
 
-const vehicleCategories = computed(() =>
-  (chartData.value.profitByVehicle ?? []).slice(0, 10).map(v => v.vehicle_id),
-)
-const vehicleSeries = computed(() => [
-  {
-    name: 'Beneficio neto',
-    data: (chartData.value.profitByVehicle ?? []).slice(0, 10).map(v => v.profit),
-    color: '#F57C00',
-  },
-])
-
 const topRoutesCategories = computed(() =>
   (rawData.value ?? []).slice(0, 10).map(r => `${r.origin_city ?? ''}→${r.destination_city ?? ''}`),
 )
 const topRoutesSeries = computed(() => [
   {
-    name: 'Margen neto',
-    data: (rawData.value ?? []).slice(0, 10).map(r => r.net_margin_eur ?? 0),
-    color: '#4CAF50',
+    name: 'Coste total',
+    data: (rawData.value ?? [])
+      .slice(0, 10)
+      .map(r => (r.total_variable_cost_eur ?? 0) + (r.allocated_fixed_cost_eur ?? 0)),
+    color: '#F57C00',
   },
 ])
 </script>

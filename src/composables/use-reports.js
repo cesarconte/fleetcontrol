@@ -1,7 +1,7 @@
 /**
- * FleetControl — useInformes Composable
+ * FleetControl — useReports Composable
  *
- * Reactive informe state with data fetching, aggregation, and export.
+ * Reactive report state with data fetching, aggregation, and export.
  *
  * @see PRD §4.9 — Informes
  */
@@ -17,13 +17,26 @@ import {
   aggregateMonthlyTrend,
   aggregateFleetKpis,
   aggregateCargoKpis,
+  aggregateCargoBreakdown,
+  aggregateDriverKpis,
+  aggregateDriverActivity,
+  aggregateFuelKpis,
+  aggregateFuelByVehicle,
+  aggregateMaintenanceKpis,
+  aggregateMaintenanceByVehicle,
+  aggregateComplianceKpis,
+  aggregateComplianceBreakdown,
+  aggregateTachographKpis,
+  aggregateTachographByDriver,
+  aggregateRouteIncidents,
 } from '@/utils/report-aggregations.js'
 import { exportPdf as doExportPdf } from '@/utils/export-pdf.js'
 import { exportXlsx as doExportXlsx } from '@/utils/export-xlsx.js'
 
-export function useInformes() {
+export function useReports() {
   const type = ref('economico')
   const rawData = ref([])
+  const secondaryData = ref([])
   const isLoading = ref(false)
   const error = ref(null)
   const period = ref('este_mes')
@@ -51,6 +64,16 @@ export function useInformes() {
         return aggregateFleetKpis(rawData.value)
       case 'cargas':
         return aggregateCargoKpis(rawData.value)
+      case 'conductores':
+        return aggregateDriverKpis(rawData.value)
+      case 'combustible':
+        return aggregateFuelKpis(rawData.value)
+      case 'mantenimiento':
+        return aggregateMaintenanceKpis(rawData.value)
+      case 'cumplimiento':
+        return aggregateComplianceKpis(rawData.value, secondaryData.value)
+      case 'tacografos':
+        return aggregateTachographKpis(rawData.value)
       default:
         return []
     }
@@ -65,6 +88,35 @@ export function useInformes() {
           profitByVehicle: aggregateProfitByVehicle(rawData.value),
           monthlyTrend: aggregateMonthlyTrend(rawData.value),
         }
+      case 'rutas':
+        return {
+          incidents: aggregateRouteIncidents(rawData.value),
+          monthlyTrend: aggregateMonthlyTrend(rawData.value),
+        }
+      case 'conductores':
+        return {
+          activity: aggregateDriverActivity(rawData.value, secondaryData.value),
+        }
+      case 'combustible':
+        return {
+          byVehicle: aggregateFuelByVehicle(rawData.value),
+        }
+      case 'mantenimiento':
+        return {
+          byVehicle: aggregateMaintenanceByVehicle(rawData.value),
+        }
+      case 'cumplimiento':
+        return {
+          breakdown: aggregateComplianceBreakdown(rawData.value, secondaryData.value),
+        }
+      case 'tacografos':
+        return {
+          byDriver: aggregateTachographByDriver(rawData.value),
+        }
+      case 'cargas':
+        return {
+          byType: aggregateCargoBreakdown(rawData.value),
+        }
       default:
         return {}
     }
@@ -75,10 +127,15 @@ export function useInformes() {
     error.value = null
     try {
       if (!dateFrom.value) resolveDates()
-      rawData.value = await apiReports.getReportData(type.value, {
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-      })
+      const params = { date_from: dateFrom.value, date_to: dateTo.value }
+
+      if (type.value === 'cumplimiento') {
+        const result = await apiReports.getComplianceData(params)
+        rawData.value = result.vehicleDocs
+        secondaryData.value = result.driverDocs
+      } else {
+        rawData.value = await apiReports.getReportData(type.value, params)
+      }
     } catch (err) {
       error.value = err
       notifications.error('Error al cargar datos del informe')
@@ -87,7 +144,7 @@ export function useInformes() {
     }
   }
 
-  function setInformeType(newType) {
+  function setReportType(newType) {
     type.value = newType
     fetch()
   }
@@ -120,6 +177,7 @@ export function useInformes() {
   return {
     reportType: type,
     rawData,
+    secondaryData,
     isLoading,
     error,
     period,
@@ -128,7 +186,7 @@ export function useInformes() {
     kpis,
     chartData,
     fetch,
-    setInformeType,
+    setReportType,
     setPeriod,
     exportPdf,
     exportXlsx,

@@ -12,7 +12,7 @@ vi.mock('@/stores/notifications.js', () => ({
   useNotificationStore: () => ({ success: vi.fn(), error: vi.fn() }),
 }))
 
-import { useInformes } from './use-reports.js'
+import { useReports } from './use-reports.js'
 import { apiReports } from '@/services/api-reports.js'
 
 const mockRoutes = [
@@ -40,7 +40,7 @@ const mockRoutes = [
   },
 ]
 
-describe('useInformes', () => {
+describe('useReports', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
@@ -48,37 +48,37 @@ describe('useInformes', () => {
 
   describe('estado inicial', () => {
     it('debería tener reportType en economico por defecto', () => {
-      const { reportType } = useInformes()
+      const { reportType } = useReports()
       expect(reportType.value).toBe('economico')
     })
 
     it('debería tener isLoading en false', () => {
-      const { isLoading } = useInformes()
+      const { isLoading } = useReports()
       expect(isLoading.value).toBe(false)
     })
 
     it('debería tener error en null', () => {
-      const { error } = useInformes()
+      const { error } = useReports()
       expect(error.value).toBeNull()
     })
 
     it('debería tener rawData vacío', () => {
-      const { rawData } = useInformes()
+      const { rawData } = useReports()
       expect(rawData.value).toEqual([])
     })
   })
 
-  describe('setInformeType', () => {
+  describe('setReportType', () => {
     it('debería cambiar el tipo de informe', () => {
-      const { reportType, setInformeType } = useInformes()
-      setInformeType('flota')
+      const { reportType, setReportType } = useReports()
+      setReportType('flota')
       expect(reportType.value).toBe('flota')
     })
 
     it('debería cargar datos al cambiar tipo si hay período', async () => {
       apiReports.getReportData.mockResolvedValue(mockRoutes)
-      const { setInformeType } = useInformes()
-      setInformeType('rutas')
+      const { setReportType } = useReports()
+      setReportType('rutas')
       expect(apiReports.getReportData).toHaveBeenCalled()
     })
   })
@@ -86,7 +86,7 @@ describe('useInformes', () => {
   describe('fetch', () => {
     it('debería cargar datos en éxito', async () => {
       apiReports.getReportData.mockResolvedValue(mockRoutes)
-      const { rawData, fetch, isLoading } = useInformes()
+      const { rawData, fetch, isLoading } = useReports()
 
       const promise = fetch()
       expect(isLoading.value).toBe(true)
@@ -99,7 +99,7 @@ describe('useInformes', () => {
     it('debería establecer error en fallo', async () => {
       const err = new Error('Network error')
       apiReports.getReportData.mockRejectedValue(err)
-      const { error, fetch } = useInformes()
+      const { error, fetch } = useReports()
 
       await fetch()
 
@@ -110,7 +110,7 @@ describe('useInformes', () => {
   describe('kpis', () => {
     it('debería computar KPIs financieros cuando el tipo es economico', async () => {
       apiReports.getReportData.mockResolvedValue(mockRoutes)
-      const { kpis, fetch } = useInformes()
+      const { kpis, fetch } = useReports()
       await fetch()
       expect(kpis.value.length).toBeGreaterThan(0)
       expect(kpis.value.some(k => k.key === 'total_revenue')).toBe(true)
@@ -119,14 +119,14 @@ describe('useInformes', () => {
 
   describe('exportPdf', () => {
     it('debería ser una función', () => {
-      const { exportPdf } = useInformes()
+      const { exportPdf } = useReports()
       expect(typeof exportPdf).toBe('function')
     })
   })
 
   describe('exportXlsx', () => {
     it('debería ser una función', () => {
-      const { exportXlsx } = useInformes()
+      const { exportXlsx } = useReports()
       expect(typeof exportXlsx).toBe('function')
     })
   })
