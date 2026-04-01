@@ -80,7 +80,7 @@ describe('apiReports', () => {
       })
       supabase.from.mockReturnValue(buildQuery())
 
-      const result = await apiReports.getReportData('cargas', {})
+      await apiReports.getReportData('cargas', {})
       expect(supabase.from).toHaveBeenCalledWith('cargo_records')
     })
 

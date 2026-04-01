@@ -101,7 +101,6 @@
 import { computed, onMounted } from 'vue'
 import { useInformes } from '@/composables/use-informes.js'
 import ReportKpiCard from '@/components/reports/ReportKpiCard.vue'
-import ReportChartCard from '@/components/reports/ReportChartCard.vue'
 import ReportBarChart from '@/components/reports/ReportBarChart.vue'
 import ReportLineChart from '@/components/reports/ReportLineChart.vue'
 import ReportPieChart from '@/components/reports/ReportPieChart.vue'
@@ -117,7 +116,6 @@ const {
   period,
   dateFrom,
   dateTo,
-  fetch,
   setPeriod,
   exportPdf,
   exportXlsx,

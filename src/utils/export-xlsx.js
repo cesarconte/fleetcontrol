@@ -40,7 +40,6 @@ export async function exportXlsx(title, columns, rows, options = {}) {
 
   // KPIs
   if (kpis.length > 0) {
-    const kpiHeaderRow = mainSheet.getRow(startRow)
     kpis.forEach((kpi, i) => {
       const col = i * 2 + 1
       const valueCell = mainSheet.getCell(startRow, col)
