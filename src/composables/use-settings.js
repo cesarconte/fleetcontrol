@@ -23,7 +23,7 @@ export function useSettings() {
   const notifications = useNotificationStore()
   const authStore = useAuthStore()
 
-  const isAdmin = computed(() => authStore.userRole === 'administrador')
+  const isAdmin = computed(() => authStore.userRole === 'admin')
   const currentRole = computed(() => authStore.userRole)
 
   async function fetchCompanySettings() {

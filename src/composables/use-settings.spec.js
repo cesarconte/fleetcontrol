@@ -24,7 +24,7 @@ vi.mock('@/stores/notifications.js', () => ({
 
 vi.mock('@/stores/auth.js', () => ({
   useAuthStore: vi.fn(() => ({
-    userRole: 'administrador',
+    userRole: 'admin',
     currentUser: { id: 'admin-1' },
   })),
 }))
@@ -100,7 +100,7 @@ describe('useSettings', () => {
   describe('fetchProfiles', () => {
     it('debería cargar perfiles', async () => {
       const mockProfiles = [
-        { id: 'u1', full_name: 'Admin', role: 'administrador' },
+        { id: 'u1', full_name: 'Admin', role: 'admin' },
         { id: 'u2', full_name: 'User', role: 'solo_lectura' },
       ]
       apiProfiles.getAll.mockResolvedValue(mockProfiles)
@@ -114,13 +114,13 @@ describe('useSettings', () => {
 
   describe('updateUserRole', () => {
     it('debería actualizar rol del usuario', async () => {
-      apiProfiles.updateRole.mockResolvedValue({ id: 'u1', role: 'jefe_trafico' })
+      apiProfiles.updateRole.mockResolvedValue({ id: 'u1', role: 'traffic_manager' })
       apiProfiles.getAll.mockResolvedValue([])
       const { updateUserRole } = useSettings()
 
-      await updateUserRole('u1', 'jefe_trafico')
+      await updateUserRole('u1', 'traffic_manager')
 
-      expect(apiProfiles.updateRole).toHaveBeenCalledWith('u1', 'jefe_trafico')
+      expect(apiProfiles.updateRole).toHaveBeenCalledWith('u1', 'traffic_manager')
     })
   })
 

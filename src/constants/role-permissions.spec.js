@@ -20,11 +20,11 @@ describe('role-permissions', () => {
     })
 
     it('debería incluir los 5 roles del enum user_role', () => {
-      expect(USER_ROLES).toHaveProperty('administrador')
-      expect(USER_ROLES).toHaveProperty('jefe_trafico')
-      expect(USER_ROLES).toHaveProperty('agente_trafico')
-      expect(USER_ROLES).toHaveProperty('tecnico_mantenimiento')
-      expect(USER_ROLES).toHaveProperty('solo_lectura')
+      expect(USER_ROLES).toHaveProperty('admin')
+      expect(USER_ROLES).toHaveProperty('traffic_manager')
+      expect(USER_ROLES).toHaveProperty('traffic_agent')
+      expect(USER_ROLES).toHaveProperty('maintenance_tech')
+      expect(USER_ROLES).toHaveProperty('read_only')
     })
 
     it('cada rol debería tener value, label, color', () => {
@@ -52,11 +52,11 @@ describe('role-permissions', () => {
 
   describe('getUserRoleLabel', () => {
     it('debería retornar label para administrador', () => {
-      expect(getUserRoleLabel('administrador')).toBe('Administrador')
+      expect(getUserRoleLabel('admin')).toBe('Administrador')
     })
 
     it('debería retornar label para jefe_trafico', () => {
-      expect(getUserRoleLabel('jefe_trafico')).toContain('Tráfico')
+      expect(getUserRoleLabel('traffic_manager')).toContain('Tráfico')
     })
 
     it('debería retornar el value para rol desconocido', () => {
@@ -76,11 +76,11 @@ describe('role-permissions', () => {
 
   describe('ROLE_PERMISSIONS', () => {
     it('debería tener permisos para los 5 roles', () => {
-      expect(ROLE_PERMISSIONS).toHaveProperty('administrador')
-      expect(ROLE_PERMISSIONS).toHaveProperty('jefe_trafico')
-      expect(ROLE_PERMISSIONS).toHaveProperty('agente_trafico')
-      expect(ROLE_PERMISSIONS).toHaveProperty('tecnico_mantenimiento')
-      expect(ROLE_PERMISSIONS).toHaveProperty('solo_lectura')
+      expect(ROLE_PERMISSIONS).toHaveProperty('admin')
+      expect(ROLE_PERMISSIONS).toHaveProperty('traffic_manager')
+      expect(ROLE_PERMISSIONS).toHaveProperty('traffic_agent')
+      expect(ROLE_PERMISSIONS).toHaveProperty('maintenance_tech')
+      expect(ROLE_PERMISSIONS).toHaveProperty('read_only')
     })
 
     it('cada rol debería tener permisos para companySettings, users, alertThresholds, integrations', () => {
@@ -99,99 +99,99 @@ describe('role-permissions', () => {
 
   describe('canEditCompanySettings', () => {
     it('administrador debería poder editar', () => {
-      expect(canEditCompanySettings('administrador')).toBe(true)
+      expect(canEditCompanySettings('admin')).toBe(true)
     })
 
     it('jefe_trafico NO debería poder editar', () => {
-      expect(canEditCompanySettings('jefe_trafico')).toBe(false)
+      expect(canEditCompanySettings('traffic_manager')).toBe(false)
     })
 
     it('solo_lectura NO debería poder editar', () => {
-      expect(canEditCompanySettings('solo_lectura')).toBe(false)
+      expect(canEditCompanySettings('read_only')).toBe(false)
     })
   })
 
   describe('canManageUsers', () => {
     it('administrador debería poder gestionar usuarios', () => {
-      expect(canManageUsers('administrador')).toBe(true)
+      expect(canManageUsers('admin')).toBe(true)
     })
 
     it('ningún otro rol debería poder gestionar usuarios', () => {
-      expect(canManageUsers('jefe_trafico')).toBe(false)
-      expect(canManageUsers('agente_trafico')).toBe(false)
-      expect(canManageUsers('tecnico_mantenimiento')).toBe(false)
-      expect(canManageUsers('solo_lectura')).toBe(false)
+      expect(canManageUsers('traffic_manager')).toBe(false)
+      expect(canManageUsers('traffic_agent')).toBe(false)
+      expect(canManageUsers('maintenance_tech')).toBe(false)
+      expect(canManageUsers('read_only')).toBe(false)
     })
   })
 
   describe('canEditAlertThresholds', () => {
     it('administrador debería poder editar umbrales', () => {
-      expect(canEditAlertThresholds('administrador')).toBe(true)
+      expect(canEditAlertThresholds('admin')).toBe(true)
     })
 
     it('otros roles NO deberían poder editar', () => {
-      expect(canEditAlertThresholds('jefe_trafico')).toBe(false)
-      expect(canEditAlertThresholds('solo_lectura')).toBe(false)
+      expect(canEditAlertThresholds('traffic_manager')).toBe(false)
+      expect(canEditAlertThresholds('read_only')).toBe(false)
     })
   })
 
   describe('canEditIntegrations', () => {
     it('administrador debería poder editar integraciones', () => {
-      expect(canEditIntegrations('administrador')).toBe(true)
+      expect(canEditIntegrations('admin')).toBe(true)
     })
 
     it('otros roles NO deberían poder editar', () => {
-      expect(canEditIntegrations('jefe_trafico')).toBe(false)
+      expect(canEditIntegrations('traffic_manager')).toBe(false)
     })
   })
 
   describe('canEditModule', () => {
     it('administrador debería poder editar todos los módulos', () => {
-      expect(canEditModule('administrador', 'vehicles')).toBe(true)
-      expect(canEditModule('administrador', 'drivers')).toBe(true)
-      expect(canEditModule('administrador', 'routes')).toBe(true)
-      expect(canEditModule('administrador', 'maintenance')).toBe(true)
+      expect(canEditModule('admin', 'vehicles')).toBe(true)
+      expect(canEditModule('admin', 'drivers')).toBe(true)
+      expect(canEditModule('admin', 'routes')).toBe(true)
+      expect(canEditModule('admin', 'maintenance')).toBe(true)
     })
 
     it('jefe_trafico debería poder editar vehicles, drivers, routes pero no maintenance', () => {
-      expect(canEditModule('jefe_trafico', 'vehicles')).toBe(true)
-      expect(canEditModule('jefe_trafico', 'routes')).toBe(true)
-      expect(canEditModule('jefe_trafico', 'maintenance')).toBe(false)
+      expect(canEditModule('traffic_manager', 'vehicles')).toBe(true)
+      expect(canEditModule('traffic_manager', 'routes')).toBe(true)
+      expect(canEditModule('traffic_manager', 'maintenance')).toBe(false)
     })
 
     it('agente_trafico debería poder editar solo routes y cargo', () => {
-      expect(canEditModule('agente_trafico', 'routes')).toBe(true)
-      expect(canEditModule('agente_trafico', 'cargo')).toBe(true)
-      expect(canEditModule('agente_trafico', 'vehicles')).toBe(false)
-      expect(canEditModule('agente_trafico', 'maintenance')).toBe(false)
+      expect(canEditModule('traffic_agent', 'routes')).toBe(true)
+      expect(canEditModule('traffic_agent', 'cargo')).toBe(true)
+      expect(canEditModule('traffic_agent', 'vehicles')).toBe(false)
+      expect(canEditModule('traffic_agent', 'maintenance')).toBe(false)
     })
 
     it('solo_lectura no debería poder editar nada', () => {
-      expect(canEditModule('solo_lectura', 'vehicles')).toBe(false)
-      expect(canEditModule('solo_lectura', 'routes')).toBe(false)
+      expect(canEditModule('read_only', 'vehicles')).toBe(false)
+      expect(canEditModule('read_only', 'routes')).toBe(false)
     })
   })
 
   describe('hasSettingsAccess', () => {
     it('administrador debería tener acceso a todas las pestañas', () => {
-      expect(hasSettingsAccess('administrador', 'empresa')).toBe(true)
-      expect(hasSettingsAccess('administrador', 'usuarios')).toBe(true)
-      expect(hasSettingsAccess('administrador', 'alertas')).toBe(true)
-      expect(hasSettingsAccess('administrador', 'integraciones')).toBe(true)
+      expect(hasSettingsAccess('admin', 'empresa')).toBe(true)
+      expect(hasSettingsAccess('admin', 'usuarios')).toBe(true)
+      expect(hasSettingsAccess('admin', 'alertas')).toBe(true)
+      expect(hasSettingsAccess('admin', 'integraciones')).toBe(true)
     })
 
     it('jefe_trafico debería poder ver empresa y alertas pero no usuarios ni integraciones', () => {
-      expect(hasSettingsAccess('jefe_trafico', 'empresa')).toBe(true)
-      expect(hasSettingsAccess('jefe_trafico', 'alertas')).toBe(true)
-      expect(hasSettingsAccess('jefe_trafico', 'usuarios')).toBe(false)
-      expect(hasSettingsAccess('jefe_trafico', 'integraciones')).toBe(false)
+      expect(hasSettingsAccess('traffic_manager', 'empresa')).toBe(true)
+      expect(hasSettingsAccess('traffic_manager', 'alertas')).toBe(true)
+      expect(hasSettingsAccess('traffic_manager', 'usuarios')).toBe(false)
+      expect(hasSettingsAccess('traffic_manager', 'integraciones')).toBe(false)
     })
 
     it('solo_lectura solo debería poder ver empresa y alertas', () => {
-      expect(hasSettingsAccess('solo_lectura', 'empresa')).toBe(true)
-      expect(hasSettingsAccess('solo_lectura', 'alertas')).toBe(true)
-      expect(hasSettingsAccess('solo_lectura', 'usuarios')).toBe(false)
-      expect(hasSettingsAccess('solo_lectura', 'integraciones')).toBe(false)
+      expect(hasSettingsAccess('read_only', 'empresa')).toBe(true)
+      expect(hasSettingsAccess('read_only', 'alertas')).toBe(true)
+      expect(hasSettingsAccess('read_only', 'usuarios')).toBe(false)
+      expect(hasSettingsAccess('read_only', 'integraciones')).toBe(false)
     })
   })
 })

@@ -17,28 +17,28 @@ function deepFreeze(obj) {
 }
 
 export const USER_ROLES = deepFreeze({
-  administrador: {
-    value: 'administrador',
+  admin: {
+    value: 'admin',
     label: 'Administrador',
     color: 'error',
   },
-  jefe_trafico: {
-    value: 'jefe_trafico',
+  traffic_manager: {
+    value: 'traffic_manager',
     label: 'Jefe de Tráfico',
     color: 'primary',
   },
-  agente_trafico: {
-    value: 'agente_trafico',
+  traffic_agent: {
+    value: 'traffic_agent',
     label: 'Agente de Tráfico',
     color: 'info',
   },
-  tecnico_mantenimiento: {
-    value: 'tecnico_mantenimiento',
+  maintenance_tech: {
+    value: 'maintenance_tech',
     label: 'Técnico de Mantenimiento',
     color: 'warning',
   },
-  solo_lectura: {
-    value: 'solo_lectura',
+  read_only: {
+    value: 'read_only',
     label: 'Solo Lectura',
     color: 'grey',
   },
@@ -52,7 +52,7 @@ export const USER_ROLE_VALUES = Object.freeze(Object.keys(USER_ROLES))
  * Values: 'none', 'view', 'edit', 'manage'
  */
 export const ROLE_PERMISSIONS = deepFreeze({
-  administrador: {
+  admin: {
     companySettings: 'edit',
     users: 'manage',
     alertThresholds: 'edit',
@@ -63,7 +63,7 @@ export const ROLE_PERMISSIONS = deepFreeze({
     cargo: 'crud',
     maintenance: 'crud',
   },
-  jefe_trafico: {
+  traffic_manager: {
     companySettings: 'view',
     users: 'none',
     alertThresholds: 'view',
@@ -74,7 +74,7 @@ export const ROLE_PERMISSIONS = deepFreeze({
     cargo: 'crud',
     maintenance: 'view',
   },
-  agente_trafico: {
+  traffic_agent: {
     companySettings: 'view',
     users: 'none',
     alertThresholds: 'view',
@@ -85,7 +85,7 @@ export const ROLE_PERMISSIONS = deepFreeze({
     cargo: 'crud',
     maintenance: 'view',
   },
-  tecnico_mantenimiento: {
+  maintenance_tech: {
     companySettings: 'view',
     users: 'none',
     alertThresholds: 'view',
@@ -96,7 +96,7 @@ export const ROLE_PERMISSIONS = deepFreeze({
     cargo: 'view',
     maintenance: 'crud',
   },
-  solo_lectura: {
+  read_only: {
     companySettings: 'view',
     users: 'none',
     alertThresholds: 'view',

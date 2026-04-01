@@ -102,7 +102,7 @@ describe('settings-schema', () => {
     const valid = {
       email: 'user@ejemplo.com',
       full_name: 'Nuevo Usuario',
-      role: 'agente_trafico',
+      role: 'traffic_agent',
     }
 
     it('debería aceptar datos válidos de usuario', () => {
@@ -118,13 +118,7 @@ describe('settings-schema', () => {
     })
 
     it('debería aceptar todos los roles válidos', () => {
-      const roles = [
-        'administrador',
-        'jefe_trafico',
-        'agente_trafico',
-        'tecnico_mantenimiento',
-        'solo_lectura',
-      ]
+      const roles = ['admin', 'traffic_manager', 'traffic_agent', 'maintenance_tech', 'read_only']
       roles.forEach(role => {
         expect(userCreateSchema.safeParse({ ...valid, role }).success).toBe(true)
       })
