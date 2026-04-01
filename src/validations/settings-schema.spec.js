@@ -33,7 +33,7 @@ describe('settings-schema', () => {
     })
 
     it('debería aceptar email opcional', () => {
-      const { email: _email, ...rest } = valid
+      const { email, ...rest } = valid // eslint-disable-line no-unused-vars
       expect(companySettingsSchema.safeParse(rest).success).toBe(true)
     })
 
