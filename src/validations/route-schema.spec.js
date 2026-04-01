@@ -3,7 +3,7 @@ import { routeSchema, routeSearchSchema } from './route-schema.js'
 
 describe('routeSchema', () => {
   const validRoute = {
-    planned_departure: '2026-04-01',
+    departure_date: '2026-04-01',
     origin_city: 'Madrid',
     destination_city: 'Barcelona',
     vehicle_id: '550e8400-e29b-41d4-a716-446655440000',
@@ -17,7 +17,7 @@ describe('routeSchema', () => {
     })
 
     it('debería requerir fecha de salida', () => {
-      const result = routeSchema.safeParse({ ...validRoute, planned_departure: '' })
+      const result = routeSchema.safeParse({ ...validRoute, departure_date: '' })
       expect(result.success).toBe(false)
     })
 

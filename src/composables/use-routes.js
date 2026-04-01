@@ -2,7 +2,7 @@
  * FleetControl — useRoutes Composable
  *
  * Reactive route list with pagination, filtering, and CRUD operations.
- * Sort column matches Supabase DB schema (planned_departure).
+ * Sort column matches Supabase DB schema (departure_date).
  */
 
 import { ref, computed } from 'vue'
@@ -19,7 +19,7 @@ export function useRoutes(initialFilters = {}) {
   const page = ref(1)
   const pageSize = ref(25)
   const filters = ref({ ...initialFilters })
-  const sort = ref({ col: 'planned_departure', asc: false })
+  const sort = ref({ col: 'departure_date', asc: false })
 
   const notifications = useNotificationStore()
 

@@ -1,31 +1,31 @@
 <template>
   <div class="app-notifications">
     <transition-group name="notif">
-      <v-snackbar
-        v-for="item in notificationStore.items"
-        :key="item.id"
-        :model-value="true"
-        :color="getColor(item.type)"
-        :timeout="item.timeout"
-        location="bottom right"
-        multi-line
-        :data-testid="`notification-${item.type}`"
-        @update:model-value="handleClose(item.id)"
-      >
-        <div class="d-flex align-center">
-          <v-icon class="mr-2" size="20">{{ getIcon(item.type) }}</v-icon>
-          <span class="text-body-2">{{ item.message }}</span>
-        </div>
-        <template #actions>
-          <v-btn
-            icon="mdi-close"
-            size="small"
-            variant="text"
-            data-testid="notification-dismiss"
-            @click="handleClose(item.id)"
-          />
-        </template>
-      </v-snackbar>
+      <div v-for="item in notificationStore.items" :key="item.id">
+        <v-snackbar
+          :model-value="true"
+          :color="getColor(item.type)"
+          :timeout="item.timeout"
+          location="bottom right"
+          multi-line
+          :data-testid="`notification-${item.type}`"
+          @update:model-value="handleClose(item.id)"
+        >
+          <div class="d-flex align-center">
+            <v-icon class="mr-2" size="20">{{ getIcon(item.type) }}</v-icon>
+            <span class="text-body-2">{{ item.message }}</span>
+          </div>
+          <template #actions>
+            <v-btn
+              icon="mdi-close"
+              size="small"
+              variant="text"
+              data-testid="notification-dismiss"
+              @click="handleClose(item.id)"
+            />
+          </template>
+        </v-snackbar>
+      </div>
     </transition-group>
   </div>
 </template>

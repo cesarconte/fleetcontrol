@@ -7,10 +7,10 @@
           <v-row>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.planned_departure"
+                v-model="form.departure_date"
                 label="Fecha salida *"
                 type="date"
-                :error-messages="errors.planned_departure"
+                :error-messages="errors.departure_date"
                 variant="outlined"
                 required
                 data-testid="route-departure-date"
@@ -27,7 +27,7 @@
             </v-col>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="form.planned_arrival"
+                v-model="form.planned_arrival_date"
                 label="Fecha llegada"
                 type="date"
                 variant="outlined"
@@ -361,9 +361,9 @@ const subcategoryOptions = CARGO_CATEGORIES.flatMap(cat =>
 )
 
 const form = reactive({
-  planned_departure: '',
+  departure_date: '',
   departure_time: '',
-  planned_arrival: '',
+  planned_arrival_date: '',
   arrival_time: '',
   origin_city: '',
   origin_province: '',

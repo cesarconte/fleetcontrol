@@ -4,10 +4,10 @@
       <div class="d-flex justify-space-between align-start mb-2">
         <div>
           <div class="text-body-2 font-weight-medium">
-            {{ route.origen_municipio }} → {{ route.destino_municipio }}
+            {{ route.origin_city }} → {{ route.destination_city }}
           </div>
           <div class="text-caption text-medium-emphasis">
-            {{ formatDate(route.fecha_salida) }}
+            {{ formatDate(route.departure_date) }}
           </div>
         </div>
         <v-chip :color="getStatusColor(route.status, 'ruta')" size="small" variant="tonal">
@@ -18,9 +18,9 @@
       <v-divider class="my-2" />
 
       <div class="d-flex justify-space-between text-caption text-medium-emphasis">
-        <span>{{ route.distancia_total_km ? `${route.distancia_total_km} km` : '—' }}</span>
+        <span>{{ route.distance_total_km ? `${route.distance_total_km} km` : '—' }}</span>
         <span>
-          {{ route.peso_carga_kg ? `${route.peso_carga_kg.toLocaleString('es-ES')} kg` : '—' }}
+          {{ route.cargo_weight_kg ? `${route.cargo_weight_kg.toLocaleString('es-ES')} kg` : '—' }}
         </span>
       </div>
     </v-card-text>

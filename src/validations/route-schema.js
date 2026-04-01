@@ -4,20 +4,20 @@
  * All route form validations per PRD §4.4.
  * Field names match Supabase DB schema (source of truth).
  * departure_time / arrival_time are virtual fields (no DB column)
- * combined into planned_departure / planned_arrival at service level.
+ * combined into departure_date / planned_arrival_date at service level.
  */
 
 import { z } from 'zod'
 
 export const routeSchema = z.object({
   // ── Planificación ────────────────────────────────────
-  planned_departure: z
+  departure_date: z
     .string({ required_error: 'La fecha de salida es obligatoria' })
     .min(1, 'La fecha de salida es obligatoria'),
 
   departure_time: z.string().optional().or(z.literal('')),
 
-  planned_arrival: z.string().optional().or(z.literal('')),
+  planned_arrival_date: z.string().optional().or(z.literal('')),
   arrival_time: z.string().optional().or(z.literal('')),
 
   // ── Origen / Destino ─────────────────────────────────
