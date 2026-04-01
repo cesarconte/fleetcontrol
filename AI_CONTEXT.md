@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-01 (sesión 11)
+> **Última actualización:** 2026-04-01 (sesión 12)
 > **Actualizado por:** AI Agent
 
 ---
@@ -29,6 +29,9 @@ Estado servidor:      TanStack Query (Vue Query v5)
 Formularios:          Vee-Validate v4 + Zod
 Mapas:                Google Maps Platform
 Iconos:               Material Symbols (Google)
+Gráficos:             ECharts + vue-echarts
+Exportación PDF:      jsPDF + jsPDF-AutoTable
+Exportación Excel:    ExcelJS
 Testing:              Vitest + Cypress
 Linting:              ESLint + Prettier
 
@@ -62,7 +65,12 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
     ├── assets/
     ├── components/
     │   ├── layout/               ← AppSidebar, AppTopBar, AppLayout
-    │   └── ui/                   ← Componentes reutilizables
+    │   ├── ui/                   ← Componentes reutilizables
+    │   ├── vehicles/             ← VehicleForm, VehicleList, etc.
+    │   ├── drivers/              ← DriverForm, DriverList, etc.
+    │   ├── routes/               ← RouteForm, RouteList, etc.
+    │   ├── alerts/               ← AlertList, AlertDismissDialog
+    │   └── reports/              ← ReportKpiCard, ReportChartCard, etc. (7 componentes)
     ├── composables/              ← use-*.js (lógica de negocio)
     ├── constants/                ← Enums, legal-limits, document-types
     ├── pages/                    ← Páginas Vue (lazy-loaded)
@@ -98,13 +106,13 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance |
 | Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                     |
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
-| Módulo Alertas             | 🟡 En progreso | CRUD, filtros, acciones, dismiss. Pendiente: generación automática, realtime |
-| Módulo Informes            | 🔴 Sin empezar | Operativos + regulatorios                                                    |
+| Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                            |
+| Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera          |
 | Configuración              | 🔴 Sin empezar | Empresa, usuarios, integraciones                                             |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟡 En progreso | 789 tests (Vitest), Cypress configurado, E2E smoke test                      |
+| Testing (TDD)              | 🟢 Completado  | 920 tests (Vitest), Cypress configurado, E2E smoke test                      |
 
 ### Documentación de Transporte (v1.0)
 
@@ -210,11 +218,65 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-01 (sesión 11)
-**Branch:** feature/alertas
-**Tests:** 789 pasando, 0 errores lint, typecheck limpio
+**Fecha:** 2026-04-01 (sesión 12)
+**Branch:** feature/informes
+**Tests:** 920 pasando, 0 errores lint, 0 warnings, typecheck limpio
 
 **Trabajo realizado:**
+
+### Sesión 12 — Módulo Informes (completo)
+
+**Alcance:** Sistema de informes profesional con 9 tipos, gráficos ECharts, exportación PDF/Excel, y esquema BD financiera completo.
+
+**Migraciones BD aplicadas (6):**
+
+- 019: `route_financials` — 11 columnas nuevas en routes (revenue, costs, margins, client, incidents)
+- 020: `vehicle_annual_costs` — Tabla costes fijos anuales por vehículo (seguro, IVTM, ITV, depreciación, neumáticos, GPS, etc.) con `total_fixed_cost_eur` GENERATED
+- 021: `driver_compensation` — Tabla compensación mensual por conductor (salario, plus, dietas, SS, con `total_company_cost_eur` GENERATED)
+- 022: `financial_functions` — Función `calculate_route_fixed_cost()` + vista `v_route_financials`
+- 023: `financial_indexes` — 4 índices para queries financieras
+- 024: `financial_rls` — RLS restrictivo (created_by = auth.uid()) en tablas nuevas
+
+**Dependencias instaladas:**
+
+- `echarts` + `vue-echarts` — Gráficos
+- `jspdf` + `jspdf-autotable` — Exportación PDF
+- `exceljs` — Exportación Excel
+
+**Archivos creados (~40):**
+
+Infraestructura:
+
+- `src/constants/report-types.js` + spec — 10 tipos de informe (flota, conductores, rutas, combustible, mantenimiento, cumplimiento, tacografos, cargas, económico, dashboard)
+- `src/validations/report-schema.js` + spec — Zod para filtros
+- `src/services/api-reports.js` + spec — getReportData, getComplianceData
+- `src/utils/report-aggregations.js` + spec — 18 funciones de agregación (KPIs, breakdowns, trends)
+- `src/utils/export-pdf.js` + spec — PDF con jsPDF + autoTable
+- `src/utils/export-xlsx.js` + spec — Excel con ExcelJS
+- `src/composables/use-reports.js` + spec — Estado reactivo con aggregación por tipo
+
+Componentes UI compartidos (7):
+
+- `ReportKpiCard.vue`, `ReportChartCard.vue`, `ReportBarChart.vue`, `ReportLineChart.vue`, `ReportPieChart.vue`, `ReportPeriodFilter.vue`, `ReportExportBar.vue`
+
+Páginas (10):
+
+- `ReportsHubPage.vue` — Grid 9 tarjetas navegables
+- `EconomicoReportPage.vue` — KPIs + 4 gráficos + tabla detalle rutas
+- `FleetReportPage.vue` — Flota con composición, estado, km
+- `DriversReportPage.vue` — Conductores con actividad, docs
+- `RoutesReportPage.vue` — Rutas con incidencias, tendencia, costes
+- `FuelReportPage.vue` — Combustible con precio/L, consumo, CO2
+- `MaintenanceReportPage.vue` — Mantenimiento costes, preventivo/correctivo
+- `ComplianceReportPage.vue` — Cumplimiento doc vehículos + conductores
+- `TachographReportPage.vue` — Tacógrafos descargas, infracciones, horas
+- `CargoReportPage.vue` — Cargas por tipo, peso, ADR
+
+Rutas: 10 nuevas (hub + 9 informes), sidebar actualizado
+
+**Resultado:** 920 tests (789 + 131 nuevos). Lint + typecheck limpios. 0 warnings Supabase advisors.
+
+---
 
 ### Sesión 11 — Módulo Alertas (CRUD + UI)
 
@@ -260,12 +322,15 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 **Estado final BD Supabase:**
 
-- 12 tablas con RLS habilitado
+- 14 tablas con RLS habilitado (12 originales + vehicle_annual_costs + driver_compensation)
 - Todas las columnas en inglés
 - Todos los valores de enum en inglés
 - 2 buckets Storage: `documentos-conductores` + `vehicle-documents`
-- 18 migraciones aplicadas
+- 24 migraciones aplicadas (001-024)
 - Código y BD 100% sincronizados
+- Vista `v_route_financials` con security_invoker
+- Función `calculate_route_fixed_cost()` para allocation de costes fijos
+- RLS restrictivo en tablas financieras (created_by = auth.uid())
 
 **Problema 1: BD en español vs código en inglés**
 
@@ -417,6 +482,58 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 ---
 
+## 8.1 Tareas Pendientes (por prioridad)
+
+### Alta — Próxima sesión
+
+| Tarea                            | Módulo    | Descripción                                                                                                         |
+| -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| Generación automática de alertas | Alertas   | Detectar vencimientos doc, límites HOS, consumo anómalo, mantenimiento pendiente e insertar alertas automáticamente |
+| Realtime subscriptions           | Alertas   | Suscripción Supabase Realtime en tabla `alerts` para actualización en tiempo real (Tier 1 según AGENTS.md §17)      |
+| Badge alertas activas            | Sidebar   | Mostrar contador de alertas no leídas/no silenciadas en el icono del sidebar                                        |
+| Aplicar migraciones BD informes  | Informes  | Migraciones 019-024 ya aplicadas en Supabase ✅                                                                     |
+| Dashboard principal              | Dashboard | Reemplazar placeholder con KPIs reales desde `get_dashboard_kpis()` + gráficos desde datos                          |
+
+### Media — Siguientes iteraciones
+
+| Tarea                          | Módulo          | Descripción                                                              |
+| ------------------------------ | --------------- | ------------------------------------------------------------------------ |
+| Comparación período vs período | Informes        | Añadir selector "comparar con" (mes anterior, año anterior) con deltas % |
+| Drill-down en gráficos         | Informes        | Click en gráfico → ver datos filtrados en tabla                          |
+| Notificaciones por email       | Alertas         | Integración Brevo para alertas configurables por tipo y por usuario      |
+| Configuración de umbrales      | Alertas         | UI para editar `company_settings` (alert_days_vehicle_doc, etc.)         |
+| Exportación PDF con gráficos   | Informes        | Incluir capturas de gráficos ECharts en el PDF exportado                 |
+| Informes programados           | Informes        | Envío automático por email de informes en horarios configurados          |
+| Módulo Tacógrafos              | Gestión         | CRUD descargas DDD, análisis conducción/descanso, infracciones           |
+| Gestión Documental completa    | Gestión         | Documentos centralizados con flujo de aprobación y auditoría             |
+| Sistema Realtime               | Infraestructura | Suscripciones en tablas Tier 1 (alerts, routes, vehicles, drivers)       |
+
+### Baja — Futuras ampliaciones
+
+| Tarea                         | Módulo          | Descripción                                                                      |
+| ----------------------------- | --------------- | -------------------------------------------------------------------------------- |
+| Portal de datos económicos    | Informes        | CRUD de revenue, driver_cost, other_variable_cost, allocated_fixed_cost por ruta |
+| CRUD vehicle_annual_costs     | Configuración   | UI para gestionar costes fijos anuales por vehículo                              |
+| CRUD driver_compensation      | Configuración   | UI para gestionar compensación mensual por conductor                             |
+| Exportación Excel avanzada    | Informes        | Múltiples hojas por informe (resumen KPIs + detalle + gráficos)                  |
+| Gráficos interactivos         | Informes        | Zoom, filtros por click en leyenda, tooltips avanzados                           |
+| Configuración empresa         | Configuración   | Datos fiscales, logo, preferencias, integraciones                                |
+| Sistema notificaciones in-app | Notificaciones  | Centro de notificaciones con historial y preferencias                            |
+| GPS/Telemática                | Infraestructura | Integración con proveedor para posición en tiempo real                           |
+
+### Completado (no requiere acción)
+
+| Tarea                                                               | Fecha     |
+| ------------------------------------------------------------------- | --------- |
+| CRUD alertas completo                                               | Sesión 11 |
+| 9 informes con KPIs + gráficos + export                             | Sesión 12 |
+| BD financiera (routes + vehicle_annual_costs + driver_compensation) | Sesión 12 |
+| 24 migraciones aplicadas en Supabase                                | Sesión 12 |
+| RLS restrictivo en tablas nuevas                                    | Sesión 12 |
+| 920 tests TDD                                                       | Sesión 12 |
+
+---
+
 ## 9. Referencias y Recursos
 
 | Recurso                         | Tipo         | Ubicación                                              |
@@ -432,9 +549,11 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
 | Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
 | Tipos de alerta                 | Código       | `src/constants/alert-types.js`                         |
+| Tipos de informe                | Código       | `src/constants/report-types.js`                        |
+| Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                     |
 | Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
 | Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-018 aplicadas en Supabase) |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-024 aplicadas en Supabase) |
 | Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                     |
 | Material Design 3               | Docs         | https://m3.material.io                                 |
 | Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
