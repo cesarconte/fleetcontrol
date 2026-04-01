@@ -33,7 +33,7 @@ describe('settings-schema', () => {
     })
 
     it('debería aceptar email opcional', () => {
-      const { email, ...rest } = valid
+      const { email: _email, ...rest } = valid
       expect(companySettingsSchema.safeParse(rest).success).toBe(true)
     })
 
