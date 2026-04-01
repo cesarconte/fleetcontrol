@@ -86,7 +86,7 @@ const emit = defineEmits(['saved'])
 
 const formRef = ref(null)
 const isSubmitting = ref(false)
-const isEditable = canEditIntegrations(currentRole.value)
+const isEditable = canEditIntegrations(currentRole)
 
 const gpsProviders = [
   { title: 'Webfleet', value: 'webfleet' },

@@ -160,7 +160,7 @@ const formRef = ref(null)
 const isSubmitting = ref(false)
 const errors = reactive({})
 
-const isEditable = computed(() => canEditCompanySettings(currentRole.value))
+const isEditable = computed(() => canEditCompanySettings(currentRole))
 
 const fullAddress = computed(() => {
   const s = props.settings

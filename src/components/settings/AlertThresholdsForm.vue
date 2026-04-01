@@ -143,7 +143,7 @@ const emit = defineEmits(['saved'])
 const formRef = ref(null)
 const isSubmitting = ref(false)
 const errors = reactive({})
-const isEditable = canEditAlertThresholds(currentRole.value)
+const isEditable = canEditAlertThresholds(currentRole)
 
 const form = reactive({
   alert_days_vehicle_doc: 30,
