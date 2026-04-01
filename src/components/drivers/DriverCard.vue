@@ -5,7 +5,7 @@
         <div>
           <div class="text-h6 font-weight-bold">{{ driver.full_name }}</div>
           <div class="text-body-2 text-medium-emphasis">
-            {{ driver.nif }}
+            {{ driver.national_id }}
           </div>
         </div>
         <v-chip :color="getStatusColor(driver.status, 'conductor')" size="small" variant="tonal">

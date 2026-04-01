@@ -6,44 +6,44 @@
       <v-row>
         <v-col cols="12" sm="6" md="3">
           <v-select
-            :model-value="modelValue.carnet_class"
+            :model-value="modelValue.license_class"
             :items="clasesCarnet"
             label="Clase"
             variant="outlined"
             clearable
             data-testid="driver-carnet-clase"
-            @update:model-value="updateField('carnet_class', $event)"
+            @update:model-value="updateField('license_class', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_number"
+            :model-value="modelValue.license_number"
             label="Número de carnet"
             variant="outlined"
             maxlength="20"
-            :error-messages="errors.carnet_number"
+            :error-messages="errors.license_number"
             data-testid="driver-carnet-numero"
-            @update:model-value="updateField('carnet_number', $event)"
+            @update:model-value="updateField('license_number', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_issue_date"
+            :model-value="modelValue.license_issue_date"
             label="Fecha de expedición"
             type="date"
             variant="outlined"
             data-testid="driver-carnet-fecha-expedicion"
-            @update:model-value="updateField('carnet_issue_date', $event)"
+            @update:model-value="updateField('license_issue_date', $event)"
           />
         </v-col>
         <v-col cols="12" sm="6" md="3">
           <v-text-field
-            :model-value="modelValue.carnet_expiry_date"
+            :model-value="modelValue.license_expiry_date"
             label="Fecha de vencimiento"
             type="date"
             variant="outlined"
             data-testid="driver-carnet-fecha-vencimiento"
-            @update:model-value="updateField('carnet_expiry_date', $event)"
+            @update:model-value="updateField('license_expiry_date', $event)"
           />
         </v-col>
       </v-row>

@@ -6,27 +6,27 @@
       <v-row>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Clase</div>
-          <div class="text-body-1 font-weight-medium">{{ driver.carnet_class || '—' }}</div>
+          <div class="text-body-1 font-weight-medium">{{ driver.license_class || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Número</div>
-          <div class="text-body-1">{{ driver.carnet_number || '—' }}</div>
+          <div class="text-body-1">{{ driver.license_number || '—' }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha expedición</div>
-          <div class="text-body-1">{{ formatDate(driver.carnet_issue_date) }}</div>
+          <div class="text-body-1">{{ formatDate(driver.license_issue_date) }}</div>
         </v-col>
         <v-col cols="6" sm="4" md="3">
           <div class="text-caption text-medium-emphasis">Fecha vencimiento</div>
           <div class="d-flex align-center ga-2">
-            <div class="text-body-1">{{ formatDate(driver.carnet_expiry_date) }}</div>
+            <div class="text-body-1">{{ formatDate(driver.license_expiry_date) }}</div>
             <v-chip
-              v-if="driver.carnet_expiry_date"
-              :color="getEstado(driver.carnet_expiry_date).color"
+              v-if="driver.license_expiry_date"
+              :color="getEstado(driver.license_expiry_date).color"
               size="x-small"
               variant="tonal"
             >
-              {{ getEstado(driver.carnet_expiry_date).label }}
+              {{ getEstado(driver.license_expiry_date).label }}
             </v-chip>
           </div>
         </v-col>

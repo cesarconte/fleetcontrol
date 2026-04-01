@@ -35,7 +35,7 @@ import { supabase } from '@/services/supabase-client.js'
 const mockDriver = {
   id: '1',
   full_name: 'Juan García López',
-  nif: '12345678A',
+  national_id: '12345678A',
   birth_date: '1985-03-15',
   status: 'active',
   email: 'juan@test.com',

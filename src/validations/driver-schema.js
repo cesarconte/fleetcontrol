@@ -18,7 +18,7 @@ const baseFields = {
     .min(2, 'El nombre debe tener al menos 2 caracteres')
     .max(200, 'El nombre es demasiado largo'),
 
-  nif: z
+  national_id: z
     .string({ required_error: 'El NIF/NIE es obligatorio' })
     .regex(NIF_REGEX, 'Formato de NIF inválido (8 dígitos + letra, ej: 12345678A)')
     .or(z.string().regex(NIE_REGEX, 'Formato de NIE inválido (X/Y/Z + 7 dígitos + letra)')),
@@ -41,7 +41,7 @@ const baseFields = {
 
   photo_url: z.string().optional().or(z.literal('')),
 
-  hire_date: z.string().optional().or(z.literal('')),
+  join_date: z.string().optional().or(z.literal('')),
 
   status: z
     .enum(['active', 'temporary_leave', 'permanently_off'], {

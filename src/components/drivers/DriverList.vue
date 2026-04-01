@@ -163,7 +163,7 @@ let searchTimer = null
 
 const headers = [
   { title: 'Nombre', key: 'full_name', sortable: true },
-  { title: 'NIF/NIE', key: 'nif', sortable: true },
+  { title: 'NIF/NIE', key: 'national_id', sortable: true },
   { title: 'Teléfono', key: 'phone', sortable: false },
   { title: 'Estado', key: 'status', sortable: true },
   { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },

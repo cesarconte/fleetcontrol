@@ -17,9 +17,9 @@
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.nif"
+                v-model="form.national_id"
                 label="NIF/NIE *"
-                :error-messages="errors.nif"
+                :error-messages="errors.national_id"
                 variant="outlined"
                 required
                 maxlength="9"
@@ -116,7 +116,7 @@
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.hire_date"
+                v-model="form.join_date"
                 label="Fecha de incorporación"
                 type="date"
                 variant="outlined"
@@ -175,7 +175,7 @@ const openPanels = ref(['personal'])
 
 const form = reactive({
   full_name: '',
-  nif: '',
+  national_id: '',
   birth_date: '',
   nationality: '',
   address: '',
@@ -185,12 +185,12 @@ const form = reactive({
   phone: '',
   email: '',
   photo_url: '',
-  hire_date: '',
+  join_date: '',
   status: 'active',
-  carnet_class: '',
-  carnet_number: '',
-  carnet_issue_date: '',
-  carnet_expiry_date: '',
+  license_class: '',
+  license_number: '',
+  license_issue_date: '',
+  license_expiry_date: '',
   cap_number: '',
   cap_expiry_date: '',
   cap_training_hours: 35,

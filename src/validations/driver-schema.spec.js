@@ -4,7 +4,7 @@ import { driverSchema, driverSearchSchema } from './driver-schema.js'
 describe('driverSchema', () => {
   const validDriver = {
     full_name: 'Juan García López',
-    nif: '12345678A',
+    national_id: '12345678A',
     birth_date: '1985-03-15',
     status: 'active',
   }
@@ -27,34 +27,34 @@ describe('driverSchema', () => {
     })
   })
 
-  describe('nif', () => {
+  describe('national_id', () => {
     it('debería aceptar NIF válido', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: '12345678A' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: '12345678A' })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar NIE válido con X', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: 'X1234567A' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: 'X1234567A' })
       expect(result.success).toBe(true)
     })
 
     it('debería aceptar NIE válido con Y', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: 'Y1234567A' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: 'Y1234567A' })
       expect(result.success).toBe(true)
     })
 
     it('debería rechazar NIF corto', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: '12345' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: '12345' })
       expect(result.success).toBe(false)
     })
 
     it('debería rechazar NIF sin letra', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: '123456789' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: '123456789' })
       expect(result.success).toBe(false)
     })
 
     it('debería rechazar NIF vacío', () => {
-      const result = driverSchema.safeParse({ ...validDriver, nif: '' })
+      const result = driverSchema.safeParse({ ...validDriver, national_id: '' })
       expect(result.success).toBe(false)
     })
   })
@@ -146,7 +146,7 @@ describe('driverSchema', () => {
         address: 'Calle Mayor 1',
         phone: '612345678',
         email: 'juan@test.com',
-        hire_date: '2020-01-15',
+        join_date: '2020-01-15',
       })
       expect(result.success).toBe(true)
     })

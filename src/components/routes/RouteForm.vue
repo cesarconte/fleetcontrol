@@ -425,7 +425,7 @@ onMounted(async () => {
       value: v.id,
     }))
     driverOptions.value = drivers.map(d => ({
-      title: `${d.full_name} (${d.nif})`,
+      title: `${d.full_name} (${d.national_id})`,
       value: d.id,
     }))
     // Restore selected vehicle if editing

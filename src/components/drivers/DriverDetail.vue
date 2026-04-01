@@ -18,7 +18,7 @@
         <div>
           <h1 class="text-h5">{{ driver.full_name }}</h1>
           <p class="text-body-2 text-medium-emphasis">
-            {{ driver.nif }}
+            {{ driver.national_id }}
           </p>
         </div>
         <div class="d-flex ga-2">
@@ -47,7 +47,7 @@
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">NIF/NIE</div>
-                <div class="text-body-1">{{ driver.nif }}</div>
+                <div class="text-body-1">{{ driver.national_id }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha nacimiento</div>
@@ -99,7 +99,7 @@
             <v-row>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha incorporación</div>
-                <div class="text-body-1">{{ formatDate(driver.hire_date) }}</div>
+                <div class="text-body-1">{{ formatDate(driver.join_date) }}</div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Estado</div>
