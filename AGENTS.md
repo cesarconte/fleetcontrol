@@ -1398,6 +1398,7 @@ main ─────────────────────────
 
 ### Commit Rules
 
+- **NEVER commit without asking user first** — when a task is complete (Definition of Done met), the agent MUST propose the commit and wait for explicit user confirmation before executing it
 - **NEVER push without asking user first**
 - **NEVER commit with `console.log` or dev-only code**
 - Run `npm run check` before every commit (Husky enforces this)
@@ -1495,6 +1496,7 @@ Before merging ANY branch to `dev`:
 - [ ] No inline credentials or API keys
 - [ ] Composition API used (`<script setup>`)
 - [ ] Mobile-first responsive design verified
+- [ ] **Propose commit to user** — ask before executing, never commit unilaterally
 
 ---
 
@@ -1555,6 +1557,7 @@ When facing ambiguity:
 - ❌ Assuming code "is fine" without running the Definition of Done checklist
 - ❌ Exposing technical info or stack traces to end users
 - ❌ Committing code that doesn't pass tests
+- ❌ Committing changes without asking user first
 - ❌ Producing UI without considering accessible and mobile behavior
 - ❌ Suggesting a dependency without knowing its maintenance status and bundle impact
 

@@ -2,7 +2,7 @@
   <div>
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense>
+        <v-row density="comfortable">
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="searchQuery"
