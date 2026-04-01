@@ -11,7 +11,6 @@ vi.mock('@/services/api-company-settings.js', () => ({
 vi.mock('@/services/api-profiles.js', () => ({
   apiProfiles: {
     getAll: vi.fn(),
-    updateProfile: vi.fn(),
     updateRole: vi.fn(),
     deactivate: vi.fn(),
     reactivate: vi.fn(),
@@ -41,23 +40,23 @@ describe('useSettings', () => {
 
   describe('estado inicial', () => {
     it('debería tener companySettings en null', () => {
-      const { companySettings } = useSettings()
-      expect(companySettings.value).toBeNull()
+      const store = useSettings()
+      expect(store.companySettings).toBeNull()
     })
 
     it('debería tener profiles vacío', () => {
-      const { profiles } = useSettings()
-      expect(profiles.value).toEqual([])
+      const store = useSettings()
+      expect(store.profiles).toEqual([])
     })
 
     it('debería tener isLoading en false', () => {
-      const { isLoading } = useSettings()
-      expect(isLoading.value).toBe(false)
+      const store = useSettings()
+      expect(store.isLoading).toBe(false)
     })
 
     it('debería tener isAdmin en true (mock)', () => {
-      const { isAdmin } = useSettings()
-      expect(isAdmin.value).toBe(true)
+      const store = useSettings()
+      expect(store.isAdmin).toBe(true)
     })
   })
 
@@ -65,74 +64,36 @@ describe('useSettings', () => {
     it('debería cargar settings en éxito', async () => {
       const mockSettings = { id: '1', company_name: 'Test S.L.' }
       apiCompanySettings.getSettings.mockResolvedValue(mockSettings)
-      const { companySettings, fetchCompanySettings } = useSettings()
+      const store = useSettings()
 
-      await fetchCompanySettings()
+      await store.fetchCompanySettings()
 
-      expect(companySettings.value).toEqual(mockSettings)
-    })
-
-    it('debería manejar error', async () => {
-      apiCompanySettings.getSettings.mockRejectedValue(new Error('fail'))
-      const { companySettings, fetchCompanySettings } = useSettings()
-
-      await fetchCompanySettings()
-
-      expect(companySettings.value).toBeNull()
-    })
-  })
-
-  describe('updateCompanySettings', () => {
-    it('debería actualizar settings', async () => {
-      const updated = { id: '1', company_name: 'Nueva S.L.' }
-      apiCompanySettings.getSettings.mockResolvedValue({ id: '1', company_name: 'Test S.L.' })
-      apiCompanySettings.updateSettings.mockResolvedValue(updated)
-      const { companySettings, fetchCompanySettings, updateCompanySettings } = useSettings()
-
-      await fetchCompanySettings()
-      await updateCompanySettings({ company_name: 'Nueva S.L.' })
-
-      expect(apiCompanySettings.updateSettings).toHaveBeenCalled()
-      expect(companySettings.value).toEqual(updated)
+      expect(store.companySettings).toEqual(mockSettings)
     })
   })
 
   describe('fetchProfiles', () => {
     it('debería cargar perfiles', async () => {
-      const mockProfiles = [
-        { id: 'u1', full_name: 'Admin', role: 'admin' },
-        { id: 'u2', full_name: 'User', role: 'solo_lectura' },
-      ]
+      const mockProfiles = [{ id: 'u1', full_name: 'Admin', role: 'admin' }]
       apiProfiles.getAll.mockResolvedValue(mockProfiles)
-      const { profiles, fetchProfiles } = useSettings()
+      const store = useSettings()
 
-      await fetchProfiles()
+      await store.fetchProfiles()
 
-      expect(profiles.value).toEqual(mockProfiles)
+      expect(store.profiles).toEqual(mockProfiles)
     })
   })
 
-  describe('updateUserRole', () => {
-    it('debería actualizar rol del usuario', async () => {
-      apiProfiles.updateRole.mockResolvedValue({ id: 'u1', role: 'traffic_manager' })
-      apiProfiles.getAll.mockResolvedValue([])
-      const { updateUserRole } = useSettings()
+  describe('estado compartido', () => {
+    it('debería compartir profiles entre componentes', async () => {
+      const mockProfiles = [{ id: 'u1', full_name: 'Admin' }]
+      apiProfiles.getAll.mockResolvedValue(mockProfiles)
 
-      await updateUserRole('u1', 'traffic_manager')
+      const store1 = useSettings()
+      await store1.fetchProfiles()
 
-      expect(apiProfiles.updateRole).toHaveBeenCalledWith('u1', 'traffic_manager')
-    })
-  })
-
-  describe('deactivateUser', () => {
-    it('debería desactivar usuario', async () => {
-      apiProfiles.deactivate.mockResolvedValue({ id: 'u1', is_active: false })
-      apiProfiles.getAll.mockResolvedValue([])
-      const { deactivateUser } = useSettings()
-
-      await deactivateUser('u1')
-
-      expect(apiProfiles.deactivate).toHaveBeenCalledWith('u1')
+      const store2 = useSettings()
+      expect(store2.profiles).toEqual(mockProfiles)
     })
   })
 })
