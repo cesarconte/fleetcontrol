@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-02 (sesión 14 — correcciones settings)
+> **Última actualización:** 2026-04-02 (sesión 15 — Sesión A: correcciones críticas y seguridad)
 > **Actualizado por:** AI Agent
 
 ---
@@ -218,33 +218,36 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-02 (sesión 14)
+**Fecha:** 2026-04-02 (sesión 15)
 **Branch:** dev
-**Tests:** 980 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Tests:** 989 pasando, 0 errores lint, 0 warnings, typecheck limpio
 
 **Trabajo realizado:**
 
-### Sesión 14 — Correcciones módulo Configuración (SettingsPage)
+### Sesión 15 — Sesión A: Correcciones críticas y seguridad
 
-**Problemas encontrados y corregidos:**
+**Tareas completadas:**
 
-- VTabs/VWindow no renderizaban: cambiado `<div>` a `<VContainer>`, quitado `v-if` de VWindowItems
-- Enum `user_role` tenía valores antiguos (`admin`, `traffic_manager`, etc.) — renombrados a los correctos del código
-- `company_settings` vacía — insertada fila por defecto
-- Auth store fallback `'readonly'` no coincidía con enum BD `'read_only'` — corregido
-- `useSettings()` composable creaba instancias independientes por componente — convertido a Pinia store (`src/stores/settings.js`)
-- `currentRole.value` → `currentRole` (Pinia auto-desempaqueta)
-- Componentes dentro slots VDataTable necesitaban kebab-case
+1. **Verificación defaults alerta (BD):** Valores en `company_settings` confirmados correctos: km=5000, days=30, critical=7. Sin cambios necesarios.
+2. **`DRIVER_DOC_EXPIRY_WARNING_DAYS`:** Constante añadida a `legal-limits.js` (sección `ALERT_THRESHOLDS`, valor 30). Test verificatorio en `legal-limits.spec.js`.
+3. **Admin auto-degradación:** Guard clause en `updateUserRole()` de `stores/settings.js` — impide que un admin cambie su propio rol. Nuevo archivo `stores/settings.spec.js` con 3 tests.
+4. **Validación Zod IntegrationsForm:** Nuevo `integrationsSchema` en `settings-schema.js` (gps_provider enum + strings opcionales). `IntegrationsForm.vue` actualizado con `safeParse()` y manejo de errores inline. 5 tests nuevos en `settings-schema.spec.js`.
 
-**Archivos creados/modificados:**
+**Archivos creados (2):**
 
-- `src/stores/settings.js` — Pinia store para estado compartido
-- `src/composables/use-settings.js` — wrapper delgado al store
-- `src/components/settings/UsersTable.vue` — CRUD completo con diálogos
-- `src/components/settings/CompanyForm.vue` — fix currentRole
-- `src/components/settings/AlertThresholdsForm.vue` — fix currentRole
-- `src/components/settings/IntegrationsForm.vue` — fix currentRole
-- `src/pages/SettingsPage.vue` — fix render VTabs
+- `src/stores/settings.spec.js` — 3 tests (admin permisos, auto-degradación)
+- _(schema integrations ya existía, solo se amplió)_
+
+**Archivos modificados (4):**
+
+- `src/constants/legal-limits.js` — +1 constante (`DRIVER_DOC_EXPIRY_WARNING_DAYS`)
+- `src/constants/legal-limits.spec.js` — +1 test
+- `src/stores/settings.js` — guard clause auto-degradación en `updateUserRole()`
+- `src/validations/settings-schema.js` — +`integrationsSchema` (3 campos)
+- `src/validations/settings-schema.spec.js` — +5 tests
+- `src/components/settings/IntegrationsForm.vue` — import schema, `safeParse()`, errores inline
+
+**Resultado:** 989 tests (980 + 9 nuevos). Lint + typecheck limpios.
 
 ---
 
@@ -252,14 +255,14 @@ _(Complementa las de AGENTS.md)_
 
 **Contexto:** Revisión de las 4 pestañas de configuración contra PRD §4.10, legal-limits.js, y estándares del sector transporte. Se identificaron discrepancias y funcionalidades faltantes.
 
-#### Sesión A — Correcciones críticas y seguridad
+#### ~~Sesión A — Correcciones críticas y seguridad~~ ✅ COMPLETADA
 
-| #   | Tarea                                                              | Archivos                                      |
-| --- | ------------------------------------------------------------------ | --------------------------------------------- |
-| 1   | Corregir defaults alerta: km 10000→5000, days 90→30, critical 15→7 | `AlertThresholdsForm.vue`                     |
-| 2   | Añadir `DRIVER_DOC_EXPIRY_WARNING_DAYS: 30` a `legal-limits.js`    | `legal-limits.js`                             |
-| 3   | Admin no puede auto-degradar su rol                                | `stores/settings.js`                          |
-| 4   | Validación Zod en IntegrationsForm                                 | `IntegrationsForm.vue` + `settings-schema.js` |
+| #   | Tarea                                                              | Archivos                                      | Estado                    |
+| --- | ------------------------------------------------------------------ | --------------------------------------------- | ------------------------- |
+| 1   | Corregir defaults alerta: km 10000→5000, days 90→30, critical 15→7 | `AlertThresholdsForm.vue`                     | ✅ BD verificada correcta |
+| 2   | Añadir `DRIVER_DOC_EXPIRY_WARNING_DAYS: 30` a `legal-limits.js`    | `legal-limits.js` + spec                      | ✅                        |
+| 3   | Admin no puede auto-degradar su rol                                | `stores/settings.js` + spec                   | ✅                        |
+| 4   | Validación Zod en IntegrationsForm                                 | `IntegrationsForm.vue` + `settings-schema.js` | ✅                        |
 
 #### Sesión B — Funcionalidad PRD + Integraciones completas
 
@@ -289,7 +292,7 @@ Cada sección: selector proveedor + campos credenciales + botón guardar + botó
 
 #### Migraciones BD necesarias
 
-- **Sesión A**: 0 migraciones (solo correcciones de código)
+- **Sesión A**: 0 migraciones (solo correcciones de código) ✅ COMPLETADA
 - **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones)
 - **Sesión C**: 1 migración (tabla document_templates)
 
@@ -580,6 +583,8 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | 24 migraciones aplicadas en Supabase                                | Sesión 12 |
 | RLS restrictivo en tablas nuevas                                    | Sesión 12 |
 | 920 tests TDD                                                       | Sesión 12 |
+| Sesión A: correcciones críticas seguridad (4 tareas)                | Sesión 15 |
+| 989 tests TDD (920 + sesiones 13-15)                                | Sesión 15 |
 
 ---
 

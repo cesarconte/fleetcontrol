@@ -73,6 +73,10 @@ export const useSettingsStore = defineStore('settings', () => {
       notifications.error('Solo el administrador puede cambiar roles')
       return
     }
+    if (userId === authStore.currentUser?.id) {
+      notifications.error('No puedes cambiar tu propio rol')
+      return
+    }
     error.value = null
     try {
       await apiProfiles.updateRole(userId, role)

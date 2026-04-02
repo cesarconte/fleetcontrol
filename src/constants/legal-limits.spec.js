@@ -102,5 +102,9 @@ describe('LEGAL_LIMITS', () => {
     it('alerta crítica vencimiento: 7 días', () => {
       expect(LEGAL_LIMITS.ALERT_THRESHOLDS.DOCUMENT_EXPIRY_CRITICAL_DAYS).toBe(7)
     })
+
+    it('aviso vencimiento doc. conductor: 30 días', () => {
+      expect(LEGAL_LIMITS.ALERT_THRESHOLDS.DRIVER_DOC_EXPIRY_WARNING_DAYS).toBe(30)
+    })
   })
 })

@@ -15,6 +15,7 @@
               :items="gpsProviders"
               label="Proveedor GPS"
               variant="outlined"
+              :error-messages="errors.gps_provider"
               data-testid="integrations-gps-provider"
             />
           </VCol>
@@ -73,6 +74,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { useSettings } from '@/composables/use-settings.js'
 import { canEditIntegrations } from '@/constants/role-permissions.js'
+import { integrationsSchema } from '@/validations/settings-schema.js'
 
 const store = useSettings()
 
@@ -80,6 +82,7 @@ const emit = defineEmits(['saved'])
 
 const formRef = ref(null)
 const isSubmitting = ref(false)
+const errors = reactive({})
 const isEditable = computed(() => canEditIntegrations(store.currentRole))
 
 const gpsProviders = [
@@ -113,10 +116,22 @@ function maskSecret(value) {
   return '••••' + value.slice(-4)
 }
 
+function clearErrors() {
+  Object.keys(errors).forEach(k => delete errors[k])
+}
+
 async function handleSubmit() {
+  clearErrors()
+  const result = integrationsSchema.safeParse(form)
+  if (!result.success) {
+    for (const issue of result.error.issues) {
+      errors[issue.path[0]] = issue.message
+    }
+    return
+  }
   isSubmitting.value = true
   try {
-    await store.updateCompanySettings(form)
+    await store.updateCompanySettings(result.data)
     emit('saved')
   } finally {
     isSubmitting.value = false

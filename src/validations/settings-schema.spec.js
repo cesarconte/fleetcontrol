@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   companySettingsSchema,
   alertThresholdsSchema,
+  integrationsSchema,
   userProfileSchema,
   userCreateSchema,
 } from './settings-schema.js'
@@ -122,6 +123,33 @@ describe('settings-schema', () => {
       roles.forEach(role => {
         expect(userCreateSchema.safeParse({ ...valid, role }).success).toBe(true)
       })
+    })
+  })
+
+  describe('integrationsSchema', () => {
+    it('debería aceptar formulario vacío (campos opcionales)', () => {
+      expect(integrationsSchema.safeParse({}).success).toBe(true)
+    })
+
+    it('debería aceptar proveedor GPS válido', () => {
+      expect(integrationsSchema.safeParse({ gps_provider: 'webfleet' }).success).toBe(true)
+    })
+
+    it('debería aceptar cadena vacía como proveedor', () => {
+      expect(integrationsSchema.safeParse({ gps_provider: '' }).success).toBe(true)
+    })
+
+    it('debería rechazar proveedor GPS inválido', () => {
+      expect(integrationsSchema.safeParse({ gps_provider: 'invalid_provider' }).success).toBe(false)
+    })
+
+    it('debería aceptar API key y secret como strings', () => {
+      const result = integrationsSchema.safeParse({
+        gps_provider: 'geotab',
+        gps_api_key: 'my-api-key',
+        gps_api_secret: 'my-secret',
+      })
+      expect(result.success).toBe(true)
     })
   })
 })

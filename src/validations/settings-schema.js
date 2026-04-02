@@ -31,6 +31,14 @@ export const alertThresholdsSchema = z.object({
   fuel_anomaly_percent: z.number().int().min(1).max(100),
 })
 
+const GPS_PROVIDERS = ['webfleet', 'frotcom', 'geotab', 'otro', '']
+
+export const integrationsSchema = z.object({
+  gps_provider: z.enum(GPS_PROVIDERS).optional().or(z.literal('')),
+  gps_api_key: z.string().optional().or(z.literal('')),
+  gps_api_secret: z.string().optional().or(z.literal('')),
+})
+
 export const userProfileSchema = z.object({
   full_name: z.string().min(1, 'El nombre es obligatorio').max(200),
   phone: z.string().max(20).optional().or(z.literal('')),
