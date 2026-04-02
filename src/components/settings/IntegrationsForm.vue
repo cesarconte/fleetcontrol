@@ -1,15 +1,15 @@
 <template>
-  <v-card>
-    <v-card-title>Integraciones GPS</v-card-title>
-    <v-card-text>
-      <v-form
+  <VCard>
+    <VCardTitle>Integraciones GPS</VCardTitle>
+    <VCardText>
+      <VForm
         v-if="isEditable"
         ref="formRef"
         data-testid="integrations-form"
         @submit.prevent="handleSubmit"
       >
-        <v-row>
-          <v-col cols="12" sm="6" md="4">
+        <VRow>
+          <VCol cols="12" sm="6" md="4">
             <v-select
               v-model="form.gps_provider"
               :items="gpsProviders"
@@ -17,30 +17,28 @@
               variant="outlined"
               data-testid="integrations-gps-provider"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model="form.gps_api_key"
               label="API Key"
               type="password"
               variant="outlined"
-              autocomplete="new-password"
               data-testid="integrations-api-key"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model="form.gps_api_secret"
               label="API Secret"
               type="password"
               variant="outlined"
-              autocomplete="new-password"
               data-testid="integrations-api-secret"
             />
-          </v-col>
-        </v-row>
+          </VCol>
+        </VRow>
         <div class="d-flex justify-end ga-3 mt-2">
-          <v-btn
+          <VBtn
             type="submit"
             color="primary"
             :loading="isSubmitting"
@@ -48,45 +46,41 @@
             data-testid="integrations-form-submit"
           >
             Guardar
-          </v-btn>
+          </VBtn>
         </div>
-      </v-form>
+      </VForm>
 
       <!-- Read-only display -->
-      <v-row v-else>
-        <v-col cols="12" sm="6" md="4">
+      <VRow v-else>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Proveedor GPS</div>
-          <div class="text-body-1">{{ settings?.gps_provider ?? '—' }}</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">{{ store.companySettings?.gps_provider ?? '—' }}</div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">API Key</div>
-          <div class="text-body-1">{{ maskSecret(settings?.gps_api_key) }}</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">{{ maskSecret(store.companySettings?.gps_api_key) }}</div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">API Secret</div>
-          <div class="text-body-1">{{ maskSecret(settings?.gps_api_secret) }}</div>
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+          <div class="text-body-1">{{ maskSecret(store.companySettings?.gps_api_secret) }}</div>
+        </VCol>
+      </VRow>
+    </VCardText>
+  </VCard>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useSettings } from '@/composables/use-settings.js'
 import { canEditIntegrations } from '@/constants/role-permissions.js'
 
-const { currentRole, updateCompanySettings } = useSettings()
-
-const props = defineProps({
-  settings: { type: Object, default: null },
-})
+const store = useSettings()
 
 const emit = defineEmits(['saved'])
 
 const formRef = ref(null)
 const isSubmitting = ref(false)
-const isEditable = canEditIntegrations(currentRole)
+const isEditable = computed(() => canEditIntegrations(store.currentRole))
 
 const gpsProviders = [
   { title: 'Webfleet', value: 'webfleet' },
@@ -102,7 +96,7 @@ const form = reactive({
 })
 
 watch(
-  () => props.settings,
+  () => store.companySettings,
   s => {
     if (s) {
       form.gps_provider = s.gps_provider ?? ''
@@ -122,7 +116,7 @@ function maskSecret(value) {
 async function handleSubmit() {
   isSubmitting.value = true
   try {
-    await updateCompanySettings({ ...form })
+    await store.updateCompanySettings(form)
     emit('saved')
   } finally {
     isSubmitting.value = false

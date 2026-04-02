@@ -1,15 +1,15 @@
 <template>
-  <v-card>
-    <v-card-title>Umbrales de alerta</v-card-title>
-    <v-card-text>
-      <v-form
+  <VCard>
+    <VCardTitle>Umbrales de alerta</VCardTitle>
+    <VCardText>
+      <VForm
         v-if="isEditable"
         ref="formRef"
         data-testid="alert-thresholds-form"
         @submit.prevent="handleSubmit"
       >
-        <v-row>
-          <v-col cols="12" sm="6" md="4">
+        <VRow>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.alert_days_vehicle_doc"
               label="Días aviso doc. vehículo"
@@ -20,8 +20,8 @@
               variant="outlined"
               data-testid="alert-vehicle-doc"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.alert_days_driver_doc"
               label="Días aviso doc. conductor"
@@ -32,8 +32,8 @@
               variant="outlined"
               data-testid="alert-driver-doc"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.alert_days_maintenance_km"
               label="Aviso mantenimiento (km)"
@@ -44,8 +44,8 @@
               variant="outlined"
               data-testid="alert-maintenance-km"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.alert_days_maintenance_days"
               label="Aviso mantenimiento (días)"
@@ -56,8 +56,8 @@
               variant="outlined"
               data-testid="alert-maintenance-days"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.alert_critical_doc_days"
               label="Días doc. crítico"
@@ -68,8 +68,8 @@
               variant="outlined"
               data-testid="alert-critical-doc"
             />
-          </v-col>
-          <v-col cols="12" sm="6" md="4">
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
             <v-text-field
               v-model.number="form.fuel_anomaly_percent"
               label="% anomalía combustible"
@@ -80,10 +80,10 @@
               variant="outlined"
               data-testid="alert-fuel-anomaly"
             />
-          </v-col>
-        </v-row>
+          </VCol>
+        </VRow>
         <div class="d-flex justify-end ga-3 mt-2">
-          <v-btn
+          <VBtn
             type="submit"
             color="primary"
             :loading="isSubmitting"
@@ -91,71 +91,77 @@
             data-testid="alert-thresholds-submit"
           >
             Guardar
-          </v-btn>
+          </VBtn>
         </div>
-      </v-form>
+      </VForm>
 
       <!-- Read-only display -->
-      <v-row v-else>
-        <v-col cols="12" sm="6" md="4">
+      <VRow v-else>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Aviso doc. vehículo</div>
-          <div class="text-body-1">{{ settings?.alert_days_vehicle_doc ?? '—' }} días</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_days_vehicle_doc ?? '—' }} días
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Aviso doc. conductor</div>
-          <div class="text-body-1">{{ settings?.alert_days_driver_doc ?? '—' }} días</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_days_driver_doc ?? '—' }} días
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Mantenimiento (km)</div>
-          <div class="text-body-1">{{ settings?.alert_days_maintenance_km ?? '—' }} km</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_days_maintenance_km ?? '—' }} km
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Mantenimiento (días)</div>
-          <div class="text-body-1">{{ settings?.alert_days_maintenance_days ?? '—' }} días</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_days_maintenance_days ?? '—' }} días
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Doc. crítico</div>
-          <div class="text-body-1">{{ settings?.alert_critical_doc_days ?? '—' }} días</div>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_critical_doc_days ?? '—' }} días
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
           <div class="text-caption text-uppercase text-medium-emphasis">Anomalía combustible</div>
-          <div class="text-body-1">{{ settings?.fuel_anomaly_percent ?? '—' }}%</div>
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+          <div class="text-body-1">{{ store.companySettings?.fuel_anomaly_percent ?? '—' }}%</div>
+        </VCol>
+      </VRow>
+    </VCardText>
+  </VCard>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useSettings } from '@/composables/use-settings.js'
 import { canEditAlertThresholds } from '@/constants/role-permissions.js'
 import { alertThresholdsSchema } from '@/validations/settings-schema.js'
 
-const { currentRole, updateCompanySettings } = useSettings()
-
-const props = defineProps({
-  settings: { type: Object, default: null },
-})
+const store = useSettings()
 
 const emit = defineEmits(['saved'])
 
 const formRef = ref(null)
 const isSubmitting = ref(false)
 const errors = reactive({})
-const isEditable = canEditAlertThresholds(currentRole)
+const isEditable = computed(() => canEditAlertThresholds(store.currentRole))
 
 const form = reactive({
   alert_days_vehicle_doc: 30,
   alert_days_driver_doc: 30,
-  alert_days_maintenance_km: 10000,
-  alert_days_maintenance_days: 90,
-  alert_critical_doc_days: 15,
+  alert_days_maintenance_km: 5000,
+  alert_days_maintenance_days: 30,
+  alert_critical_doc_days: 7,
   fuel_anomaly_percent: 20,
 })
 
 watch(
-  () => props.settings,
+  () => store.companySettings,
   s => {
     if (s) {
       for (const key of Object.keys(form)) {
@@ -181,7 +187,7 @@ async function handleSubmit() {
   }
   isSubmitting.value = true
   try {
-    await updateCompanySettings(result.data)
+    await store.updateCompanySettings(result.data)
     emit('saved')
   } finally {
     isSubmitting.value = false

@@ -35,7 +35,7 @@
 
     <VWindow v-model="activeTab">
       <VWindowItem value="empresa">
-        <CompanyForm :settings="companySettings" @saved="handleSaved" />
+        <CompanyForm @saved="handleSaved" />
       </VWindowItem>
 
       <VWindowItem value="usuarios">
@@ -43,11 +43,11 @@
       </VWindowItem>
 
       <VWindowItem value="alertas">
-        <AlertThresholdsForm :settings="companySettings" @saved="handleSaved" />
+        <AlertThresholdsForm @saved="handleSaved" />
       </VWindowItem>
 
       <VWindowItem value="integraciones">
-        <IntegrationsForm :settings="companySettings" @saved="handleSaved" />
+        <IntegrationsForm @saved="handleSaved" />
       </VWindowItem>
     </VWindow>
   </VContainer>
@@ -62,7 +62,7 @@ import UsersTable from '@/components/settings/UsersTable.vue'
 import AlertThresholdsForm from '@/components/settings/AlertThresholdsForm.vue'
 import IntegrationsForm from '@/components/settings/IntegrationsForm.vue'
 
-const { companySettings, currentRole, fetchCompanySettings, fetchProfiles } = useSettings()
+const { currentRole, fetchCompanySettings, fetchProfiles } = useSettings()
 
 const activeTab = ref('empresa')
 
