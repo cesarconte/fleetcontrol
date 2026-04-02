@@ -24,6 +24,13 @@
             {{ getCargoTypeLabel(record.cargo_type) }}
           </v-chip>
           <v-btn
+            icon="mdi-file-document-plus-outline"
+            variant="outlined"
+            size="small"
+            data-testid="detail-generate-doc"
+            @click="showGenerateDialog = true"
+          />
+          <v-btn
             icon="mdi-pencil"
             variant="outlined"
             size="small"
@@ -168,6 +175,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <GenerateDocumentDialog
+      v-model="showGenerateDialog"
+      :route-id="record?.route_id"
+      :cargo-id="record?.id"
+      @generated="handleDocGenerated"
+    />
   </div>
 </template>
 
@@ -178,6 +192,8 @@ import { useCargo } from '@/composables/use-cargo.js'
 import { getCargoTypeColor, getCargoTypeLabel, formatKg } from '@/utils/cargo-helpers.js'
 import { getSubcategoryById, getVehicleRequirements } from '@/constants/cargo-categories.js'
 import { getEquipmentChecklist, getNormativeReference } from '@/constants/vehicle-equipment.js'
+import { useNotificationStore } from '@/stores/notifications.js'
+import GenerateDocumentDialog from '@/components/documents/GenerateDocumentDialog.vue'
 
 const props = defineProps({ recordId: { type: String, required: true } })
 const router = useRouter()
@@ -185,6 +201,8 @@ const { getById, remove, isLoading, currentRecord: record } = useCargo()
 const openPanels = ref(['details'])
 const confirmDelete = ref(false)
 const isDeleting = ref(false)
+const showGenerateDialog = ref(false)
+const notifications = useNotificationStore()
 
 const subcategoryName = computed(() => {
   if (!record.value?.subcategoria_id) return null
@@ -222,5 +240,9 @@ async function handleDelete() {
     isDeleting.value = false
     confirmDelete.value = false
   }
+}
+
+function handleDocGenerated(result) {
+  notifications.success(`Documento generado: ${result.filename}`)
 }
 </script>

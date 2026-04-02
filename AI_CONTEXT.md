@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-02 (sesión B — Funcionalidad PRD + integraciones completas)
+> **Última actualización:** 2026-04-02 (sesión C — Documentos Transporte + limpieza integraciones)
 > **Actualizado por:** AI Agent
 
 ---
@@ -108,25 +108,26 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
 | Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                            |
 | Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera          |
-| Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS                  |
+| Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc  |
+| Documentos Transporte      | 🟢 Completado  | 6 tipos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR), generación PDF auto    |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
 | Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟢 Completado  | 852 tests (Vitest), Cypress configurado, E2E smoke test                      |
+| Testing (TDD)              | 🟢 Completado  | 1081 tests (Vitest), Cypress configurado, E2E smoke test                     |
 
 ### Documentación de Transporte (v1.0)
 
 | Documento                       | Estado | Base Legal                            | Obligatorio                |
 | ------------------------------- | ------ | ------------------------------------- | -------------------------- |
-| Carta de Porte CMR              | 🔴     | Convenio CMR 1956 (arts. 5-6)         | Sí (internacional)         |
-| Carta de Porte Nacional         | 🔴     | LCTTM (Ley 15/2009, art. 10-12)       | Sí (>€150 con porteador)   |
+| Carta de Porte CMR              | 🟢     | Convenio CMR 1956 (arts. 5-6)         | Sí (internacional)         |
+| Carta de Porte Nacional         | 🟢     | LCTTM (Ley 15/2009, art. 10-12)       | Sí (>€150 con porteador)   |
 | Documento de Control Digital    | 🔴     | Orden FOM/2861/2012 + Ley 9/2025      | **Sí (desde 05/10/2026)**  |
-| Albarán de Entrega              | 🔴     | Práctica comercial + UNE 56100        | Sí (práctica)              |
-| Hoja de Ruta                    | 🔴     | LOTT / RD 70/2019                     | Recomendado (funcional)    |
+| Albarán de Entrega              | 🟢     | Práctica comercial + UNE 56100        | Sí (práctica)              |
+| Hoja de Ruta                    | 🟢     | LOTT / RD 70/2019                     | Recomendado (funcional)    |
 | Nota de Gastos                  | 🔴     | IRPF + Convenio colectivo transporte  | Sí (si hay reembolso)      |
-| Factura de Transporte           | 🔴     | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal)                |
-| Certificado de Entrega (POD)    | 🔴     | LCTTM / práctica comercial            | Sí (prueba de entrega)     |
-| Documento de Transporte ADR     | 🔴     | ADR 2025 (5.4) + RD 97/2014           | Sí (mercancías peligrosas) |
+| Factura de Transporte           | 🟢     | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal)                |
+| Certificado de Entrega (POD)    | 🟢     | LCTTM / práctica comercial            | Sí (prueba de entrega)     |
+| Documento de Transporte ADR     | 🟢     | ADR 2025 (5.4) + RD 97/2014           | Sí (mercancías peligrosas) |
 | Declaración de Valor CMR        | 🔴     | CMR art. 24/26                        | Si valor > límite CMR      |
 | Certificado ATP + control temp. | 🔴     | ATP + RD 635/1984                     | Sí (perecederos)           |
 | Packing List                    | 🔴     | Práctica comercial                    | Recomendado                |
@@ -218,12 +219,51 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-02 (sesión B — implementación)
-**Branch:** dev
-**Tests:** 1014 pasando, 0 errores lint, 0 warnings, typecheck limpio
-**Migraciones:** 26 aplicadas (001-026)
+**Fecha:** 2026-04-02 (sesión C — Documentos Transporte + limpieza integraciones)
+**Branch:** feature/sesion-c-mejoras (desde `dev`)
+**Tests:** 1081 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Migraciones:** 27 aplicadas (001-027)
 
 **Trabajo realizado:**
+
+### Sesión C — Documentos de Transporte + Limpieza Integraciones
+
+**Tareas completadas:**
+
+1. **Task 9 — Eliminar "Otro" de integraciones:** `'otro'` eliminado de `GPS_PROVIDERS`, `FUEL_CARD_PROVIDERS`, `ACCOUNTING_PROVIDERS` en `settings-schema.js`. VListItem 'Otro' eliminado de 3 paneles en `IntegrationsForm.vue`.
+2. **Task 10a — Constantes transport-document-types.js:** 6 tipos definidos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR) con fields, icon, baseLegal. CMR_FIELD_MAPPING agrupado por entidad.
+3. **Task 10b — Migración 027:** Tablas `document_templates` + `generated_documents`, RLS, bucket Storage `transport-documents`, seed de 6 plantillas.
+4. **Task 10c — Schema Zod:** `generateDocumentSchema` + `documentTemplateSchema` en `transport-document-schema.js`.
+5. **Task 10d — Servicio API:** `apiDocumentTemplates` (CRUD + getActiveTemplates, getByType, toggleActive) + `apiGeneratedDocuments` (getByRoute, delete).
+6. **Task 10e — Generador PDF:** `document-generator.js` con `generateDocument()` que fetch datos, genera PDF con jsPDF (layouts CMR, Albarán, Hoja Ruta, Factura, POD, ADR + stub genérico), sube a Storage, registra en BD.
+7. **Task 10f — Composable:** `use-document-templates.js` con templates, isLoading, error, isGenerating, generateError + funciones fetchTemplates, toggleTemplate, generateDocument, deleteGeneratedDocument.
+8. **Task 10g — DocumentTemplatesForm.vue:** Componente de pestaña Configuración con expansion panels por tipo, toggle activo/inactivo, read-only para no-admins.
+9. **Task 10h — GenerateDocumentDialog.vue:** Diálogo con selector tipo doc + selector ruta + selector carga opcional + botón generar PDF.
+10. **Task 10i — SettingsPage.vue:** Nueva pestaña "Documentos" con RBAC (acceso para todos los roles con permiso de empresa).
+11. **Task 10j — Botones en rutas/cargas:** Botón "Generar documento" (icon mdi-file-document-plus-outline) en RouteDetail y CargoDetail con route_id y cargo_id pre-rellenados.
+
+**Archivos creados (13):**
+
+- `src/constants/transport-document-types.js` + spec — 6 tipos documento, CMR_FIELD_MAPPING (23 tests)
+- `supabase/migrations/20260402_027_transport_documents.sql` — tablas + RLS + bucket + seed
+- `src/validations/transport-document-schema.js` + spec — Zod schemas (13 tests)
+- `src/services/api-document-templates.js` + spec — CRUD service (12 tests)
+- `src/services/document-generator.js` + spec — PDF generation service (6 tests)
+- `src/composables/use-document-templates.js` + spec — composable (10 tests)
+- `src/components/settings/DocumentTemplatesForm.vue` — settings tab component
+- `src/components/documents/GenerateDocumentDialog.vue` — generate dialog component
+
+**Archivos modificados (7):**
+
+- `src/validations/settings-schema.js` — eliminar 'otro' de 3 arrays de providers
+- `src/validations/settings-schema.spec.js` — +3 tests (rechazar 'otro')
+- `src/components/settings/IntegrationsForm.vue` — eliminar VListItem 'Otro' de 3 paneles
+- `src/pages/SettingsPage.vue` — nueva pestaña "Documentos" + import DocumentTemplatesForm
+- `src/constants/role-permissions.js` — +case 'documentos' en hasSettingsAccess
+- `src/components/routes/RouteDetail.vue` — +botón generar documento + GenerateDocumentDialog
+- `src/components/cargo/CargoDetail.vue` — +botón generar documento + GenerateDocumentDialog
+
+**Resultado:** 1081 tests (1014 + 67 nuevos). Lint + typecheck limpios. 1 migración pendiente de aplicar en Supabase (027).
 
 ### Sesión B — Funcionalidad PRD + Integraciones completas
 
@@ -322,20 +362,20 @@ _(Complementa las de AGENTS.md)_
 
 Cada sección: selector proveedor + campos credenciales + botón guardar + botón "Probar conexión" (deshabilitado, pendiente GPS en producción).
 
-#### Sesión C — Mejoras adicionales
+#### ~~Sesión C — Mejoras adicionales~~ ✅ COMPLETADA
 
-> **Plan:** `docs/plans/sesion-c-mejoras-adicionales.md`
+> **Plan:** `docs/plans/SESSION_C_PLAN.md`
 
-| #   | Tarea                                                                | Archivos                                      |
-| --- | -------------------------------------------------------------------- | --------------------------------------------- |
-| 9   | Eliminar "Otro" de 3 paneles de integraciones                        | `IntegrationsForm.vue` + `settings-schema.js` |
-| 10  | Sistema documentos transporte (catálogo + PDF auto-rellenado por ID) | 13 archivos nuevos + 3 modificados            |
+| #   | Tarea                                                                | Archivos                                      | Estado |
+| --- | -------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| 9   | Eliminar "Otro" de 3 paneles de integraciones                        | `IntegrationsForm.vue` + `settings-schema.js` | ✅     |
+| 10  | Sistema documentos transporte (catálogo + PDF auto-rellenado por ID) | 13 archivos nuevos + 7 modificados            | ✅     |
 
 #### Migraciones BD necesarias
 
 - **Sesión A**: 0 migraciones (solo correcciones de código) ✅ COMPLETADA
 - **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones) ✅ COMPLETADA
-- **Sesión C**: 1 migración (tabla document_templates + generated_documents)
+- **Sesión C**: 1 migración (tabla document_templates + generated_documents) ✅ PENDIENTE APLICAR EN SUPABASE
 
 **Archivos creados Sesión A (11):**
 
@@ -634,47 +674,52 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 ### Completado (no requiere acción)
 
-| Tarea                                                               | Fecha     |
-| ------------------------------------------------------------------- | --------- |
-| CRUD alertas completo                                               | Sesión 11 |
-| 9 informes con KPIs + gráficos + export                             | Sesión 12 |
-| BD financiera (routes + vehicle_annual_costs + driver_compensation) | Sesión 12 |
-| 26 migraciones aplicadas en Supabase                                | Sesión B  |
-| RLS restrictivo en tablas nuevas                                    | Sesión 12 |
-| 920 tests TDD                                                       | Sesión 12 |
-| Sesión A: correcciones críticas seguridad (4 tareas)                | Sesión 15 |
-| Sesión B: funcionalidad PRD + integraciones (4 tareas)              | Sesión B  |
-| 1014 tests TDD (989 + sesión B)                                     | Sesión B  |
+| Tarea                                                                | Fecha     |
+| -------------------------------------------------------------------- | --------- |
+| CRUD alertas completo                                                | Sesión 11 |
+| 9 informes con KPIs + gráficos + export                              | Sesión 12 |
+| BD financiera (routes + vehicle_annual_costs + driver_compensation)  | Sesión 12 |
+| 26 migraciones aplicadas en Supabase                                 | Sesión B  |
+| 27 migraciones creadas (027 pendiente aplicar en Supabase)           | Sesión C  |
+| RLS restrictivo en tablas nuevas                                     | Sesión 12 |
+| 920 tests TDD                                                        | Sesión 12 |
+| Sesión A: correcciones críticas seguridad (4 tareas)                 | Sesión 15 |
+| Sesión B: funcionalidad PRD + integraciones (4 tareas)               | Sesión B  |
+| 1014 tests TDD (989 + sesión B)                                      | Sesión B  |
+| Sesión C: documentos transporte + limpieza integraciones (12 tareas) | Sesión C  |
+| 1081 tests TDD (1014 + sesión C)                                     | Sesión C  |
+| 27 migraciones aplicadas (001-027)                                   | Sesión C  |
 
 ---
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                                              |
-| ------------------------------- | ------------ | ------------------------------------------------------ |
-| PRD completo                    | Documento    | `PRD.md`                                               |
-| Reglas del agente               | Documento    | `AGENTS.md`                                            |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                   |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                          |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`                        |
-| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                    |
-| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                   |
-| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                       |
-| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                        |
-| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`               |
-| Tipos de alerta                 | Código       | `src/constants/alert-types.js`                         |
-| Tipos de informe                | Código       | `src/constants/report-types.js`                        |
-| Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                     |
-| Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
-| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-026 aplicadas en Supabase) |
-| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                     |
-| Material Design 3               | Docs         | https://m3.material.io                                 |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                              |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                    |
-| ADR 2025                        | Normativa    | UNECE                                                  |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                         |
+| Recurso                         | Tipo         | Ubicación                                               |
+| ------------------------------- | ------------ | ------------------------------------------------------- |
+| PRD completo                    | Documento    | `PRD.md`                                                |
+| Reglas del agente               | Documento    | `AGENTS.md`                                             |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                    |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                           |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`                         |
+| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                     |
+| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                    |
+| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                        |
+| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                         |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`                |
+| Tipos de alerta                 | Código       | `src/constants/alert-types.js`                          |
+| Tipos de informe                | Código       | `src/constants/report-types.js`                         |
+| Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                      |
+| Tipos de documentos             | Código       | `src/constants/transport-document-types.js`             |
+| Plantillas documentos           | Composable   | `src/composables/use-document-templates.js`             |
+| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                 |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-027, 027 pendiente aplicar) |
+| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                      |
+| Material Design 3               | Docs         | https://m3.material.io                                  |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                                   |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                               |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                     |
+| ADR 2025                        | Normativa    | UNECE                                                   |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                          |
 
 ---
 

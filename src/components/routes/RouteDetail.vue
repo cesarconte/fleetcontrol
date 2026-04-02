@@ -27,6 +27,13 @@
             {{ getStatusLabel(route.status) }}
           </v-chip>
           <v-btn
+            icon="mdi-file-document-plus-outline"
+            variant="outlined"
+            size="small"
+            data-testid="detail-generate-doc"
+            @click="showGenerateDialog = true"
+          />
+          <v-btn
             icon="mdi-pencil"
             variant="outlined"
             size="small"
@@ -222,6 +229,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Generate document dialog -->
+    <GenerateDocumentDialog
+      v-model="showGenerateDialog"
+      :route-id="routeId"
+      @generated="handleDocGenerated"
+    />
   </div>
 </template>
 
@@ -232,6 +246,7 @@ import { useRoutes } from '@/composables/use-routes.js'
 import { useNotificationStore } from '@/stores/notifications.js'
 import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
 import { formatDate } from '@/utils/format-helpers.js'
+import GenerateDocumentDialog from '@/components/documents/GenerateDocumentDialog.vue'
 
 const props = defineProps({
   routeId: { type: String, required: true },
@@ -244,6 +259,7 @@ const notifications = useNotificationStore()
 const openPanels = ref(['planning', 'cargo'])
 const confirmDelete = ref(false)
 const isDeleting = ref(false)
+const showGenerateDialog = ref(false)
 
 onMounted(() => {
   getById(props.routeId)
@@ -286,5 +302,9 @@ async function handleDelete() {
     isDeleting.value = false
     confirmDelete.value = false
   }
+}
+
+function handleDocGenerated(result) {
+  notifications.success(`Documento generado: ${result.filename}`)
 }
 </script>

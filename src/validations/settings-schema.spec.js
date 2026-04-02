@@ -263,4 +263,22 @@ describe('settings-schema', () => {
       ).toBe(false)
     })
   })
+
+  describe('eliminación de "otro" en providers', () => {
+    it('debería rechazar "otro" como proveedor GPS', () => {
+      expect(integrationsSchema.safeParse({ gps_provider: 'otro' }).success).toBe(false)
+    })
+
+    it('debería rechazar "otro" como proveedor combustible', () => {
+      expect(fuelCardIntegrationsSchema.safeParse({ fuel_card_provider: 'otro' }).success).toBe(
+        false,
+      )
+    })
+
+    it('debería rechazar "otro" como proveedor contabilidad', () => {
+      expect(accountingIntegrationsSchema.safeParse({ accounting_provider: 'otro' }).success).toBe(
+        false,
+      )
+    })
+  })
 })

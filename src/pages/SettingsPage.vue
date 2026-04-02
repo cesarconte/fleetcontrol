@@ -31,6 +31,13 @@
       >
         Integraciones
       </VTab>
+      <VTab
+        v-if="hasSettingsAccess(currentRole, 'documentos')"
+        value="documentos"
+        data-testid="settings-tab-documentos"
+      >
+        Documentos
+      </VTab>
     </VTabs>
 
     <VWindow v-model="activeTab">
@@ -49,6 +56,10 @@
       <VWindowItem value="integraciones">
         <IntegrationsForm @saved="handleSaved" />
       </VWindowItem>
+
+      <VWindowItem value="documentos">
+        <DocumentTemplatesForm />
+      </VWindowItem>
     </VWindow>
   </VContainer>
 </template>
@@ -61,6 +72,7 @@ import CompanyForm from '@/components/settings/CompanyForm.vue'
 import UsersTable from '@/components/settings/UsersTable.vue'
 import AlertThresholdsForm from '@/components/settings/AlertThresholdsForm.vue'
 import IntegrationsForm from '@/components/settings/IntegrationsForm.vue'
+import DocumentTemplatesForm from '@/components/settings/DocumentTemplatesForm.vue'
 
 const { currentRole, fetchCompanySettings, fetchProfiles } = useSettings()
 

@@ -419,7 +419,6 @@ const gpsProviders = [
   { title: 'Webfleet', value: 'webfleet' },
   { title: 'Frotcom', value: 'frotcom' },
   { title: 'Geotab', value: 'geotab' },
-  { title: 'Otro', value: 'otro' },
 ]
 const emailProviders = [
   { title: 'Brevo', value: 'brevo' },
@@ -429,13 +428,11 @@ const mapsProviders = [{ title: 'Google Maps', value: 'google_maps' }]
 const fuelCardProviders = [
   { title: 'DKV', value: 'dkv' },
   { title: 'WABCO', value: 'wabco' },
-  { title: 'Otro', value: 'otro' },
 ]
 const accountingProviders = [
   { title: 'Sage', value: 'sage' },
   { title: 'A3', value: 'a3' },
   { title: 'Holded', value: 'holded' },
-  { title: 'Otro', value: 'otro' },
 ]
 
 const SECTION_SCHEMAS = {
