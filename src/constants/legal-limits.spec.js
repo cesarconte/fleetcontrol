@@ -106,5 +106,17 @@ describe('LEGAL_LIMITS', () => {
     it('aviso vencimiento doc. conductor: 30 días', () => {
       expect(LEGAL_LIMITS.ALERT_THRESHOLDS.DRIVER_DOC_EXPIRY_WARNING_DAYS).toBe(30)
     })
+
+    it('umbral conducción: 9 horas', () => {
+      expect(LEGAL_LIMITS.ALERT_THRESHOLDS.DRIVING_HOURS).toBe(9)
+    })
+
+    it('umbral descarga tacógrafo: 28 días', () => {
+      expect(LEGAL_LIMITS.ALERT_THRESHOLDS.TACHOGRAPH_DOWNLOAD_DAYS).toBe(28)
+    })
+
+    it('umbral velocidad: 90 km/h', () => {
+      expect(LEGAL_LIMITS.ALERT_THRESHOLDS.SPEED_LIMIT_KMH).toBe(90)
+    })
   })
 })

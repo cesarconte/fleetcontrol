@@ -10,7 +10,12 @@ vi.mock('@/services/supabase-client.js', () => {
     update: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
   }
-  return { supabase: { from: vi.fn().mockReturnValue(query) } }
+  return {
+    supabase: {
+      from: vi.fn().mockReturnValue(query),
+      functions: { invoke: vi.fn() },
+    },
+  }
 })
 
 import { apiProfiles } from './api-profiles.js'
@@ -86,6 +91,42 @@ describe('apiProfiles', () => {
 
       const result = await apiProfiles.deactivate('u1')
       expect(result.is_active).toBe(false)
+    })
+  })
+
+  describe('inviteUser', () => {
+    it('debería invitar un usuario via Edge Function', async () => {
+      const mockUser = { id: 'u2', email: 'new@ejemplo.com', full_name: 'Nuevo', role: 'admin' }
+      supabase.functions.invoke.mockResolvedValue({
+        data: { success: true, user: mockUser },
+        error: null,
+      })
+
+      const result = await apiProfiles.inviteUser('new@ejemplo.com', 'Nuevo', 'admin')
+      expect(supabase.functions.invoke).toHaveBeenCalledWith('invite-user', {
+        body: { email: 'new@ejemplo.com', full_name: 'Nuevo', role: 'admin' },
+      })
+      expect(result).toEqual(mockUser)
+    })
+
+    it('debería lanzar error si la Edge Function falla', async () => {
+      supabase.functions.invoke.mockResolvedValue({
+        data: null,
+        error: { message: 'Network error' },
+      })
+
+      await expect(apiProfiles.inviteUser('fail@ejemplo.com', 'Fail', 'admin')).rejects.toThrow()
+    })
+
+    it('debería lanzar error si la respuesta contiene error', async () => {
+      supabase.functions.invoke.mockResolvedValue({
+        data: { error: 'Solo administradores' },
+        error: null,
+      })
+
+      await expect(apiProfiles.inviteUser('x@ejemplo.com', 'X', 'admin')).rejects.toThrow(
+        'Solo administradores',
+      )
     })
   })
 })

@@ -35,6 +35,7 @@ cypress/screenshots/
 
 # Supabase
 supabase/.branches/
+supabase/.temp/
 
 # Bun
 bun.lock
