@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-01 (sesión 12)
+> **Última actualización:** 2026-04-02 (sesión 14 — correcciones settings)
 > **Actualizado por:** AI Agent
 
 ---
@@ -218,19 +218,80 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-01 (sesión 13)
-**Branch:** feature/configuracion (múltiples módulos en esta sesión)
-**Tests:** 852 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Fecha:** 2026-04-02 (sesión 14)
+**Branch:** dev
+**Tests:** 980 pasando, 0 errores lint, 0 warnings, typecheck limpio
 
 **Trabajo realizado:**
 
-### Sesión 13 — Módulo Configuración (RBAC + Settings UI)
+### Sesión 14 — Correcciones módulo Configuración (SettingsPage)
 
-**Alcance:** Módulo configuración completo con política RBAC definida en PRD §4.10.1. Solo administrador puede editar empresa, gestionar usuarios, configurar umbrales e integraciones. Otros roles solo lectura.
+**Problemas encontrados y corregidos:**
 
-**Migración BD aplicada (1):**
+- VTabs/VWindow no renderizaban: cambiado `<div>` a `<VContainer>`, quitado `v-if` de VWindowItems
+- Enum `user_role` tenía valores antiguos (`admin`, `traffic_manager`, etc.) — renombrados a los correctos del código
+- `company_settings` vacía — insertada fila por defecto
+- Auth store fallback `'readonly'` no coincidía con enum BD `'read_only'` — corregido
+- `useSettings()` composable creaba instancias independientes por componente — convertido a Pinia store (`src/stores/settings.js`)
+- `currentRole.value` → `currentRole` (Pinia auto-desempaqueta)
+- Componentes dentro slots VDataTable necesitaban kebab-case
 
-- 025: `settings_enhancements` — company_settings (gps_provider, gps_api_key, gps_api_secret, alert_critical_doc_days, fuel_anomaly_percent)
+**Archivos creados/modificados:**
+
+- `src/stores/settings.js` — Pinia store para estado compartido
+- `src/composables/use-settings.js` — wrapper delgado al store
+- `src/components/settings/UsersTable.vue` — CRUD completo con diálogos
+- `src/components/settings/CompanyForm.vue` — fix currentRole
+- `src/components/settings/AlertThresholdsForm.vue` — fix currentRole
+- `src/components/settings/IntegrationsForm.vue` — fix currentRole
+- `src/pages/SettingsPage.vue` — fix render VTabs
+
+---
+
+### PLAN PENDIENTE — Mejoras módulo Configuración (siguiente sesión)
+
+**Contexto:** Revisión de las 4 pestañas de configuración contra PRD §4.10, legal-limits.js, y estándares del sector transporte. Se identificaron discrepancias y funcionalidades faltantes.
+
+#### Sesión A — Correcciones críticas y seguridad
+
+| #   | Tarea                                                              | Archivos                                      |
+| --- | ------------------------------------------------------------------ | --------------------------------------------- |
+| 1   | Corregir defaults alerta: km 10000→5000, days 90→30, critical 15→7 | `AlertThresholdsForm.vue`                     |
+| 2   | Añadir `DRIVER_DOC_EXPIRY_WARNING_DAYS: 30` a `legal-limits.js`    | `legal-limits.js`                             |
+| 3   | Admin no puede auto-degradar su rol                                | `stores/settings.js`                          |
+| 4   | Validación Zod en IntegrationsForm                                 | `IntegrationsForm.vue` + `settings-schema.js` |
+
+#### Sesión B — Funcionalidad PRD + Integraciones completas
+
+| #   | Tarea                                                                  | Archivos                                 |
+| --- | ---------------------------------------------------------------------- | ---------------------------------------- |
+| 5   | Nuevos umbrales: conducción (9h), tacógrafo (28d), velocidad (90 km/h) | `AlertThresholdsForm.vue` + migración BD |
+| 6   | Upload logo empresa (Supabase Storage)                                 | `CompanyForm.vue`                        |
+| 7   | Creación usuario (Edge Function Supabase Admin API)                    | `UsersTable.vue` + Edge Function         |
+| 8   | Refactor IntegrationsForm → VExpansionPanels con 5 secciones           | `IntegrationsForm.vue` + migración BD    |
+
+**Secciones de Integraciones (VExpansionPanels):**
+
+- GPS/Telemática: Webfleet, Frotcom, Geotab, Otro
+- Email: Brevo, SendGrid
+- Maps: Google Maps
+- Tarjetas combustible: DKV, WABCO, Otro
+- Contabilidad: Sage, A3, Holded, Otro
+
+Cada sección: selector proveedor + campos credenciales + botón guardar + botón "Probar conexión".
+
+#### Sesión C — Mejoras adicionales
+
+| #   | Tarea                                   | Archivos                 |
+| --- | --------------------------------------- | ------------------------ |
+| 9   | Botón test conexión GPS (Edge Function) | `IntegrationsForm.vue`   |
+| 10  | Plantillas documentos transporte        | Nueva tabla + componente |
+
+#### Migraciones BD necesarias
+
+- **Sesión A**: 0 migraciones (solo correcciones de código)
+- **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones)
+- **Sesión C**: 1 migración (tabla document_templates)
 
 **Archivos creados (16):**
 
