@@ -1670,3 +1670,61 @@ Always use the **latest stable version** of each dependency unless there is a do
 - Question packages abandoned for 2+ years in critical paths
 - If outdated versions are detected, flag proactively with current version and estimated impact
 - Never assume a library is available — check `package.json` first
+
+---
+
+## 28. Session Management
+
+Sesiones cortas producen código de mayor calidad. El agente DEBE autogestionar la duración de la sesión.
+
+### Límites de sesión
+
+| Límite                       | Umbral | Acción                   |
+| ---------------------------- | ------ | ------------------------ |
+| Módulos/features por sesión  | 1-2    | Proponer commit + cierre |
+| Archivos creados/modificados | > 15   | Proponer commit + cierre |
+| Tests escritos               | > 50   | Proponer commit + cierre |
+| Commits en la sesión         | > 5    | Proponer cierre          |
+| Turnos de conversación       | > 20   | Evaluar si cerrar        |
+
+### Checklist de cierre de sesión
+
+Antes de proponer cerrar una sesión, el agente DEBE:
+
+1. `npm test` — todos los tests pasan
+2. `npm run check` — lint + typecheck limpios
+3. Commit de todos los cambios
+4. Push a la rama correspondiente
+5. Actualizar `AI_CONTEXT.md` con:
+   - Qué se hizo
+   - Qué queda pendiente (con prioridad)
+   - Siguiente paso recomendado
+6. Confirmar que el working tree está limpio (`git status --short` vacío)
+
+### Señal de cierre
+
+Cuando se alcanza un límite, el agente dice:
+
+```
+La sesión está llegando a su límite óptimo. Propongo:
+1. Commit de lo realizado
+2. Actualizar AI_CONTEXT.md
+3. Cerrar sesión y continuar en una nueva con [siguiente tarea]
+```
+
+### Puente entre sesiones
+
+`AI_CONTEXT.md` es el puente. Cada sesión termina actualizándolo con:
+
+- Estado actual (tests, branch, working tree)
+- Tarea completada
+- Siguiente tarea pendiente con contexto suficiente para retomar
+- Bloqueos si los hay
+
+### Excepciones
+
+Se permite sesiones más largas SOLO cuando:
+
+- Un solo módulo complejo requiere continuidad (ej: migración BD + API + UI de un feature)
+- Un bug requiere debugging profundo con múltiples iteraciones
+- El usuario explícitamente pide continuar
