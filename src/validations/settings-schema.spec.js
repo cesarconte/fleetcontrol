@@ -3,6 +3,10 @@ import {
   companySettingsSchema,
   alertThresholdsSchema,
   integrationsSchema,
+  emailIntegrationsSchema,
+  mapsIntegrationsSchema,
+  fuelCardIntegrationsSchema,
+  accountingIntegrationsSchema,
   userProfileSchema,
   userCreateSchema,
 } from './settings-schema.js'
@@ -53,6 +57,9 @@ describe('settings-schema', () => {
       alert_days_maintenance_days: 30,
       alert_critical_doc_days: 7,
       fuel_anomaly_percent: 20,
+      alert_driving_hours: 9,
+      alert_tachograph_days: 28,
+      alert_speed_limit: 90,
     }
 
     it('debería aceptar umbrales válidos', () => {
@@ -79,6 +86,42 @@ describe('settings-schema', () => {
 
     it('debería rechazar porcentaje de anomalía mayor a 100', () => {
       expect(alertThresholdsSchema.safeParse({ ...valid, fuel_anomaly_percent: 150 }).success).toBe(
+        false,
+      )
+    })
+
+    it('debería aceptar umbral de conducción válido', () => {
+      expect(alertThresholdsSchema.safeParse({ ...valid, alert_driving_hours: 9 }).success).toBe(
+        true,
+      )
+    })
+
+    it('debería rechazar umbral de conducción mayor a 24', () => {
+      expect(alertThresholdsSchema.safeParse({ ...valid, alert_driving_hours: 25 }).success).toBe(
+        false,
+      )
+    })
+
+    it('debería aceptar umbral de tacógrafo válido', () => {
+      expect(alertThresholdsSchema.safeParse({ ...valid, alert_tachograph_days: 28 }).success).toBe(
+        true,
+      )
+    })
+
+    it('debería rechazar umbral de tacógrafo mayor a 90', () => {
+      expect(
+        alertThresholdsSchema.safeParse({ ...valid, alert_tachograph_days: 100 }).success,
+      ).toBe(false)
+    })
+
+    it('debería aceptar umbral de velocidad válido', () => {
+      expect(alertThresholdsSchema.safeParse({ ...valid, alert_speed_limit: 90 }).success).toBe(
+        true,
+      )
+    })
+
+    it('debería rechazar umbral de velocidad mayor a 200', () => {
+      expect(alertThresholdsSchema.safeParse({ ...valid, alert_speed_limit: 250 }).success).toBe(
         false,
       )
     })
@@ -150,6 +193,74 @@ describe('settings-schema', () => {
         gps_api_secret: 'my-secret',
       })
       expect(result.success).toBe(true)
+    })
+  })
+
+  describe('emailIntegrationsSchema', () => {
+    it('debería aceptar formulario vacío', () => {
+      expect(emailIntegrationsSchema.safeParse({}).success).toBe(true)
+    })
+
+    it('debería aceptar proveedor email válido', () => {
+      expect(emailIntegrationsSchema.safeParse({ email_provider: 'brevo' }).success).toBe(true)
+    })
+
+    it('debería rechazar proveedor email inválido', () => {
+      expect(emailIntegrationsSchema.safeParse({ email_provider: 'invalid' }).success).toBe(false)
+    })
+
+    it('debería rechazar sender_email inválido', () => {
+      expect(emailIntegrationsSchema.safeParse({ email_sender_email: 'not-email' }).success).toBe(
+        false,
+      )
+    })
+  })
+
+  describe('mapsIntegrationsSchema', () => {
+    it('debería aceptar formulario vacío', () => {
+      expect(mapsIntegrationsSchema.safeParse({}).success).toBe(true)
+    })
+
+    it('debería aceptar proveedor maps válido', () => {
+      expect(mapsIntegrationsSchema.safeParse({ maps_provider: 'google_maps' }).success).toBe(true)
+    })
+
+    it('debería rechazar proveedor maps inválido', () => {
+      expect(mapsIntegrationsSchema.safeParse({ maps_provider: 'mapbox' }).success).toBe(false)
+    })
+  })
+
+  describe('fuelCardIntegrationsSchema', () => {
+    it('debería aceptar formulario vacío', () => {
+      expect(fuelCardIntegrationsSchema.safeParse({}).success).toBe(true)
+    })
+
+    it('debería aceptar proveedor válido', () => {
+      expect(fuelCardIntegrationsSchema.safeParse({ fuel_card_provider: 'dkv' }).success).toBe(true)
+    })
+
+    it('debería rechazar proveedor inválido', () => {
+      expect(fuelCardIntegrationsSchema.safeParse({ fuel_card_provider: 'shell' }).success).toBe(
+        false,
+      )
+    })
+  })
+
+  describe('accountingIntegrationsSchema', () => {
+    it('debería aceptar formulario vacío', () => {
+      expect(accountingIntegrationsSchema.safeParse({}).success).toBe(true)
+    })
+
+    it('debería aceptar proveedor válido', () => {
+      expect(accountingIntegrationsSchema.safeParse({ accounting_provider: 'sage' }).success).toBe(
+        true,
+      )
+    })
+
+    it('debería rechazar proveedor inválido', () => {
+      expect(
+        accountingIntegrationsSchema.safeParse({ accounting_provider: 'quickbooks' }).success,
+      ).toBe(false)
     })
   })
 })

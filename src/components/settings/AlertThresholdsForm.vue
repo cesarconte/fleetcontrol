@@ -81,6 +81,42 @@
               data-testid="alert-fuel-anomaly"
             />
           </VCol>
+          <VCol cols="12" sm="6" md="4">
+            <v-text-field
+              v-model.number="form.alert_driving_hours"
+              label="Horas conducción (alerta)"
+              type="number"
+              :min="1"
+              :max="24"
+              :error-messages="errors.alert_driving_hours"
+              variant="outlined"
+              data-testid="alert-driving-hours"
+            />
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
+            <v-text-field
+              v-model.number="form.alert_tachograph_days"
+              label="Días sin descargar tacógrafo"
+              type="number"
+              :min="1"
+              :max="90"
+              :error-messages="errors.alert_tachograph_days"
+              variant="outlined"
+              data-testid="alert-tachograph-days"
+            />
+          </VCol>
+          <VCol cols="12" sm="6" md="4">
+            <v-text-field
+              v-model.number="form.alert_speed_limit"
+              label="Límite velocidad (km/h)"
+              type="number"
+              :min="1"
+              :max="200"
+              :error-messages="errors.alert_speed_limit"
+              variant="outlined"
+              data-testid="alert-speed-limit"
+            />
+          </VCol>
         </VRow>
         <div class="d-flex justify-end ga-3 mt-2">
           <VBtn
@@ -131,6 +167,20 @@
           <div class="text-caption text-uppercase text-medium-emphasis">Anomalía combustible</div>
           <div class="text-body-1">{{ store.companySettings?.fuel_anomaly_percent ?? '—' }}%</div>
         </VCol>
+        <VCol cols="12" sm="6" md="4">
+          <div class="text-caption text-uppercase text-medium-emphasis">Horas conducción</div>
+          <div class="text-body-1">{{ store.companySettings?.alert_driving_hours ?? '—' }} h</div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
+          <div class="text-caption text-uppercase text-medium-emphasis">Días tacógrafo</div>
+          <div class="text-body-1">
+            {{ store.companySettings?.alert_tachograph_days ?? '—' }} días
+          </div>
+        </VCol>
+        <VCol cols="12" sm="6" md="4">
+          <div class="text-caption text-uppercase text-medium-emphasis">Límite velocidad</div>
+          <div class="text-body-1">{{ store.companySettings?.alert_speed_limit ?? '—' }} km/h</div>
+        </VCol>
       </VRow>
     </VCardText>
   </VCard>
@@ -158,6 +208,9 @@ const form = reactive({
   alert_days_maintenance_days: 30,
   alert_critical_doc_days: 7,
   fuel_anomaly_percent: 20,
+  alert_driving_hours: 9,
+  alert_tachograph_days: 28,
+  alert_speed_limit: 90,
 })
 
 watch(

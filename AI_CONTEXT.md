@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-02 (sesión 15 — Sesión A: correcciones críticas y seguridad)
+> **Última actualización:** 2026-04-02 (sesión B — Funcionalidad PRD + integraciones completas)
 > **Actualizado por:** AI Agent
 
 ---
@@ -218,9 +218,48 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-02 (sesión 15)
+**Fecha:** 2026-04-02 (sesión B — implementación)
 **Branch:** dev
-**Tests:** 989 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Tests:** 1014 pasando, 0 errores lint, 0 warnings, typecheck limpio
+**Migraciones:** 26 aplicadas (001-026)
+
+**Trabajo realizado:**
+
+### Sesión B — Funcionalidad PRD + Integraciones completas
+
+**Tareas completadas:**
+
+1. **Migración 026:** Columnas nuevas en `company_settings` (alert*driving_hours, alert_tachograph_days, alert_speed_limit, email*\_, maps\__, fuel*card*_, accounting\_\_). Bucket Storage `company-logos` creado con políticas RLS.
+2. **Task 5 — Nuevos umbrales de alerta:** 3 constantes en `ALERT_THRESHOLDS` (DRIVING_HOURS: 9, TACHOGRAPH_DOWNLOAD_DAYS: 28, SPEED_LIMIT_KMH: 90). Schema Zod extendido. Form actualizado con 3 campos nuevos.
+3. **Task 6 — Upload logo empresa:** `CompanyForm.vue` con VFileInput + preview + upload a bucket `company-logos` + validación (formato, max 2MB). `logo_url` añadido a `companySettingsSchema`.
+4. **Task 8 — Refactor IntegrationsForm:** Reescrito como 5 `VExpansionPanel` (GPS, Email, Maps, Tarjetas Combustible, Contabilidad). 4 nuevos schemas Zod por sección. Guardado por sección independiente. Read-only con secrets enmascarados.
+5. **Task 7 — Edge Function invite-user:** `supabase/functions/invite-user/index.ts` con verificación JWT + check admin + `auth.admin.inviteUserByEmail()` + creación perfil. Método `inviteUser()` en `api-profiles.js` + store `settings.js`. `UsersTable.vue` conectado con `handleCreate()`.
+
+**Archivos creados (2):**
+
+- `supabase/migrations/20260402_026_session_b_settings.sql`
+- `supabase/functions/invite-user/index.ts`
+
+**Archivos modificados (9):**
+
+- `src/constants/legal-limits.js` — +3 constantes (umbrales conducción, tacógrafo, velocidad)
+- `src/constants/legal-limits.spec.js` — +3 tests
+- `src/validations/settings-schema.js` — +logo_url en companySettings, +3 campos alertThresholds, +4 schemas integraciones por sección
+- `src/validations/settings-schema.spec.js` — +12 tests (3 alertas + 9 integraciones)
+- `src/components/settings/AlertThresholdsForm.vue` — +3 campos (conducción, tacógrafo, velocidad) + read-only
+- `src/components/settings/CompanyForm.vue` — upload logo (VFileInput, preview, bucket upload)
+- `src/components/settings/IntegrationsForm.vue` — rewrite completo con 5 VExpansionPanels
+- `src/components/settings/UsersTable.vue` — `handleCreate()` conectado con Edge Function
+- `src/services/api-profiles.js` — +`inviteUser()` método
+- `src/stores/settings.js` — +`inviteUser()` acción
+
+**Resultado:** 1014 tests (989 + 25 nuevos). Lint + typecheck limpios. 1 migración aplicada en Supabase.
+
+**Pendiente para la Edge Function:**
+
+- Configurar `SUPABASE_SERVICE_ROLE_KEY` como secret: `supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<key>`
+- Desplegar Edge Function: `supabase functions deploy invite-user`
+- Obtener service_role key del dashboard: Settings → API → Project API keys
 
 **Trabajo realizado:**
 
@@ -264,39 +303,41 @@ _(Complementa las de AGENTS.md)_
 | 3   | Admin no puede auto-degradar su rol                                | `stores/settings.js` + spec                   | ✅                        |
 | 4   | Validación Zod en IntegrationsForm                                 | `IntegrationsForm.vue` + `settings-schema.js` | ✅                        |
 
-#### Sesión B — Funcionalidad PRD + Integraciones completas
+#### ~~Sesión B — Funcionalidad PRD + Integraciones completas~~ ✅ COMPLETADA
 
-| #   | Tarea                                                                  | Archivos                                 |
-| --- | ---------------------------------------------------------------------- | ---------------------------------------- |
-| 5   | Nuevos umbrales: conducción (9h), tacógrafo (28d), velocidad (90 km/h) | `AlertThresholdsForm.vue` + migración BD |
-| 6   | Upload logo empresa (Supabase Storage)                                 | `CompanyForm.vue`                        |
-| 7   | Creación usuario (Edge Function Supabase Admin API)                    | `UsersTable.vue` + Edge Function         |
-| 8   | Refactor IntegrationsForm → VExpansionPanels con 5 secciones           | `IntegrationsForm.vue` + migración BD    |
+| #   | Tarea                                                                  | Archivos                                 | Estado |
+| --- | ---------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| 5   | Nuevos umbrales: conducción (9h), tacógrafo (28d), velocidad (90 km/h) | `AlertThresholdsForm.vue` + migración BD | ✅     |
+| 6   | Upload logo empresa (Supabase Storage)                                 | `CompanyForm.vue`                        | ✅     |
+| 7   | Creación usuario (Edge Function Supabase Admin API)                    | `UsersTable.vue` + Edge Function         | ✅     |
+| 8   | Refactor IntegrationsForm → VExpansionPanels con 5 secciones           | `IntegrationsForm.vue` + migración BD    | ✅     |
 
 **Secciones de Integraciones (VExpansionPanels):**
 
-- GPS/Telemática: Webfleet, Frotcom, Geotab, Otro
+- GPS/Telemática: Webfleet, Frotcom, Geotab
 - Email: Brevo, SendGrid
 - Maps: Google Maps
-- Tarjetas combustible: DKV, WABCO, Otro
-- Contabilidad: Sage, A3, Holded, Otro
+- Tarjetas combustible: DKV, WABCO
+- Contabilidad: Sage, A3, Holded
 
-Cada sección: selector proveedor + campos credenciales + botón guardar + botón "Probar conexión".
+Cada sección: selector proveedor + campos credenciales + botón guardar + botón "Probar conexión" (deshabilitado, pendiente GPS en producción).
 
 #### Sesión C — Mejoras adicionales
 
-| #   | Tarea                                   | Archivos                 |
-| --- | --------------------------------------- | ------------------------ |
-| 9   | Botón test conexión GPS (Edge Function) | `IntegrationsForm.vue`   |
-| 10  | Plantillas documentos transporte        | Nueva tabla + componente |
+> **Plan:** `docs/plans/sesion-c-mejoras-adicionales.md`
+
+| #   | Tarea                                                                | Archivos                                      |
+| --- | -------------------------------------------------------------------- | --------------------------------------------- |
+| 9   | Eliminar "Otro" de 3 paneles de integraciones                        | `IntegrationsForm.vue` + `settings-schema.js` |
+| 10  | Sistema documentos transporte (catálogo + PDF auto-rellenado por ID) | 13 archivos nuevos + 3 modificados            |
 
 #### Migraciones BD necesarias
 
 - **Sesión A**: 0 migraciones (solo correcciones de código) ✅ COMPLETADA
-- **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones)
-- **Sesión C**: 1 migración (tabla document_templates)
+- **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones) ✅ COMPLETADA
+- **Sesión C**: 1 migración (tabla document_templates + generated_documents)
 
-**Archivos creados (16):**
+**Archivos creados Sesión A (11):**
 
 - `src/constants/role-permissions.js` + spec — 5 roles, matriz permisos, helpers RBAC (29 tests)
 - `src/validations/settings-schema.js` + spec — Zod para empresa, umbrales, usuarios
@@ -309,6 +350,24 @@ Cada sección: selector proveedor + campos credenciales + botón guardar + botó
 - `src/components/settings/IntegrationsForm.vue` — GPS provider + API keys
 - `src/pages/SettingsPage.vue` — VTabs con RBAC gate (4 pestañas)
 - PRD.md actualizado §4.10.1 — Política RBAC completa
+
+**Archivos creados Sesión B (2):**
+
+- `supabase/migrations/20260402_026_session_b_settings.sql`
+- `supabase/functions/invite-user/index.ts`
+
+**Archivos modificados Sesión B (9):**
+
+- `src/constants/legal-limits.js` — +3 constantes (umbrales conducción, tacógrafo, velocidad)
+- `src/constants/legal-limits.spec.js` — +3 tests
+- `src/validations/settings-schema.js` — +logo_url, +3 campos alertas, +4 schemas integraciones
+- `src/validations/settings-schema.spec.js` — +12 tests
+- `src/components/settings/AlertThresholdsForm.vue` — +3 campos umbrales
+- `src/components/settings/CompanyForm.vue` — upload logo (VFileInput, bucket upload)
+- `src/components/settings/IntegrationsForm.vue` — rewrite completo con 5 VExpansionPanels
+- `src/components/settings/UsersTable.vue` — handleCreate() con Edge Function
+- `src/services/api-profiles.js` — +inviteUser() método
+- `src/stores/settings.js` — +inviteUser() acción
 
 ### Sesión 12 — Módulo Informes (completo)
 
@@ -543,8 +602,8 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | Generación automática de alertas | Alertas   | Detectar vencimientos doc, límites HOS, consumo anómalo, mantenimiento pendiente e insertar alertas automáticamente |
 | Realtime subscriptions           | Alertas   | Suscripción Supabase Realtime en tabla `alerts` para actualización en tiempo real (Tier 1 según AGENTS.md §17)      |
 | Badge alertas activas            | Sidebar   | Mostrar contador de alertas no leídas/no silenciadas en el icono del sidebar                                        |
-| Aplicar migraciones BD informes  | Informes  | Migraciones 019-024 ya aplicadas en Supabase ✅                                                                     |
 | Dashboard principal              | Dashboard | Reemplazar placeholder con KPIs reales desde `get_dashboard_kpis()` + gráficos desde datos                          |
+| Deploy Edge Function invite-user | Config    | Configurar SUPABASE_SERVICE_ROLE_KEY como secret + desplegar `supabase functions deploy invite-user`                |
 
 ### Media — Siguientes iteraciones
 
@@ -580,11 +639,12 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | CRUD alertas completo                                               | Sesión 11 |
 | 9 informes con KPIs + gráficos + export                             | Sesión 12 |
 | BD financiera (routes + vehicle_annual_costs + driver_compensation) | Sesión 12 |
-| 24 migraciones aplicadas en Supabase                                | Sesión 12 |
+| 26 migraciones aplicadas en Supabase                                | Sesión B  |
 | RLS restrictivo en tablas nuevas                                    | Sesión 12 |
 | 920 tests TDD                                                       | Sesión 12 |
 | Sesión A: correcciones críticas seguridad (4 tareas)                | Sesión 15 |
-| 989 tests TDD (920 + sesiones 13-15)                                | Sesión 15 |
+| Sesión B: funcionalidad PRD + integraciones (4 tareas)              | Sesión B  |
+| 1014 tests TDD (989 + sesión B)                                     | Sesión B  |
 
 ---
 
@@ -607,7 +667,7 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                     |
 | Tipos de documentos             | Código       | `src/constants/document-types.js`                      |
 | Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-024 aplicadas en Supabase) |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-026 aplicadas en Supabase) |
 | Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                     |
 | Material Design 3               | Docs         | https://m3.material.io                                 |
 | Vuetify 4                       | Docs         | https://vuetifyjs.com                                  |
