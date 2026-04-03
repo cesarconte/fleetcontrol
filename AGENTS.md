@@ -1427,6 +1427,85 @@ ci(scope): description
 - **Jobs**: lint → typecheck → test (unit) → test:e2e
 - Workflow file: `.github/workflows/ci.yml`
 
+### Git Safety Protocol (MANDATORY)
+
+**These rules prevent the divergence/overwrite incident of 2026-04-03, where local code fixes were lost during merge because remote commits had overwritten them.**
+
+#### Before ANY commit — synchronization gate
+
+1. **ALWAYS run `git pull --rebase origin dev` before starting work** — ensures local is synced with remote
+2. **ALWAYS verify `git status --short` shows expected files** — confirm what will be committed
+3. **ALWAYS run `git diff --stat` before `git add`** — verify the scope of changes matches expectations
+4. **If `git status` shows divergence** (ahead/behind different branches), STOP and resolve:
+   ```bash
+   git fetch origin
+   git log --oneline --graph --all -10  # visualize divergence
+   git log --oneline origin/dev..HEAD    # local-only commits
+   git log --oneline HEAD..origin/dev    # remote-only commits
+   ```
+
+#### Before ANY push — verification gate
+
+1. **ALWAYS run `git log --oneline --graph --all -10`** — verify branch structure is clean
+2. **ALWAYS run `git status`** — working tree must be clean before push
+3. **ALWAYS run `git log --oneline origin/dev..HEAD`** — confirms exactly what will be pushed
+4. **If there are unpushed commits AND remote has new commits**, merge first:
+   ```bash
+   git fetch origin
+   git merge origin/dev --no-edit  # integrate remote changes
+   npm test && npm run check       # verify nothing broke
+   git push origin dev             # now safe to push
+   ```
+
+#### Commit integrity — never lose code
+
+1. **ALWAYS verify `git show --stat HEAD` after commit** — confirm ALL expected files are included
+2. **If commit contains fewer files than expected**, the working tree was dirty or files were unstaged — fix before proceeding
+3. **NEVER trust `git add -A` blindly** — always check `git status --short` first to see what's staged vs unstaged
+4. **After merge, ALWAYS verify local changes survived**:
+   ```bash
+   git diff HEAD --stat           # what changed in last commit
+   rg "pattern" path/to/file      # spot-check critical fixes exist
+   ```
+
+#### Recovery — when things go wrong
+
+1. **If local changes are lost after merge**:
+   ```bash
+   git reflog                     # find the commit with your changes
+   git show abc123                # verify it's the right one
+   git cherry-pick abc123         # re-apply it
+   ```
+2. **If merge overwrote local files**:
+   ```bash
+   git reset --soft HEAD~1        # undo merge commit, keep changes
+   git merge origin/dev --no-edit # re-do merge properly
+   ```
+3. **If commit captured wrong files**:
+   ```bash
+   git reset HEAD~1               # undo commit, keep changes staged
+   git reset HEAD                 # unstage everything
+   git add <correct-files>        # stage only what's needed
+   git commit -m "correct message"
+   ```
+
+#### Branch hygiene
+
+1. **Run `git remote prune origin` monthly** — remove stale remote tracking branches
+2. **Delete local feature branches after merge**: `git branch -d feature/name`
+3. **NEVER force push to `dev` or `main`** — use `--force-with-lease` only on feature branches
+4. **If `git status` shows "diverged"**, resolve before committing — never commit on top of divergence
+
+#### Anti-patterns (NEVER)
+
+- ❌ Commit without checking `git status --short` first
+- ❌ Push when `git log --oneline origin/dev..HEAD` shows unexpected commits
+- ❌ Merge without verifying `git diff --stat` includes all expected changes
+- ❌ Trust that a commit captured everything — always verify with `git show --stat HEAD`
+- ❌ Continue working when `git status` shows divergence — resolve first
+- ❌ Assume merge preserved local changes — always spot-check critical files
+- ❌ Push to `dev` without running `npm test && npm run check` after merge
+
 ---
 
 ## 20. Development Workflow
