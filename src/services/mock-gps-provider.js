@@ -130,6 +130,7 @@ export class MockGpsProvider extends GpsProvider {
   /**
    * Inicia la simulación GPS.
    * Genera posiciones periódicamente para vehículos en ruta.
+   * @throws {Error} Si no hay rutas activas configuradas
    */
   startSimulation() {
     if (this._isRunning) return

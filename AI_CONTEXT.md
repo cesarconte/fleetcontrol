@@ -387,6 +387,44 @@ _(Complementa las de AGENTS.md)_
 
 **Pendiente:** Tests integración realtime (Tarea 6.1), tests FleetMap component, eliminar docs/plans obsoletos.
 
+### Sesión mapa — Tests pendientes + mejoras
+
+**Fecha:** 2026-04-03
+**Branch:** feature/mapa
+**Tests:** 1181 pasando (+22 nuevos: 7 integración realtime + 12 FleetMap + 3 heading), 3 skipped (Google Maps DOM-dependent), 0 errores lint, 0 warnings, typecheck limpio
+
+**Trabajo realizado:**
+
+- **Tests integración realtime** (`use-fleet-map.integration.spec.js`): 7 tests
+  - Suscripción a vehicle_positions al llamar subscribeToRealtime
+  - Refetch al recibir INSERT en vehicle_positions
+  - Actualización de vehículo al recibir UPDATE (cambio de estado)
+  - Filtrado correcto después de refetch por realtime
+  - Manejo de CHANNEL_ERROR
+  - Limpieza de suscripción al llamar cleanup
+  - Múltiples eventos realtime mantienen filteredVehicles consistente
+
+- **Tests componente FleetMap.vue** (`FleetMap.spec.js`): 12 tests (9 passing, 3 skipped)
+  - Renderizado con atributos ARIA
+  - Controles de mapa
+  - Overlay de carga (visible/oculto)
+  - Advertencia GPS (visible/oculto)
+  - Panel de detalle (visible/oculto)
+  - 3 tests de marcadores skipped (requieren Google Maps real en DOM)
+
+- **JSDoc completo**: @throws en startSimulation de MockGpsProvider
+- **Tests calculateHeading**: valores conocidos (Norte=0°, Este=90°, Sur=180°, Oeste=270°)
+
+**Archivos creados (2):**
+
+- `src/composables/use-fleet-map.integration.spec.js` — 7 tests integración realtime
+- `src/components/map/FleetMap.spec.js` — 12 tests componente (9 passing, 3 skipped)
+
+**Archivos modificados (1):**
+
+- `src/services/mock-gps-provider.js` — JSDoc @throws en startSimulation
+- `src/services/mock-gps-provider.spec.js` — +3 tests calculateHeading con valores conocidos
+
 ---
 
 ### PLAN PENDIENTE — Mejoras módulo Configuración (siguiente sesión)

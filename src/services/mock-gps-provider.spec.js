@@ -47,11 +47,25 @@ describe('mock-gps-provider.js', () => {
     describe('calculateHeading', () => {
       it('debería calcular heading hacia el norte (~0°)', () => {
         const heading = calculateHeading({ lat: 40, lng: -3 }, { lat: 41, lng: -3 })
-        expect(heading).toBeGreaterThanOrEqual(0)
-        expect(heading).toBeLessThan(360)
+        expect(heading).toBeCloseTo(0, 1)
       })
 
-      it('debería devolver valor entre 0 y 360', () => {
+      it('debería calcular heading hacia el este (~90°)', () => {
+        const heading = calculateHeading({ lat: 40, lng: -3 }, { lat: 40, lng: -2 })
+        expect(heading).toBeCloseTo(90, 0)
+      })
+
+      it('debería calcular heading hacia el sur (~180°)', () => {
+        const heading = calculateHeading({ lat: 41, lng: -3 }, { lat: 40, lng: -3 })
+        expect(heading).toBeCloseTo(180, 1)
+      })
+
+      it('debería calcular heading hacia el oeste (~270°)', () => {
+        const heading = calculateHeading({ lat: 40, lng: -2 }, { lat: 40, lng: -3 })
+        expect(heading).toBeCloseTo(270, 0)
+      })
+
+      it('debería devolver valor entre 0 y 360 para ruta diagonal', () => {
         const heading = calculateHeading(
           { lat: 40.4168, lng: -3.7038 },
           { lat: 41.3874, lng: 2.1686 },
