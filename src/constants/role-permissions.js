@@ -150,6 +150,8 @@ export function hasSettingsAccess(role, tab) {
       return perm.alertThresholds !== 'none'
     case 'integraciones':
       return perm.integrations !== 'none'
+    case 'documentos':
+      return perm.companySettings !== 'none'
     default:
       return false
   }

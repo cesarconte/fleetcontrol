@@ -168,7 +168,8 @@ import {
   USER_ROLES,
 } from '@/constants/role-permissions.js'
 
-const { profiles, isLoading, updateUserRole, deactivateUser, reactivateUser } = useSettings()
+const { profiles, isLoading, updateUserRole, deactivateUser, reactivateUser, inviteUser } =
+  useSettings()
 const authStore = useAuthStore()
 
 const canManage = computed(() => canManageUsers(authStore.userRole))
@@ -231,10 +232,10 @@ async function handleCreate() {
   if (!valid) return
   isCreating.value = true
   try {
-    // User creation requires Supabase Admin API (invite user)
+    await inviteUser(createForm.email, createForm.full_name, createForm.role)
+    createOpen.value = false
   } finally {
     isCreating.value = false
-    createOpen.value = false
   }
 }
 

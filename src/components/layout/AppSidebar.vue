@@ -96,18 +96,20 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { useUiStore } from '@/stores/ui.js'
 import { useAuthStore } from '@/stores/auth.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { useAlerts } from '@/composables/use-alerts.js'
 
 const router = useRouter()
 const { mobile } = useDisplay()
 const uiStore = useUiStore()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
+const { activeCount, fetchActiveCount } = useAlerts()
 
 const isMobile = computed(() => mobile.value)
 const sidebarCollapsed = computed(() => uiStore.sidebarCollapsed)
@@ -120,6 +122,14 @@ const isOpen = computed({
   set(value) {
     if (isMobile.value) uiStore.mobileDrawerOpen = value
   },
+})
+
+const alertsBadge = computed(() => {
+  return activeCount.value > 0 ? activeCount.value : null
+})
+
+onMounted(() => {
+  fetchActiveCount()
 })
 
 const navGroups = computed(() => [
@@ -175,10 +185,6 @@ const navGroups = computed(() => [
     ],
   },
 ])
-
-const alertsBadge = computed(() => {
-  return 0
-})
 
 async function handleLogout() {
   await authStore.logout()

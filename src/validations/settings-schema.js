@@ -20,6 +20,7 @@ export const companySettingsSchema = z.object({
   transport_authorization_number: z.string().max(50).optional().or(z.literal('')),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().max(20).optional().or(z.literal('')),
+  logo_url: z.string().url('URL inválida').optional().or(z.literal('')),
 })
 
 export const alertThresholdsSchema = z.object({
@@ -29,14 +30,45 @@ export const alertThresholdsSchema = z.object({
   alert_days_maintenance_days: z.number().int().min(1).max(365),
   alert_critical_doc_days: z.number().int().min(1).max(90),
   fuel_anomaly_percent: z.number().int().min(1).max(100),
+  alert_driving_hours: z.number().min(1).max(24),
+  alert_tachograph_days: z.number().int().min(1).max(90),
+  alert_speed_limit: z.number().int().min(1).max(200),
 })
 
-const GPS_PROVIDERS = ['webfleet', 'frotcom', 'geotab', 'otro', '']
+const GPS_PROVIDERS = ['webfleet', 'frotcom', 'geotab', '']
+const EMAIL_PROVIDERS = ['brevo', 'sendgrid', '']
+const MAPS_PROVIDERS = ['google_maps', '']
+const FUEL_CARD_PROVIDERS = ['dkv', 'wabco', '']
+const ACCOUNTING_PROVIDERS = ['sage', 'a3', 'holded', '']
 
 export const integrationsSchema = z.object({
   gps_provider: z.enum(GPS_PROVIDERS).optional().or(z.literal('')),
   gps_api_key: z.string().optional().or(z.literal('')),
   gps_api_secret: z.string().optional().or(z.literal('')),
+})
+
+export const emailIntegrationsSchema = z.object({
+  email_provider: z.enum(EMAIL_PROVIDERS).optional().or(z.literal('')),
+  email_api_key: z.string().optional().or(z.literal('')),
+  email_sender_email: z.string().email('Email inválido').optional().or(z.literal('')),
+  email_sender_name: z.string().max(200).optional().or(z.literal('')),
+})
+
+export const mapsIntegrationsSchema = z.object({
+  maps_provider: z.enum(MAPS_PROVIDERS).optional().or(z.literal('')),
+  maps_api_key: z.string().optional().or(z.literal('')),
+})
+
+export const fuelCardIntegrationsSchema = z.object({
+  fuel_card_provider: z.enum(FUEL_CARD_PROVIDERS).optional().or(z.literal('')),
+  fuel_card_api_key: z.string().optional().or(z.literal('')),
+  fuel_card_api_secret: z.string().optional().or(z.literal('')),
+})
+
+export const accountingIntegrationsSchema = z.object({
+  accounting_provider: z.enum(ACCOUNTING_PROVIDERS).optional().or(z.literal('')),
+  accounting_api_key: z.string().optional().or(z.literal('')),
+  accounting_api_url: z.string().optional().or(z.literal('')),
 })
 
 export const userProfileSchema = z.object({

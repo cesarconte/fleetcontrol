@@ -123,6 +123,24 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  async function inviteUser(email, fullName, role) {
+    if (!isAdmin.value) {
+      notifications.error('Solo el administrador puede invitar usuarios')
+      return
+    }
+    error.value = null
+    try {
+      const user = await apiProfiles.inviteUser(email, fullName, role)
+      notifications.success('Invitación enviada a ' + email)
+      await fetchProfiles()
+      return user
+    } catch (err) {
+      error.value = err
+      notifications.error('Error al invitar usuario: ' + err.message)
+      throw err
+    }
+  }
+
   return {
     companySettings,
     profiles,
@@ -136,5 +154,6 @@ export const useSettingsStore = defineStore('settings', () => {
     updateUserRole,
     deactivateUser,
     reactivateUser,
+    inviteUser,
   }
 })

@@ -8,9 +8,10 @@
  * @see apiAlerts — Service layer
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { apiAlerts } from '@/services/api-alerts.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { useRealtime } from './use-realtime.js'
 
 export function useAlerts(initialFilters = {}) {
   const items = ref([])
@@ -25,8 +26,41 @@ export function useAlerts(initialFilters = {}) {
   const sort = ref({ col: 'created_at', asc: false })
 
   const notifications = useNotificationStore()
+  const realtime = useRealtime()
 
   const totalPages = computed(() => Math.ceil(total.value / pageSize.value) || 1)
+
+  function handleAlertChange({ eventType, new: record, old: oldRecord }) {
+    try {
+      if (eventType === 'INSERT') {
+        items.value.unshift(record)
+        total.value++
+        if (record.severity === 'critical') {
+          notifications.error(`Nueva alerta crítica: ${record.title}`)
+        } else {
+          notifications.warning(`Nueva alerta: ${record.title}`)
+        }
+      }
+      if (eventType === 'UPDATE') {
+        const idx = items.value.findIndex(a => a.id === record.id)
+        if (idx !== -1) items.value[idx] = record
+      }
+      if (eventType === 'DELETE') {
+        items.value = items.value.filter(a => a.id !== oldRecord.id)
+        total.value--
+      }
+    } catch (err) {
+      console.error('[useAlerts] Realtime handler error:', err)
+    }
+  }
+
+  onMounted(() => {
+    realtime.subscribe('alerts', handleAlertChange)
+  })
+
+  onUnmounted(() => {
+    realtime.unsubscribe('alerts')
+  })
 
   async function fetch() {
     isLoading.value = true

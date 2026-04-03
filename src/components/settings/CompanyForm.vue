@@ -29,6 +29,33 @@
               data-testid="company-cif"
             />
           </VCol>
+          <VCol cols="12" sm="6" md="4">
+            <div class="mb-2">
+              <div class="text-caption text-uppercase text-medium-emphasis mb-1">Logo</div>
+              <VImg
+                v-if="logoPreview"
+                :src="logoPreview"
+                max-height="80"
+                max-width="200"
+                contain
+                class="mb-2 rounded"
+                data-testid="company-logo-preview"
+              />
+              <div v-else class="text-body-2 text-medium-emphasis mb-2">Sin logo</div>
+              <v-file-input
+                v-model="logoFile"
+                label="Seleccionar logo"
+                accept="image/png,image/jpeg,image/webp"
+                prepend-icon="mdi-image"
+                variant="outlined"
+                density="compact"
+                hide-details
+                :error-messages="errors.logo_url"
+                data-testid="company-logo-input"
+                @update:model-value="onLogoSelected"
+              />
+            </div>
+          </VCol>
           <VCol cols="12">
             <v-text-field
               v-model="form.address"
@@ -149,6 +176,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import { useSettings } from '@/composables/use-settings.js'
 import { canEditCompanySettings } from '@/constants/role-permissions.js'
 import { companySettingsSchema } from '@/validations/settings-schema.js'
+import { supabase } from '@/services/supabase-client.js'
 
 const store = useSettings()
 
@@ -157,8 +185,13 @@ const emit = defineEmits(['saved'])
 const formRef = ref(null)
 const isSubmitting = ref(false)
 const errors = reactive({})
+const logoFile = ref([])
+const logoPreview = ref(null)
 
 const isEditable = computed(() => canEditCompanySettings(store.currentRole))
+
+const LOGO_MAX_SIZE_MB = 2
+const LOGO_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 
 const fullAddress = computed(() => {
   const s = store.companySettings
@@ -177,15 +210,49 @@ const form = reactive({
   email: '',
   phone: '',
   transport_authorization_number: '',
+  logo_url: '',
 })
 
 watch(
   () => store.companySettings,
   s => {
     if (s) Object.assign(form, s)
+    if (s?.logo_url) logoPreview.value = s.logo_url
   },
   { immediate: true },
 )
+
+function onLogoSelected(files) {
+  const file = Array.isArray(files) ? files[0] : files
+  if (!file) {
+    logoPreview.value = form.logo_url || null
+    return
+  }
+  if (!LOGO_ACCEPTED_TYPES.includes(file.type)) {
+    errors.logo_url = 'Formato no válido. Usa PNG, JPEG o WebP.'
+    logoFile.value = []
+    return
+  }
+  if (file.size > LOGO_MAX_SIZE_MB * 1024 * 1024) {
+    errors.logo_url = `Máximo ${LOGO_MAX_SIZE_MB} MB.`
+    logoFile.value = []
+    return
+  }
+  delete errors.logo_url
+  logoPreview.value = URL.createObjectURL(file)
+}
+
+async function uploadLogo(file) {
+  const ext = file.name.split('.').pop()
+  const path = `logo.${ext}`
+  const { error } = await supabase.storage.from('company-logos').upload(path, file, {
+    upsert: true,
+    contentType: file.type,
+  })
+  if (error) throw error
+  const { data } = supabase.storage.from('company-logos').getPublicUrl(path)
+  return data.publicUrl
+}
 
 function clearErrors() {
   Object.keys(errors).forEach(k => delete errors[k])
@@ -202,6 +269,10 @@ async function handleSubmit() {
   }
   isSubmitting.value = true
   try {
+    const file = Array.isArray(logoFile.value) ? logoFile.value[0] : logoFile.value
+    if (file) {
+      result.data.logo_url = await uploadLogo(file)
+    }
     await store.updateCompanySettings(result.data)
     emit('saved')
   } finally {

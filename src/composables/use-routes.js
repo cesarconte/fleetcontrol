@@ -5,9 +5,10 @@
  * Sort column matches Supabase DB schema (departure_date).
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { apiRoutes } from '@/services/api-routes.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { useRealtime } from './use-realtime.js'
 
 export function useRoutes(initialFilters = {}) {
   const items = ref([])
@@ -22,8 +23,49 @@ export function useRoutes(initialFilters = {}) {
   const sort = ref({ col: 'departure_date', asc: false })
 
   const notifications = useNotificationStore()
+  const realtime = useRealtime()
 
   const totalPages = computed(() => Math.ceil(total.value / pageSize.value) || 1)
+
+  function handleRouteChange({ eventType, new: record, old: oldRecord }) {
+    try {
+      if (eventType === 'INSERT') {
+        items.value.unshift(record)
+        total.value++
+        notifications.info(`Ruta creada: ${record.name || record.id}`)
+      }
+      if (eventType === 'UPDATE') {
+        const idx = items.value.findIndex(r => r.id === record.id)
+        if (idx !== -1) {
+          const oldStatus = items.value[idx].status
+          items.value[idx] = record
+          if (oldStatus !== record.status) {
+            if (record.status === 'en_curso') {
+              notifications.info(`Ruta en curso: ${record.name || record.id}`)
+            } else if (record.status === 'completada') {
+              notifications.success(`Ruta completada: ${record.name || record.id}`)
+            } else if (record.status === 'incidencia') {
+              notifications.error(`Incidencia en ruta: ${record.name || record.id}`)
+            }
+          }
+        }
+      }
+      if (eventType === 'DELETE') {
+        items.value = items.value.filter(r => r.id !== oldRecord.id)
+        total.value--
+      }
+    } catch (err) {
+      console.error('[useRoutes] Realtime handler error:', err)
+    }
+  }
+
+  onMounted(() => {
+    realtime.subscribe('routes', handleRouteChange)
+  })
+
+  onUnmounted(() => {
+    realtime.unsubscribe('routes')
+  })
 
   async function fetch() {
     isLoading.value = true

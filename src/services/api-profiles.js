@@ -74,4 +74,14 @@ export const apiProfiles = {
     if (error) throw mapSupabaseError(error)
     return data
   },
+
+  async inviteUser(email, fullName, role) {
+    const { data, error } = await supabase.functions.invoke('invite-user', {
+      body: { email, full_name: fullName, role },
+    })
+
+    if (error) throw mapSupabaseError(error)
+    if (data?.error) throw new Error(data.error)
+    return data.user
+  },
 }
