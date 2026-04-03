@@ -103,7 +103,10 @@ export function useDocumentManagement() {
     isLoading.value = true
     error.value = null
     try {
-      const sort = { col: pagination.sortBy, asc: pagination.sortAsc }
+      // Transport documents use generated_at, not expiry_date
+      const defaultSort = activeTab.value === 'transport' ? 'generated_at' : 'expiry_date'
+      const sortCol = pagination.sortBy || defaultSort
+      const sort = { col: sortCol, asc: pagination.sortAsc }
       const pageParams = {
         page: pagination.page,
         pageSize: pagination.pageSize,
@@ -171,6 +174,12 @@ export function useDocumentManagement() {
   function setActiveTab(tab) {
     activeTab.value = tab
     pagination.page = 1
+    // Reset sort column if switching to transport (uses generated_at, not expiry_date)
+    if (tab === 'transport' && pagination.sortBy === 'expiry_date') {
+      pagination.sortBy = 'generated_at'
+    } else if (tab !== 'transport' && pagination.sortBy === 'generated_at') {
+      pagination.sortBy = 'expiry_date'
+    }
     fetchDocuments()
   }
 
@@ -224,7 +233,13 @@ export function useDocumentManagement() {
   // ── Watchers ───────────────────────────────────────────────────────
 
   // Reload data when tab changes
-  watch(activeTab, () => {
+  watch(activeTab, newTab => {
+    // Reset sort column based on tab (transport uses generated_at, others use expiry_date)
+    if (newTab === 'transport' && pagination.sortBy === 'expiry_date') {
+      pagination.sortBy = 'generated_at'
+    } else if (newTab !== 'transport' && pagination.sortBy === 'generated_at') {
+      pagination.sortBy = 'expiry_date'
+    }
     fetchDocuments()
     fetchKpis()
   })

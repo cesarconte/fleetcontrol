@@ -635,61 +635,72 @@ Añadir a `src/constants/legal-limits.js`:
 
 ## Resumen de Archivos
 
-### ✅ Creados (11)
+### ✅ Creados (20)
 
-| Archivo                                                | Tipo       | Líneas | Estado |
-| ------------------------------------------------------ | ---------- | ------ | ------ |
-| `src/services/api-documents.js`                        | Servicio   | ~250   | ✅     |
-| `src/services/api-documents.spec.js`                   | Test       | ~260   | ✅     |
-| `src/composables/use-document-management.js`           | Composable | ~200   | ✅     |
-| `src/composables/use-document-management.spec.js`      | Test       | ~270   | ✅     |
-| `src/components/documents/DocumentStatusChip.vue`      | Componente | ~45    | ✅     |
-| `src/components/documents/DocumentStatusChip.spec.js`  | Test       | ~45    | ✅     |
-| `src/components/documents/DocumentExpiryBadge.vue`     | Componente | ~55    | ✅     |
-| `src/components/documents/DocumentExpiryBadge.spec.js` | Test       | ~55    | ✅     |
-| `src/utils/export-documents.js`                        | Utilidad   | ~120   | ✅     |
-| `src/utils/export-documents.spec.js`                   | Test       | ~100   | ✅     |
-| `src/constants/legal-limits.js` (ampliado)             | Constantes | +10    | ✅     |
-| `src/constants/legal-limits.spec.js` (ampliado)        | Test       | +30    | ✅     |
+| Archivo                                                  | Tipo       | Líneas | Estado |
+| -------------------------------------------------------- | ---------- | ------ | ------ |
+| `src/services/api-documents.js`                          | Servicio   | ~283   | ✅     |
+| `src/services/api-documents.spec.js`                     | Test       | ~260   | ✅     |
+| `src/composables/use-document-management.js`             | Composable | ~267   | ✅     |
+| `src/composables/use-document-management.spec.js`        | Test       | ~270   | ✅     |
+| `src/components/documents/DocumentStatusChip.vue`        | Componente | ~45    | ✅     |
+| `src/components/documents/DocumentStatusChip.spec.js`    | Test       | ~45    | ✅     |
+| `src/components/documents/DocumentExpiryBadge.vue`       | Componente | ~55    | ✅     |
+| `src/components/documents/DocumentExpiryBadge.spec.js`   | Test       | ~55    | ✅     |
+| `src/components/documents/DocumentFilterBar.vue`         | Componente | ~218   | ✅     |
+| `src/components/documents/DocumentFilterBar.spec.js`     | Test       | ~100   | ✅     |
+| `src/components/documents/DocumentActionsDialog.vue`     | Componente | ~230   | ✅     |
+| `src/components/documents/DocumentActionsDialog.spec.js` | Test       | ~130   | ✅     |
+| `src/components/documents/VehicleDocumentsTable.vue`     | Componente | ~234   | ✅     |
+| `src/components/documents/DriverDocumentsTable.vue`      | Componente | ~212   | ✅     |
+| `src/components/documents/GeneratedDocumentsTable.vue`   | Componente | ~191   | ✅     |
+| `src/utils/export-documents.js`                          | Utilidad   | ~120   | ✅     |
+| `src/utils/export-documents.spec.js`                     | Test       | ~100   | ✅     |
+| `src/validations/document-schema.js`                     | Validación | ~20    | ✅     |
+| `src/constants/legal-limits.js` (ampliado)               | Constantes | +10    | ✅     |
+| `src/constants/legal-limits.spec.js` (ampliado)          | Test       | +30    | ✅     |
 
-### ⏳ Pendientes de crear (7)
+### ✅ Modificados (6)
 
-| Archivo                                                  | Tipo       | Líneas est. | Fase |
-| -------------------------------------------------------- | ---------- | ----------- | ---- |
-| `src/components/documents/DocumentFilterBar.vue`         | Componente | ~100        | 3    |
-| `src/components/documents/DocumentFilterBar.spec.js`     | Test       | ~40         | 3    |
-| `src/components/documents/DocumentActionsDialog.vue`     | Componente | ~120        | 3    |
-| `src/components/documents/DocumentActionsDialog.spec.js` | Test       | ~50         | 3    |
-| `src/components/documents/VehicleDocumentsTable.vue`     | Componente | ~120        | 4    |
-| `src/components/documents/DriverDocumentsTable.vue`      | Componente | ~120        | 4    |
-| `src/components/documents/GeneratedDocumentsTable.vue`   | Componente | ~100        | 4    |
-
-### ⏳ Pendientes de modificar (1)
-
-| Archivo                           | Cambio                                     | Líneas est.  | Fase |
-| --------------------------------- | ------------------------------------------ | ------------ | ---- |
-| `src/pages/DocumentsListPage.vue` | Rewrite completo (stub → página funcional) | ~180 (de 12) | 4    |
+| Archivo                                              | Cambio                                                                         | Líneas        | Fase |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------ | ------------- | ---- |
+| `src/pages/DocumentsListPage.vue`                    | Rewrite completo (stub → página funcional)                                     | ~294 (de 12)  | 4    |
+| `src/components/routes/RouteDetail.vue`              | Vista detalle ampliada (vehículo, conductor, carga, cliente, costes, márgenes) | ~380 (de 310) | —    |
+| `src/composables/use-document-management.js`         | Fix sort column por pestaña (transport → generated_at)                         | +8            | 4    |
+| `src/services/document-cmr.js`                       | Fix jspdf-autotable v5 + formato fechas DD/MM/YYYY                             | +12           | —    |
+| `src/services/document-carta-porte-nacional.js`      | Reescritura completa con layout oficial FOM/2861/2012                          | ~290 (de 491) | —    |
+| `src/services/document-cmr.spec.js`                  | Fix mocks jspdf v4 (named exports)                                             | ~15           | —    |
+| `src/services/document-carta-porte-nacional.spec.js` | Fix mocks jspdf v4 + setFillColor                                              | ~15           | —    |
 
 ### Progreso por Fase
 
-| Fase | Descripción                       | Estado       | Tests |
-| ---- | --------------------------------- | ------------ | ----- |
-| 1    | Servicio API centralizado         | ✅ Completa  | 23    |
-| 2    | Composable centralizado           | ✅ Completa  | 15    |
-| 5    | Constantes legales + export CSV   | ✅ Completa  | 21    |
-| 3    | Componentes UI reutilizables      | ⏳ Parcial   | 13/33 |
-| 4    | Página DocumentsListPage + tablas | 🔴 Pendiente | 0     |
+| Fase | Descripción                       | Estado      | Tests |
+| ---- | --------------------------------- | ----------- | ----- |
+| 1    | Servicio API centralizado         | ✅ Completa | 23    |
+| 2    | Composable centralizado           | ✅ Completa | 15    |
+| 5    | Constantes legales + export CSV   | ✅ Completa | 21    |
+| 3    | Componentes UI reutilizables      | ✅ Completa | 33    |
+| 4    | Página DocumentsListPage + tablas | ✅ Completa | 0     |
 
 ### Métricas actuales
 
 | Métrica                  | Valor     |
 | ------------------------ | --------- |
-| Tests totales proyecto   | 1315      |
-| Tests nuevos esta sesión | 113       |
+| Tests totales proyecto   | 1330      |
+| Tests nuevos esta sesión | 15        |
 | Archivos creados         | 10        |
-| Archivos modificados     | 2         |
+| Archivos modificados     | 7         |
 | Lint errors              | 0         |
 | Typecheck                | ✅ limpio |
+
+### ⏳ Pendiente para próxima sesión
+
+| Tarea                                                                  | Prioridad |
+| ---------------------------------------------------------------------- | --------- |
+| Probar Carta de Porte Nacional desde UI (layout oficial FOM/2861/2012) | Alta      |
+| Implementar acción eliminar documento en tablas                        | Media     |
+| Probar resto de generadores (albarán, hoja de ruta, factura, POD)      | Media     |
+| Añadir RLS policies para `generated_documents`                         | Media     |
 
 ---
 
@@ -715,19 +726,20 @@ Añadir a `src/constants/legal-limits.js`:
 - GREEN: Añadir constantes + función CSV
 - **Resultado:** 21 tests pasando (6 nuevas constantes + 10 export + 5 legal-limits)
 
-### ⏳ 4. **Fase 3** — Componentes UI reutilizables (PARCIAL)
+### ✅ 4. **Fase 3** — Componentes UI reutilizables (COMPLETA)
 
 - ✅ DocumentStatusChip.vue + tests (6 tests)
 - ✅ DocumentExpiryBadge.vue + tests (7 tests)
-- ⏳ DocumentFilterBar.vue + tests (pendiente)
-- ⏳ DocumentActionsDialog.vue + tests (pendiente)
+- ✅ DocumentFilterBar.vue + tests (8 tests)
+- ✅ DocumentActionsDialog.vue + tests (7 tests)
+- ✅ document-schema.js — validación Zod unificada
 
-### 🔴 5. **Fase 4** — Página completa + tablas (PENDIENTE)
+### ✅ 5. **Fase 4** — Página completa + tablas (COMPLETA)
 
-- 🔴 DocumentsListPage.vue rewrite
-- 🔴 VehicleDocumentsTable.vue
-- 🔴 DriverDocumentsTable.vue
-- 🔴 GeneratedDocumentsTable.vue
+- ✅ DocumentsListPage.vue rewrite (KPIs, filtros, tabs, 3 paneles, diálogos)
+- ✅ VehicleDocumentsTable.vue (VDataTableServer + mobile cards)
+- ✅ DriverDocumentsTable.vue (VDataTableServer + mobile cards)
+- ✅ GeneratedDocumentsTable.vue (VDataTableServer + mobile cards)
 
 ---
 

@@ -69,20 +69,24 @@
                   {{ extractTime(route.planned_arrival_date) || '—' }}
                 </div>
               </v-col>
-              <v-col cols="6" sm="4" md="3">
-                <div class="text-caption text-medium-emphasis">Origen</div>
-                <div class="text-body-1">{{ route.origin_city }}</div>
+              <v-col cols="12" sm="6">
+                <div class="text-caption text-medium-emphasis">Dirección origen</div>
+                <div class="text-body-1">
+                  {{ route.origin_address || route.origin_city || '—' }}
+                </div>
               </v-col>
-              <v-col cols="6" sm="4" md="3">
-                <div class="text-caption text-medium-emphasis">Destino</div>
-                <div class="text-body-1">{{ route.destination_city }}</div>
+              <v-col cols="12" sm="6">
+                <div class="text-caption text-medium-emphasis">Dirección destino</div>
+                <div class="text-body-1">
+                  {{ route.destination_address || route.destination_city || '—' }}
+                </div>
               </v-col>
               <v-col cols="6" sm="4" md="3">
                 <div class="text-caption text-medium-emphasis">Distancia</div>
                 <div class="text-body-1">
                   {{
                     route.distance_total_km
-                      ? `${route.distance_total_km.toLocaleString('es-ES')} km`
+                      ? `${Number(route.distance_total_km).toLocaleString('es-ES')} km`
                       : '—'
                   }}
                 </div>
@@ -97,27 +101,133 @@
           </v-expansion-panel-text>
         </v-expansion-panel>
 
+        <!-- Vehículo y Conductor -->
+        <v-expansion-panel title="Vehículo y Conductor" value="vehicle">
+          <v-expansion-panel-text>
+            <v-row>
+              <v-col cols="6" sm="4" md="3">
+                <div class="text-caption text-medium-emphasis">Matrícula</div>
+                <div class="text-body-1 font-weight-medium">
+                  <RouterLink
+                    v-if="vehicle?.id"
+                    :to="{ name: 'VehicleDetail', params: { id: vehicle.id } }"
+                    class="text-primary text-decoration-none"
+                  >
+                    {{ vehicle.plate || '—' }}
+                  </RouterLink>
+                  <span v-else>{{ vehicle?.plate || '—' }}</span>
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4" md="3">
+                <div class="text-caption text-medium-emphasis">Vehículo</div>
+                <div class="text-body-1">{{ vehicle?.brand || '' }} {{ vehicle?.model || '' }}</div>
+              </v-col>
+              <v-col cols="6" sm="4" md="3">
+                <div class="text-caption text-medium-emphasis">Conductor</div>
+                <div class="text-body-1 font-weight-medium">
+                  <RouterLink
+                    v-if="driver?.id"
+                    :to="{ name: 'DriverDetail', params: { id: driver.id } }"
+                    class="text-primary text-decoration-none"
+                  >
+                    {{ driver.full_name || '—' }}
+                  </RouterLink>
+                  <span v-else>{{ driver?.full_name || '—' }}</span>
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4" md="3">
+                <div class="text-caption text-medium-emphasis">NIF Conductor</div>
+                <div class="text-body-1">{{ driver?.national_id || '—' }}</div>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+
         <!-- Carga -->
         <v-expansion-panel title="Carga" value="cargo">
           <v-expansion-panel-text>
             <v-row>
               <v-col cols="12" sm="6">
                 <div class="text-caption text-medium-emphasis">Descripción</div>
-                <div class="text-body-1">{{ route.cargo_description || '—' }}</div>
+                <div class="text-body-1">
+                  {{ cargo?.description || route.cargo_description || '—' }}
+                </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Peso</div>
                 <div class="text-body-1">
                   {{
-                    route.cargo_weight_kg
-                      ? `${route.cargo_weight_kg.toLocaleString('es-ES')} kg`
+                    cargo?.weight_kg || route.cargo_weight_kg
+                      ? `${Number(cargo?.weight_kg || route.cargo_weight_kg).toLocaleString('es-ES')} kg`
                       : '—'
                   }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Tipo</div>
-                <div class="text-body-1">{{ getCargoTypeLabel(route.cargo_type) }}</div>
+                <div class="text-body-1">
+                  {{ getCargoTypeLabel(cargo?.cargo_type || route.cargo_type) }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Embalaje</div>
+                <div class="text-body-1">{{ cargo?.packaging_type || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Bultos</div>
+                <div class="text-body-1">{{ cargo?.packages || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Valor declarado</div>
+                <div class="text-body-1">
+                  {{
+                    cargo?.declared_value
+                      ? `${Number(cargo.declared_value).toLocaleString('es-ES')} €`
+                      : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <div class="text-caption text-medium-emphasis">Destinatario</div>
+                <div class="text-body-1">{{ cargo?.consignee_name || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">NIF Destinatario</div>
+                <div class="text-body-1">{{ cargo?.consignee_nif || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Lugar entrega</div>
+                <div class="text-body-1">{{ cargo?.cmr_delivery_place || '—' }}</div>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+
+        <!-- Cliente y Comercial -->
+        <v-expansion-panel title="Cliente y Comercial" value="client">
+          <v-expansion-panel-text>
+            <v-row>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Cliente</div>
+                <div class="text-body-1">{{ route.client_name || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">NIF Cliente</div>
+                <div class="text-body-1">{{ route.client_tax_id || '—' }}</div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Precio servicio</div>
+                <div class="text-body-1 font-weight-medium">
+                  {{
+                    route.price
+                      ? `${Number(route.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`
+                      : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Condiciones de pago</div>
+                <div class="text-body-1">{{ route.payment_terms || '—' }}</div>
               </v-col>
             </v-row>
           </v-expansion-panel-text>
@@ -136,19 +246,77 @@
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste combustible</div>
                 <div class="text-body-1">
-                  {{ route.fuel_cost_eur ? `${route.fuel_cost_eur.toFixed(2)} €` : '—' }}
+                  {{ route.fuel_cost_eur ? `${Number(route.fuel_cost_eur).toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Peajes</div>
                 <div class="text-body-1">
-                  {{ route.toll_cost_eur ? `${route.toll_cost_eur.toFixed(2)} €` : '—' }}
+                  {{ route.toll_cost_eur ? `${Number(route.toll_cost_eur).toFixed(2)} €` : '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Coste conductor</div>
+                <div class="text-body-1">
+                  {{
+                    route.driver_cost_eur ? `${Number(route.driver_cost_eur).toFixed(2)} €` : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Otros variables</div>
+                <div class="text-body-1">
+                  {{
+                    route.other_variable_cost_eur
+                      ? `${Number(route.other_variable_cost_eur).toFixed(2)} €`
+                      : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Costes fijos asignados</div>
+                <div class="text-body-1">
+                  {{
+                    route.allocated_fixed_cost_eur
+                      ? `${Number(route.allocated_fixed_cost_eur).toFixed(2)} €`
+                      : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Coste variable total</div>
+                <div class="text-body-1">
+                  {{
+                    route.total_variable_cost_eur
+                      ? `${Number(route.total_variable_cost_eur).toFixed(2)} €`
+                      : '—'
+                  }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
                 <div class="text-caption text-medium-emphasis">Coste total</div>
                 <div class="text-body-1 font-weight-medium">
-                  {{ route.total_cost_eur ? `${route.total_cost_eur.toFixed(2)} €` : '—' }}
+                  {{ route.total_cost_eur ? `${Number(route.total_cost_eur).toFixed(2)} €` : '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Margen bruto</div>
+                <div
+                  class="text-body-1 font-weight-medium"
+                  :class="marginColor(route.gross_margin_eur)"
+                >
+                  {{
+                    route.gross_margin_eur ? `${Number(route.gross_margin_eur).toFixed(2)} €` : '—'
+                  }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="3">
+                <div class="text-caption text-medium-emphasis">Margen neto</div>
+                <div
+                  class="text-body-1 font-weight-medium"
+                  :class="marginColor(route.net_margin_eur)"
+                >
+                  {{ route.net_margin_eur ? `${Number(route.net_margin_eur).toFixed(2)} €` : '—' }}
                 </div>
               </v-col>
               <v-col cols="6" sm="3">
@@ -247,6 +415,8 @@ import { useNotificationStore } from '@/stores/notifications.js'
 import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
 import { formatDate } from '@/utils/format-helpers.js'
 import GenerateDocumentDialog from '@/components/documents/GenerateDocumentDialog.vue'
+import { supabase } from '@/services/supabase-client.js'
+import { mapSupabaseError } from '@/utils/error-map.js'
 
 const props = defineProps({
   routeId: { type: String, required: true },
@@ -260,10 +430,47 @@ const openPanels = ref(['planning', 'cargo'])
 const confirmDelete = ref(false)
 const isDeleting = ref(false)
 const showGenerateDialog = ref(false)
+const vehicle = ref(null)
+const driver = ref(null)
+const cargo = ref(null)
 
-onMounted(() => {
-  getById(props.routeId)
+onMounted(async () => {
+  await getById(props.routeId)
+  await fetchRelatedData(props.routeId)
 })
+
+async function fetchRelatedData(routeId) {
+  const r = route.value
+  if (!r) return
+
+  // Fetch vehicle
+  if (r.vehicle_id) {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('id', r.vehicle_id)
+      .maybeSingle()
+    if (!error) vehicle.value = data
+  }
+
+  // Fetch driver
+  if (r.driver_id) {
+    const { data, error } = await supabase
+      .from('drivers')
+      .select('*')
+      .eq('id', r.driver_id)
+      .maybeSingle()
+    if (!error) driver.value = data
+  }
+
+  // Fetch cargo
+  const { data, error } = await supabase
+    .from('cargo_records')
+    .select('*')
+    .eq('route_id', routeId)
+    .maybeSingle()
+  if (!error) cargo.value = data
+}
 
 function getCargoTypeLabel(type) {
   const map = {
@@ -271,8 +478,16 @@ function getCargoTypeLabel(type) {
     frigorifica: 'Frigorífica',
     peligrosa: 'Peligrosa (ADR)',
     especial: 'Especial',
+    refrigerated: 'Refrigerada',
+    dangerous: 'Peligrosa (ADR)',
+    special: 'Especial',
   }
-  return map[type] ?? type
+  return map[type] ?? type ?? '—'
+}
+
+function marginColor(value) {
+  if (value == null) return ''
+  return Number(value) >= 0 ? 'text-success' : 'text-error'
 }
 
 function extractTime(dateStr) {

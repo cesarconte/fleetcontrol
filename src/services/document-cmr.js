@@ -11,8 +11,12 @@
  * @see Reg. UE 1072/2009
  */
 
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import { applyPlugin } from 'jspdf-autotable'
+
+// Register autoTable plugin on jsPDF prototype (v5 API)
+applyPlugin(jsPDF)
+
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 import { LEGAL_LIMITS } from '@/constants/legal-limits.js'
@@ -111,9 +115,8 @@ async function fetchDocumentData(routeId, cargoId) {
 }
 
 function mapCmrFields({ route, vehicle, driver, cargo, company }) {
-  const issueDate = route.departure_date
-    ? new Date(route.departure_date).toISOString().split('T')[0]
-    : ''
+  const issueDate = route.departure_date ? formatDateES(route.departure_date) : ''
+  const pickupDate = route.departure_date ? formatDateES(route.departure_date) : ''
   return {
     issue_place: route.origin_city || company.city || '',
     issue_date: issueDate,
@@ -123,13 +126,13 @@ function mapCmrFields({ route, vehicle, driver, cargo, company }) {
     carrier_name: company.company_name || '',
     carrier_address: company.address || '',
     carrier_tax_id: company.cif || '',
-    consignee_name: cargo.cmr_recipient || cargo.consignee_name || '',
-    consignee_address: cargo.cmr_delivery_place || cargo.consignee_address || '',
+    consignee_name: cargo.consignee_name || cargo.cmr_recipient || '',
+    consignee_address: cargo.consignee_address || cargo.cmr_delivery_place || '',
     consignee_tax_id: cargo.consignee_nif || '',
     pickup_place: route.origin_address || route.origin_city || '',
-    pickup_date: route.departure_date || '',
+    pickup_date: pickupDate,
     delivery_place: route.destination_address || route.destination_city || '',
-    goods_nature: cargo.subcategoria_id || cargo.categoria_id || cargo.description || '',
+    goods_nature: cargo.categoria_id || cargo.subcategoria_id || cargo.description || '',
     goods_description: cargo.description || '',
     packaging_type: cargo.packaging_type || '',
     packages_count: cargo.packages || '',
@@ -155,6 +158,14 @@ function mapCmrFields({ route, vehicle, driver, cargo, company }) {
     signature_date: issueDate,
     document_number: '',
   }
+}
+
+/** Format ISO date to DD/MM/YYYY */
+function formatDateES(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function validateCmrFields(mappedData) {

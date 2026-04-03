@@ -47,6 +47,9 @@ vi.mock('jspdf', () => {
     setDrawColor() {
       return this
     }
+    setFillColor() {
+      return this
+    }
     text() {
       return this
     }
@@ -63,10 +66,10 @@ vi.mock('jspdf', () => {
       return new ArrayBuffer(100)
     }
   }
-  return { default: MockJsPDF }
+  return { jsPDF: MockJsPDF }
 })
 
-vi.mock('jspdf-autotable', () => ({}))
+vi.mock('jspdf-autotable', () => ({ applyPlugin: vi.fn() }))
 
 import { generateCartaPorteNacionalDocument } from './document-carta-porte-nacional.js'
 import { supabase } from '@/services/supabase-client.js'

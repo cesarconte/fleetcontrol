@@ -63,10 +63,10 @@ vi.mock('jspdf', () => {
       return new ArrayBuffer(100)
     }
   }
-  return { default: MockJsPDF }
+  return { jsPDF: MockJsPDF }
 })
 
-vi.mock('jspdf-autotable', () => ({}))
+vi.mock('jspdf-autotable', () => ({ applyPlugin: vi.fn() }))
 
 import { generateCmrDocument } from './document-cmr.js'
 import { supabase } from '@/services/supabase-client.js'

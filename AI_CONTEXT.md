@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión doc-transport — 6 servicios de documentos independientes, Carta de Porte Nacional 10 secciones, schemas Zod, migración DB document_number, orquestador)
+> **Última actualización:** 2026-04-03 (sesión documentos-centralizados — TODAS las fases completadas, página Documentos funcional, 1330 tests totales)
 > **Actualizado por:** AI Agent
 
 ---
@@ -105,7 +105,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                                                                         |
 | Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance                                   |
 | Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                                                       |
-| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                                                       |
+| Gestión Documental         | 🟢 Completado  | Documentos centralizados, KPIs, filtros, tabs, export CSV, generación                                          |
 | Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                                                              |
 | Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera                                            |
 | Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc                                    |
@@ -113,7 +113,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                                                  |
 | GPS/Telemática             | 🟢 Completado  | Infraestructura GPS, adapter pattern, mock provider conectado a rutas reales, mapa FleetMap, offline indicator |
 | Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes                                    |
-| Testing (TDD)              | 🟢 Completado  | 1246 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
+| Testing (TDD)              | 🟢 Completado  | 1330 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
 
 ### Documentación de Transporte (v1.0)
 
