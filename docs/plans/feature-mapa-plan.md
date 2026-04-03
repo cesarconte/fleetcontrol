@@ -478,3 +478,72 @@ Cuando la empresa contrate Webfleet/Frotcom/Geotab:
 
 - `docs/plans/SESSION_C_PLAN.md` — ya completado
 - `docs/plans/realtime-subscriptions.md` — ya completado
+
+---
+
+## Estado de Implementación (actualizado 2026-04-03)
+
+### Tareas completadas ✅
+
+| Tarea                                      | Estado | Notas                                     |
+| ------------------------------------------ | ------ | ----------------------------------------- |
+| 1.1: Migración vehicle_positions + trigger | ✅     | Aplicada en Supabase (032)                |
+| 1.2: Constantes GPS                        | ✅     | gps-config.js + 5 tests                   |
+| 1.3: Interfaz GPS Adapter                  | ✅     | gps-provider.js + 5 tests                 |
+| 1.4: Mock GPS Provider                     | ✅     | mock-gps-provider.js + 17 tests           |
+| 1.5: Servicio api-vehicle-positions        | ✅     | + 11 tests, usa mapSupabaseError          |
+| 2.1: Constantes de mapa                    | ✅     | map-config.js + 7 tests                   |
+| 2.2: Utilidad carga Google Maps            | ✅     | load-google-maps.js + 5 tests             |
+| 3.1: Composable use-fleet-map              | ✅     | + 4 tests, isGpsConnected como computed   |
+| 3.2: Página FleetMapPage                   | ✅     |                                           |
+| 4.1: FleetMap.vue                          | ✅     | Con ARIA, realtime, markers por diff      |
+| 4.2: MapControls.vue                       | ✅     | + 3 tests, role=toolbar, aria-pressed     |
+| 4.3: VehicleDetailPanel.vue                | ✅     | + 5 tests, aria-label en close            |
+| 5.1: Ruta + Sidebar                        | ✅     | /mapa + item en FLOTA                     |
+| 5.2: Instalar dependencia                  | ✅     | @googlemaps/js-api-loader                 |
+| Migración 033: RLS restrictivo             | ✅     | SELECT authenticated, INSERT service_role |
+| Migración 034: get_latest_fleet_positions  | ✅     | DISTINCT ON en SQL (evita OOM)            |
+
+### Pendiente para próxima sesión
+
+| Prioridad | Tarea                                 | Descripción                                                                                                                                     |
+| --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alta      | Tarea 6.1: Tests integración realtime | Mock canal Supabase: INSERT → marcador se mueve, status change → color, CHANNEL_ERROR → estado error, reconexión → refetch                      |
+| Alta      | Tests de componente FleetMap.vue      | Tests del componente: carga Google Maps, marcadores por estado, click → detalle, responsive, realtime subscription                              |
+| Media     | JSDoc completo en funciones públicas  | `api-vehicle-positions.js`: @throws en todas las funciones exportadas. `mock-gps-provider.js`: @throws, JSDoc en startSimulation/stopSimulation |
+| Baja      | Nombres de índices BRIN               | Renombrar `idx_positions_*` → `idx_vehicle_positions_*` según AGENTS.md §15                                                                     |
+| Baja      | Tests heading calculateHeading        | Verificar valores conocidos (Norte=0°, Este=90°) en lugar de solo rango 0-360                                                                   |
+
+### Issues de revisión corregidos
+
+| Severidad | Issue                                        | Resolución                                          |
+| --------- | -------------------------------------------- | --------------------------------------------------- |
+| Blocking  | RLS policies abiertas (USING true)           | Migración 033: restrict por rol                     |
+| Blocking  | realtime.subscribe() API incorrecta          | Eliminado parámetro 'INSERT' no soportado           |
+| Blocking  | FleetMap no llama subscribeToRealtime()      | Añadido en onMounted + cleanup en onUnmounted       |
+| Blocking  | getFleetPositions OOM (fetch all + dedup)    | Migración 034: DISTINCT ON en SQL                   |
+| High      | Errores raw de Supabase expuestos            | mapSupabaseError en todas las funciones             |
+| High      | load-google-maps.js en utils/ (no puro)      | Movido a services/                                  |
+| High      | mock-gps-provider: mismo noise lat+lng       | Ruido independiente por eje                         |
+| High      | mock-gps-provider: speed sin límite superior | Clamped a 120 km/h                                  |
+| High      | FleetMap: estado compartido a nivel módulo   | Estado local al componente                          |
+| High      | FleetMap: updateMarkers() 43 líneas          | Split en removeStaleMarkers + createOrUpdateMarkers |
+| Medium    | Falta ARIA en componentes                    | role=toolbar, aria-pressed, aria-label              |
+| Medium    | Sin validación de inputs en servicios        | Guards en vehicleId, from/to, lat/lng               |
+| Medium    | isGpsConnected como ref mutable              | Convertido a computed                               |
+| Medium    | Tests: mutación directa de import.meta.env   | vi.stubEnv + vi.unstubAllEnvs                       |
+| Medium    | @vitest-environment jsdom innecesario        | Eliminado en tests sin DOM                          |
+| Medium    | Test duplicado en api-vehicle-positions      | Eliminado                                           |
+
+### Métricas finales
+
+| Métrica               | Valor             |
+| --------------------- | ----------------- |
+| Tests nuevos          | 62                |
+| Tests totales         | 1162              |
+| Archivos creados      | 14                |
+| Archivos modificados  | 7                 |
+| Migraciones aplicadas | 3 (032, 033, 034) |
+| Lint errors           | 0                 |
+| Lint warnings         | 0                 |
+| Typecheck             | ✅ limpio         |
