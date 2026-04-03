@@ -134,11 +134,11 @@ function scheduleReconnect(table, handler, ctx, retryCount) {
  * @param {string} table - Table name to clean up
  */
 function cleanupChannel(table) {
+  // Remove from maps FIRST to prevent recursive calls
+  // when removeChannel triggers a CLOSED event
   const channel = channels.get(table)
-  if (channel) {
-    supabase.removeChannel(channel)
-    channels.delete(table)
-  }
+  channels.delete(table)
+  handlers.delete(table)
 
   const timer = reconnectTimers.get(table)
   if (timer) {
@@ -146,7 +146,10 @@ function cleanupChannel(table) {
     reconnectTimers.delete(table)
   }
 
-  handlers.delete(table)
+  // Remove channel AFTER cleaning up maps to prevent recursion
+  if (channel) {
+    supabase.removeChannel(channel)
+  }
 }
 
 /**
