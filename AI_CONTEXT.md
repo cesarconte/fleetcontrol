@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión mapa-mejoras — Mock GPS + rutas reales, offline indicator, migraciones 033-035)
+> **Última actualización:** 2026-04-03 (sesión mapa-fix — Panel detalle completo, AdvancedMarkerElement, Mock GPS en composable, protocolo seguridad Git)
 > **Actualizado por:** AI Agent
 
 ---
@@ -458,6 +458,37 @@ _(Complementa las de AGENTS.md)_
 - `src/components/map/FleetMap.vue` — Marcadores offline (gris, opacidad reducida)
 - `src/constants/map-config.js` — Color `offline` añadido a MARKER_COLORS
 - `docs/plans/feature-mapa-plan.md` — Estado actualizado (tareas 2-6 ✅)
+
+### Sesión mapa-fix — Correcciones post-revisión + protocolo seguridad Git
+
+**Fecha:** 2026-04-03
+**Branch:** dev
+**Tests:** 1202 pasando, 0 skipped, 0 errores lint, 0 warnings, typecheck limpio
+
+**Problema detectado:** Divergencia entre commits locales y remotos causó pérdida de fixes al hacer merge. La versión de `origin/dev` sobrescribió los cambios locales porque no se verificó el contenido post-merge.
+
+**Correcciones aplicadas (12 archivos):**
+
+- **FleetMap.vue**: Eliminado MockGpsProvider local (delegado al composable), migrado a AdvancedMarkerElement + PinElement, soporte mapId, eliminado watcher duplicado, corregido `isMobile` → `mobile`
+- **VehicleDetailPanel.vue**: Panel enriquecido con 6 secciones (estado, vehículo, posición, ruta activa, carga, horas conductor, alertas). Corregido color `amber` inválido a `warning`
+- **use-fleet-map.js**: MockGpsProvider movido del componente al composable, añadido `ensureMockGps()`, `fetch()` maneja mock y real, `stopMockGps()` exportado
+- **FleetMap.spec.js**: Actualizado mocks para AdvancedMarkerElement, refs reactivos, stubs apropiados
+- **use-fleet-map.spec.js + integration**: Añadidos mocks supabase-client y error-map
+- **load-google-maps.js**: Soporte `VITE_GOOGLE_MAPS_MAP_ID`
+- **city-coords.js**: Normalización de acentos en búsqueda (NFD)
+- **mock-gps-provider.js**: `startSimulation` async con `await _refreshRoutes()`
+- **IntegrationsForm.vue**: `mock_gps_enabled` añadido a campos sección GPS
+- **AGENTS.md**: Protocolo de seguridad Git (§19) — 7 reglas anti-divergencia, recuperación, anti-patrones
+
+**Protocolo de seguridad Git añadido a AGENTS.md §19:**
+
+- Sincronización antes de commit: `git pull --rebase`, `git status --short`, `git diff --stat`
+- Verificación antes de push: `git log --graph`, `git log origin/dev..HEAD`
+- Integridad de commits: `git show --stat HEAD`, spot-check con `rg`
+- Recuperación: `git reflog`, `git cherry-pick`, `git reset --soft`
+- 7 anti-patrones explícitos (NEVER)
+
+**Limpieza:** 11 ramas remotas obsoletas eliminadas con `git remote prune origin`.
 
 ---
 
