@@ -246,6 +246,12 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/mapa',
+    name: 'FleetMap',
+    component: () => import('@/pages/FleetMapPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/pages/NotFoundPage.vue'),

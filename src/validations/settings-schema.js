@@ -35,7 +35,7 @@ export const alertThresholdsSchema = z.object({
   alert_speed_limit: z.number().int().min(1).max(200),
 })
 
-const GPS_PROVIDERS = ['webfleet', 'frotcom', 'geotab', '']
+const GPS_PROVIDERS = ['webfleet', 'frotcom', 'geotab', 'mock', '']
 const EMAIL_PROVIDERS = ['brevo', 'sendgrid', '']
 const MAPS_PROVIDERS = ['google_maps', '']
 const FUEL_CARD_PROVIDERS = ['dkv', 'wabco', '']

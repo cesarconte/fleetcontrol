@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-02 (sesión C — Documentos Transporte + limpieza integraciones)
+> **Última actualización:** 2026-04-03 (sesión mapa — Integración Google Maps + GPS)
 > **Actualizado por:** AI Agent
 
 ---
@@ -111,7 +111,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc  |
 | Documentos Transporte      | 🟢 Completado  | 6 tipos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR), generación PDF auto    |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
-| GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
+| GPS/Telemática             | 🟡 En progreso | Infraestructura GPS, adapter pattern, mock provider, mapa FleetMap           |
 | Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes  |
 | Testing (TDD)              | 🟢 Completado  | 1101 tests (Vitest), Cypress configurado, E2E smoke test                     |
 
@@ -222,7 +222,7 @@ _(Complementa las de AGENTS.md)_
 **Fecha:** 2026-04-03 (sesión realtime — Suscripciones Supabase Realtime)
 **Branch:** feature/realtime (desde `dev`)
 **Tests:** 1101 pasando (20 nuevos de use-realtime), 0 errores lint, 0 warnings, typecheck limpio
-**Migraciones:** 31 aplicadas (001-031)
+**Migraciones:** 32 aplicadas (001-032)
 
 **Trabajo realizado:**
 
@@ -358,6 +358,34 @@ _(Complementa las de AGENTS.md)_
 - `src/components/settings/IntegrationsForm.vue` — import schema, `safeParse()`, errores inline
 
 **Resultado:** 989 tests (980 + 9 nuevos). Lint + typecheck limpios.
+
+### Sesión Mapa — Integración Google Maps + GPS Profesional
+
+**Fecha:** 2026-04-03
+**Branch:** feature/mapa (desde `dev`)
+**Tests:** 1160 pasando (59 nuevos), 0 errores lint, 0 warnings, typecheck limpio
+**Migraciones:** 32 aplicadas (001-032)
+
+**Trabajo realizado:**
+
+- **Migración 032**: Tabla `vehicle_positions` (histórico GPS) + índice BRIN + RLS + trigger `AFTER INSERT` que actualiza cache en `vehicles` (latitude, longitude, current_speed_kmh)
+- **Constantes GPS**: `gps-config.js` — proveedores, tipos de fix, intervalos
+- **Adapter pattern**: `GpsProvider` (interfaz abstracta) + `MockGpsProvider` (simulación realista con interpolación haversine, ruido gaussiano, heading)
+- **Servicio API**: `api-vehicle-positions.js` — getPositions, getLatestPosition, getFleetPositions, ingestPosition, ingestBatch
+- **Constantes mapa**: `map-config.js` — centro Madrid, zoom, colores marcadores por estado, filtros
+- **Google Maps loader**: `load-google-maps.js` — carga lazy con `@googlemaps/js-api-loader`, caching singleton
+- **Composable**: `use-fleet-map.js` — estado reactivo, filtros, selección, realtime subscription
+- **Componentes UI**: `FleetMap.vue`, `MapControls.vue`, `VehicleDetailPanel.vue`
+- **Página**: `FleetMapPage.vue` — wrapper full-height
+- **Navegación**: Ruta `/mapa` + item "Mapa" en sidebar grupo FLOTA
+- **Settings**: `'mock'` añadido a `GPS_PROVIDERS`
+- **Dependencia**: `@googlemaps/js-api-loader` instalada
+
+**Archivos creados (14):** migración 032, gps-config, gps-provider, mock-gps-provider, api-vehicle-positions, map-config, load-google-maps, use-fleet-map, FleetMap, MapControls, VehicleDetailPanel, FleetMapPage + sus tests (59 tests nuevos)
+
+**Archivos modificados (4):** routes.js, AppSidebar.vue, settings-schema.js, package.json
+
+**Pendiente:** Tests integración realtime (Tarea 6.1), tests FleetMap component, eliminar docs/plans obsoletos.
 
 ---
 
@@ -704,21 +732,21 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 ### Completado (no requiere acción)
 
-| Tarea                                                                | Fecha     |
-| -------------------------------------------------------------------- | --------- |
-| CRUD alertas completo                                                | Sesión 11 |
-| 9 informes con KPIs + gráficos + export                              | Sesión 12 |
-| BD financiera (routes + vehicle_annual_costs + driver_compensation)  | Sesión 12 |
-| 26 migraciones aplicadas en Supabase                                 | Sesión B  |
-| 27 migraciones creadas (027 pendiente aplicar en Supabase)           | Sesión C  |
-| RLS restrictivo en tablas nuevas                                     | Sesión 12 |
-| 920 tests TDD                                                        | Sesión 12 |
-| Sesión A: correcciones críticas seguridad (4 tareas)                 | Sesión 15 |
-| Sesión B: funcionalidad PRD + integraciones (4 tareas)               | Sesión B  |
-| 1014 tests TDD (989 + sesión B)                                      | Sesión B  |
-| Sesión C: documentos transporte + limpieza integraciones (12 tareas) | Sesión C  |
-| 1081 tests TDD (1014 + sesión C)                                     | Sesión C  |
-| 27 migraciones aplicadas (001-027)                                   | Sesión C  |
+| Tarea                                                                | Fecha       |
+| -------------------------------------------------------------------- | ----------- |
+| CRUD alertas completo                                                | Sesión 11   |
+| 9 informes con KPIs + gráficos + export                              | Sesión 12   |
+| BD financiera (routes + vehicle_annual_costs + driver_compensation)  | Sesión 12   |
+| 26 migraciones aplicadas en Supabase                                 | Sesión B    |
+| 28 migraciones creadas (032 pendiente aplicar en Supabase)           | Sesión Mapa |
+| RLS restrictivo en tablas nuevas                                     | Sesión 12   |
+| 920 tests TDD                                                        | Sesión 12   |
+| Sesión A: correcciones críticas seguridad (4 tareas)                 | Sesión 15   |
+| Sesión B: funcionalidad PRD + integraciones (4 tareas)               | Sesión B    |
+| 1014 tests TDD (989 + sesión B)                                      | Sesión B    |
+| Sesión C: documentos transporte + limpieza integraciones (12 tareas) | Sesión C    |
+| 1160 tests TDD (1101 + sesión mapa)                                  | Sesión Mapa |
+| 32 migraciones aplicadas (001-032)                                   | Sesión Mapa |
 
 ---
 
@@ -742,7 +770,7 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | Tipos de documentos             | Código       | `src/constants/transport-document-types.js`                    |
 | Plantillas documentos           | Composable   | `src/composables/use-document-templates.js`                    |
 | Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                        |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-031)                               |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-032)                               |
 | Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                             |
 | Material Design 3               | Docs         | https://m3.material.io                                         |
 | Vuetify 4                       | Docs         | https://vuetifyjs.com                                          |
