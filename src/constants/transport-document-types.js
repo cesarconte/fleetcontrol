@@ -4,9 +4,7 @@
  * Catalog of transport document types supported by the system.
  * Each type defines its fields, data source mapping, and legal basis.
  *
- * Based on PRD §4.9 — Documentación de Transporte.
- *
- * @see Convenio CMR 1956 — Carta de Porte Internacional
+ * @see Convenio CMR 1956 — Carta de Porte Internacional (arts. 5-6)
  * @see LCTTM (Ley 15/2009) — Albarán y Factura
  * @see LOTT / RD 70/2019 — Hoja de Ruta
  * @see RD 1619/2012 + Ley 18/2022 — Factura de Transporte
@@ -27,30 +25,49 @@ export const TRANSPORT_DOCUMENT_TYPES = deepFreeze({
     value: 'cmr',
     label: 'Carta de Porte CMR',
     description: 'Convenio CMR 1956 (arts. 5-6) — transporte internacional de mercancías',
-    baseLegal: 'Convenio CMR 1956',
-    icon: 'mdi-file-document-outline',
+    baseLegal: 'Convenio CMR 1956, arts. 5-6; Reg. UE 1072/2009',
+    icon: 'mdi-earth-box-outline',
     fields: [
-      'sender_name',
-      'sender_address',
-      'sender_tax_id',
-      'recipient_name',
-      'recipient_address',
+      'issue_place',
+      'issue_date',
+      'shipper_name',
+      'shipper_address',
+      'shipper_tax_id',
+      'carrier_name',
+      'carrier_address',
+      'carrier_tax_id',
+      'consignee_name',
+      'consignee_address',
+      'consignee_tax_id',
       'pickup_place',
+      'pickup_date',
       'delivery_place',
+      'goods_nature',
+      'goods_description',
+      'packaging_type',
+      'packages_count',
+      'package_marks',
+      'gross_weight_kg',
+      'freight_charges',
+      'payment_terms',
+      'cod_amount',
+      'goods_value',
+      'customs_instructions',
+      'transit_notes',
       'vehicle_plate',
       'vehicle_type',
       'driver_name',
       'driver_license',
-      'cargo_description',
-      'cargo_weight_kg',
-      'cargo_volume_m3',
-      'cargo_packages',
-      'cargo_value',
-      'route_origin',
-      'route_destination',
-      'transport_price',
-      'carrier_notes',
+      'driver_national_id',
+      'adr_class',
+      'adr_un_number',
+      'adr_packing_group',
+      'shipper_signature',
+      'carrier_signature',
+      'consignee_signature',
+      'signature_date',
     ],
+    copiesRequired: 3,
   },
   ALBARAN: {
     value: 'albaran',
@@ -160,78 +177,42 @@ export const TRANSPORT_DOCUMENT_TYPES = deepFreeze({
   },
 })
 
-/**
- * Array of all transport document type values (for selects and validation).
- * @type {string[]}
- */
 export const TRANSPORT_DOCUMENT_TYPE_VALUES = Object.freeze(
   Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => t.value),
 )
 
-/**
- * Get the Spanish label for a transport document type value.
- * @param {string} value
- * @returns {string}
- */
 export function getTransportDocumentTypeLabel(value) {
   const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
   return entry?.label ?? value
 }
 
-/**
- * Get the field list for a transport document type.
- * @param {string} value - Document type value
- * @returns {string[]}
- */
 export function getTransportDocumentTypeFields(value) {
   const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
   return entry?.fields ?? []
 }
 
-/**
- * Get all document types as {value, label} for selects.
- * @returns {Array<{value: string, label: string}>}
- */
 export function getActiveTransportDocumentTypes() {
-  return Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => ({
-    value: t.value,
-    label: t.label,
-  }))
+  return Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => ({ value: t.value, label: t.label }))
 }
 
-/**
- * CMR field mapping: maps field groups to their data source tables and columns.
- * Used by document-generator.js to auto-fill CMR fields from DB data.
- */
+export function getCopiesRequired(value) {
+  const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
+  return entry?.copiesRequired ?? 1
+}
+
 export const CMR_FIELD_MAPPING = deepFreeze({
   sender: {
     source: 'company_settings',
-    fields: {
-      sender_name: 'company_name',
-      sender_address: 'address',
-      sender_tax_id: 'cif',
-    },
+    fields: { sender_name: 'company_name', sender_address: 'address', sender_tax_id: 'cif' },
   },
   recipient: {
     source: 'cargo_records',
-    fields: {
-      recipient_name: 'cmr_recipient',
-      recipient_address: 'cmr_delivery_place',
-    },
+    fields: { recipient_name: 'cmr_recipient', recipient_address: 'cmr_delivery_place' },
   },
-  vehicle: {
-    source: 'vehicles',
-    fields: {
-      vehicle_plate: 'plate',
-      vehicle_type: 'vehicle_type',
-    },
-  },
+  vehicle: { source: 'vehicles', fields: { vehicle_plate: 'plate', vehicle_type: 'vehicle_type' } },
   driver: {
     source: 'drivers',
-    fields: {
-      driver_name: 'full_name',
-      driver_license: 'license_number',
-    },
+    fields: { driver_name: 'full_name', driver_license: 'license_number' },
   },
   cargo: {
     source: 'cargo_records',
