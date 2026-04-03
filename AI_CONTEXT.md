@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión mapa — Integración Google Maps + GPS)
+> **Última actualización:** 2026-04-03 (sesión mapa-mejoras — Mock GPS + rutas reales, offline indicator, migraciones 033-035)
 > **Actualizado por:** AI Agent
 
 ---
@@ -93,27 +93,27 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 
 ### Gestión — Core (v1.0)
 
-| Módulo                     | Estado         | Notas                                                                        |
-| -------------------------- | -------------- | ---------------------------------------------------------------------------- |
-| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                                     |
-| Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod)                    |
-| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                                         |
-| Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                                   |
-| Módulo Conductores         | 🟢 Completado  | CRUD, licencias, horas, CAP                                                  |
-| Módulo Rutas               | 🟢 Completado  | Activas, historial, planificación                                            |
-| Módulo Mantenimiento       | 🟢 Completado  | Preventivo, correctivo, repuestos                                            |
-| Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                                       |
-| Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance |
-| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                     |
-| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                     |
-| Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                            |
-| Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera          |
-| Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc  |
-| Documentos Transporte      | 🟢 Completado  | 6 tipos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR), generación PDF auto    |
-| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
-| GPS/Telemática             | 🟡 En progreso | Infraestructura GPS, adapter pattern, mock provider, mapa FleetMap           |
-| Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes  |
-| Testing (TDD)              | 🟢 Completado  | 1101 tests (Vitest), Cypress configurado, E2E smoke test                     |
+| Módulo                     | Estado         | Notas                                                                                                          |
+| -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
+| Setup inicial del proyecto | 🟢 Completado  | Vite + Vue 3 + Vuetify 4                                                                                       |
+| Autenticación y roles      | 🟢 Completado  | Supabase Auth (api-auth, composable, login/registro, Zod)                                                      |
+| Dashboard principal        | 🟡 Parcial     | Placeholder con KPIs                                                                                           |
+| Módulo Vehículos           | 🟢 Completado  | CRUD completo, template para otros módulos                                                                     |
+| Módulo Conductores         | 🟢 Completado  | CRUD, licencias, horas, CAP                                                                                    |
+| Módulo Rutas               | 🟢 Completado  | Activas, historial, planificación                                                                              |
+| Módulo Mantenimiento       | 🟢 Completado  | Preventivo, correctivo, repuestos                                                                              |
+| Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                                                                         |
+| Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance                                   |
+| Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                                                       |
+| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                                                       |
+| Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                                                              |
+| Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera                                            |
+| Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc                                    |
+| Documentos Transporte      | 🟢 Completado  | 6 tipos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR), generación PDF auto                                      |
+| Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                                                  |
+| GPS/Telemática             | 🟢 Completado  | Infraestructura GPS, adapter pattern, mock provider conectado a rutas reales, mapa FleetMap, offline indicator |
+| Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes                                    |
+| Testing (TDD)              | 🟢 Completado  | 1101 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
 
 ### Documentación de Transporte (v1.0)
 
@@ -424,6 +424,40 @@ _(Complementa las de AGENTS.md)_
 
 - `src/services/mock-gps-provider.js` — JSDoc @throws en startSimulation
 - `src/services/mock-gps-provider.spec.js` — +3 tests calculateHeading con valores conocidos
+
+### Sesión mapa-mejoras — Mock GPS + rutas reales + offline indicator
+
+**Fecha:** 2026-04-03
+**Branch:** dev
+**Tests:** 1190 pasando (+9 nuevos: 7 city-coords + 2 use-fleet-map offline), 0 skipped, 0 errores lint, 0 warnings, typecheck limpio
+**Migraciones:** 35 aplicadas (001-035)
+
+**Trabajo realizado:**
+
+- **Migración 033**: Archivo retroactivo `20260403_033_restrict_vehicle_positions_rls.sql` — RLS restrictivo para vehicle_positions (SELECT authenticated, INSERT service_role, UPDATE/DELETE denied)
+- **Migración 034**: Archivo retroactivo `20260403_034_get_latest_fleet_positions.sql` — Función SQL `get_latest_fleet_positions()` con DISTINCT ON
+- **Migración 035**: `20260403_035_rename_vehicle_positions_indexes.sql` — Renombrar índices BRIN a convención `idx_vehicle_positions_*`
+- **city-coords.js**: 90+ ciudades españolas con coordenadas + función `getCityCoords()` con búsqueda parcial
+- **MockGpsProvider conectado a BD**: `_refreshRoutes()` lee rutas activas (`planned`/`in_progress`) de la BD, resuelve coordenadas de ciudades, interpola posiciones realistas. Refetch automático cada 60s.
+- **Offline indicator**: `use-fleet-map.js` añade `_isOffline` a vehículos sin ping >15 min (`GPS_OFFLINE_THRESHOLD_MS`). FleetMap muestra marcador gris con opacidad reducida.
+- **Tests**: `city-coords.spec.js` (7 tests), tests mock-gps-provider actualizados a nuevo formato de rutas
+
+**Archivos creados (3):**
+
+- `src/constants/city-coords.js` — 90+ ciudades españolas con coordenadas
+- `src/constants/city-coords.spec.js` — 7 tests
+- `supabase/migrations/20260403_033_restrict_vehicle_positions_rls.sql`
+- `supabase/migrations/20260403_034_get_latest_fleet_positions.sql`
+- `supabase/migrations/20260403_035_rename_vehicle_positions_indexes.sql`
+
+**Archivos modificados (5):**
+
+- `src/services/mock-gps-provider.js` — Conectado a rutas reales de BD, resolveCoords, refresh periódico
+- `src/services/mock-gps-provider.spec.js` — Tests actualizados a nuevo formato de rutas (origin/dest objects)
+- `src/composables/use-fleet-map.js` — Offline detection con `_isOffline` flag
+- `src/components/map/FleetMap.vue` — Marcadores offline (gris, opacidad reducida)
+- `src/constants/map-config.js` — Color `offline` añadido a MARKER_COLORS
+- `docs/plans/feature-mapa-plan.md` — Estado actualizado (tareas 2-6 ✅)
 
 ---
 

@@ -2,548 +2,213 @@
 
 ## Resumen
 
-Integración de Google Maps Platform en FleetControl con infraestructura GPS profesional de dos capas (cache + histórico), adapter pattern para proveedores, mock provider realista para desarrollo, y componente FleetMap con marcadores por estado, filtros, y panel de detalle.
+Integración de Google Maps Platform en FleetControl con infraestructura GPS profesional de dos capas (cache + histórico), adapter pattern para proveedores, mock provider para desarrollo, y componente FleetMap con marcadores por estado, filtros, y panel de detalle.
 
-**Duración estimada:** 1-2 sesiones (~18 archivos nuevos, ~118 tests nuevos)
-
----
-
-## Contexto Actual
-
-### Lo que ya existe
-
-- `use-vehicles.js`: composable con CRUD, paginación, filtros, realtime
-- `use-routes.js`: composable con CRUD, realtime, campos GPS
-- `use-realtime.js`: composable genérico con reconexión automática
-- Vehicle statuses: `active`, `on_route`, `in_maintenance`, `inactive`, `decommissioned`
-- `VITE_GOOGLE_MAPS_KEY` en `.env.example` (placeholder)
-- GPS provider config en settings: `webfleet`, `frotcom`, `geotab`
-- Columnas GPS en `vehicles`: `latitude`, `longitude`, `current_speed_kmh`
-- Columnas GPS en `routes`: `current_latitude`, `current_longitude`, `current_speed_kmh`, `eta_minutes`
-
-### Lo que hay que crear
-
-- **Capa GPS profesional**: tabla `vehicle_positions` (histórico) + trigger para cache en `vehicles`
-- **Adapter pattern**: interfaz GPS + adapter mock (desarrollo) + stubs para proveedores reales
-- **Google Maps**: `@googlemaps/js-api-loader` + componentes de mapa
-- **FleetMap**: página completa con marcadores, filtros, panel detalle
-- **Tests**: unitarios + integración realtime con mock de canal
+**Estado:** ✅ Fases 1-7 completadas. Todas las tareas pendientes (2-6) implementadas. Pendiente solo API Key Google Maps y tareas de producción (7-10).
 
 ---
 
 ## Arquitectura GPS Profesional
 
-### Patrón de la industria (Webfleet, Geotab, Samsara)
+### Patrón implementado
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │  FleetMap UI (Vue)                                           │
 │  ↓ consume use-fleet-map.js                                  │
 ├──────────────────────────────────────────────────────────────┤
-│  api-fleet-map.js (unified query)                            │
-│  SELECT vehicles + ultima posición + alertas                 │
+│  api-vehicle-positions.js (unified query)                    │
+│  rpc('get_latest_fleet_positions') → DISTINCT ON en SQL      │
 ├──────────────────────────────────────────────────────────────┤
 │  GPS Adapter Interface (GpsProvider)                         │
 │  ├── MockGpsProvider (desarrollo)                            │
-│  │   └── Genera posiciones realistas entre origen/destino    │
+│  │   └── Interpolación + ruido gaussiano                     │
 │  ├── WebfleetAdapter (producción futuro)                     │
 │  ├── FrotcomAdapter (producción futuro)                      │
 │  └── GeotabAdapter (producción futuro)                       │
 ├──────────────────────────────────────────────────────────────┤
-│  vehicle_positions (histórico, append-only, partitioned)     │
+│  vehicle_positions (histórico, append-only)                  │
 │  vehicles.latitude/longitude/current_speed_kmh (cache)       │
-│  Trigger AFTER INSERT en vehicle_positions → actualiza cache │
+│  Trigger AFTER INSERT → actualiza cache                      │
 └──────────────────────────────────────────────────────────────┘
 ```
-
-### Por qué dos capas
-
-| Capa          | Tabla                               | Propósito                                          | Lectura     |
-| ------------- | ----------------------------------- | -------------------------------------------------- | ----------- |
-| **Cache**     | `vehicles` (columnas lat/lng/speed) | Mapa en vivo, dashboard, dispatch                  | <50ms       |
-| **Histórico** | `vehicle_positions` (append-only)   | Replay de rutas, auditoría, compliance CE 561/2006 | Time-series |
-
-**Trigger**: cada INSERT en `vehicle_positions` actualiza automáticamente `vehicles.latitude`, `vehicles.longitude`, `vehicles.current_speed_kmh`.
-
-### Mock GPS Provider (desarrollo)
-
-Genera posiciones simuladas realistas:
-
-- Vehículos `on_route` se mueven gradualmente entre origen y destino
-- Velocidad variable: 80-90 km/h en carretera, 0 en paradas
-- Actualización cada 30s (simulando intervalo real de telemática)
-- Controlado por `VITE_MOCK_GPS=true` en `.env`
-- Se desactiva en producción sin tocar código del mapa
-
----
-
-## Tareas (orden TDD estricto)
-
-### Fase 1: Infraestructura GPS (DB + Adapters)
-
-#### Tarea 1.1: Migración — tabla vehicle_positions + trigger
-
-- **Archivo**: `supabase/migrations/20260403_032_vehicle_positions.sql`
-- **Contenido**:
-
-  ```sql
-  -- Tabla de posiciones (histórico, append-only)
-  CREATE TABLE vehicle_positions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    vehicle_id UUID NOT NULL REFERENCES vehicles(id),
-    recorded_at TIMESTAMPTZ NOT NULL,
-    latitude NUMERIC(9,6) NOT NULL CHECK (latitude BETWEEN -90 AND 90),
-    longitude NUMERIC(9,6) NOT NULL CHECK (longitude BETWEEN -180 AND 180),
-    speed_kph NUMERIC(6,2) CHECK (speed_kph >= 0 AND speed_kph <= 300),
-    heading_degrees NUMERIC(5,2) CHECK (heading_degrees >= 0 AND heading_degrees < 360),
-    ignition_on BOOLEAN NOT NULL DEFAULT false,
-    gps_fix_type VARCHAR(20) NOT NULL DEFAULT 'GPS_3D'
-      CHECK (gps_fix_type IN ('GPS_2D', 'GPS_3D', 'DEAD_RECKONING', 'CELL_TOWER', 'UNKNOWN')),
-    provider VARCHAR(30) NOT NULL DEFAULT 'mock',
-    raw_payload JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-  );
-
-  -- Índice BRIN para time-series
-  CREATE INDEX idx_positions_vehicle_time ON vehicle_positions
-    USING brin (vehicle_id, recorded_at DESC);
-  CREATE INDEX idx_positions_recorded_at ON vehicle_positions
-    USING brin (recorded_at DESC);
-
-  -- RLS
-  ALTER TABLE vehicle_positions ENABLE ROW LEVEL SECURITY;
-  CREATE POLICY "vehicle_positions_select" ON vehicle_positions
-    FOR SELECT USING (true);
-  CREATE POLICY "vehicle_positions_insert" ON vehicle_positions
-    FOR INSERT WITH CHECK (true);
-
-  -- Trigger: actualizar cache en vehicles
-  CREATE OR REPLACE FUNCTION update_vehicle_last_position()
-  RETURNS TRIGGER AS $$
-  BEGIN
-    UPDATE vehicles
-    SET latitude = NEW.latitude,
-        longitude = NEW.longitude,
-        current_speed_kmh = NEW.speed_kph
-    WHERE id = NEW.vehicle_id;
-    RETURN NEW;
-  END;
-  $$ LANGUAGE plpgsql;
-
-  CREATE TRIGGER trg_update_vehicle_position
-    AFTER INSERT ON vehicle_positions
-    FOR EACH ROW
-    EXECUTE FUNCTION update_vehicle_last_position();
-  ```
-
-- **Verificación**: `supabase_apply_migration`
-
-#### Tarea 1.2: Constantes GPS
-
-- **Archivo nuevo**: `src/constants/gps-config.js`
-- **Contenido**:
-  ```js
-  export const GPS_PROVIDERS = Object.freeze(['webfleet', 'frotcom', 'geotab', 'mock'])
-  export const GPS_FIX_TYPES = Object.freeze([
-    'GPS_2D',
-    'GPS_3D',
-    'DEAD_RECKONING',
-    'CELL_TOWER',
-    'UNKNOWN',
-  ])
-  export const GPS_UPDATE_INTERVAL_MS = 30000 // 30s (intervalo real de telemática)
-  export const GPS_OFFLINE_THRESHOLD_MS = 900000 // 15 min sin ping = offline
-  ```
-- **Test**: `gps-config.spec.js` — valores, inmutabilidad
-
-#### Tarea 1.3: Interfaz GPS Adapter
-
-- **Archivo nuevo**: `src/services/gps-provider.js`
-- **Contenido**:
-  ```js
-  /**
-   * Interfaz abstracta para proveedores GPS.
-   * Todos los adapters deben implementar estos métodos.
-   */
-  export class GpsProvider {
-    async getPositions(vehicleId, { from, to }) {
-      throw new Error('Not implemented')
-    }
-    async getLatestPosition(vehicleId) {
-      throw new Error('Not implemented')
-    }
-    async getFleetPositions() {
-      throw new Error('Not implemented')
-    }
-    async ingestPosition(data) {
-      throw new Error('Not implemented')
-    }
-    async ingestBatch(positions) {
-      throw new Error('Not implemented')
-    }
-  }
-  ```
-- **Test**: `gps-provider.spec.js` — verificar que los métodos lanzan Error
-
-#### Tarea 1.4: Mock GPS Provider
-
-- **Archivo nuevo**: `src/services/mock-gps-provider.js`
-- **Contenido**:
-  - Extiende `GpsProvider`
-  - Genera posiciones realistas interpolando entre origen y destino de rutas activas
-  - Velocidad variable con ruido gaussiano (media 85 km/h, σ=5)
-  - Simula paradas (velocidad 0 durante 15-30 min)
-  - Respeta límites de velocidad por tipo de vía
-  - Método `startSimulation()` / `stopSimulation()` para controlar el ciclo
-  - Guarda posiciones en `vehicle_positions` cada 30s
-- **Test**: `mock-gps-provider.spec.js` — ~15 tests:
-  - Interpolación correcta entre dos puntos
-  - Velocidad dentro de rangos realistas
-  - Simulación start/stop
-  - Posiciones se guardan en BD
-  - Vehículos sin ruta no generan posiciones
-  - Heading calculado correctamente
-
-#### Tarea 1.5: Servicio `api-vehicle-positions.js`
-
-- **Archivo nuevo**: `src/services/api-vehicle-positions.js`
-- **Funciones**:
-  - `getPositions(vehicleId, { from, to })` — histórico de un vehículo
-  - `getLatestPosition(vehicleId)` — última posición conocida
-  - `getFleetPositions()` — última posición de TODOS los vehículos (para mapa)
-  - `ingestPosition(data)` — inserta una posición (usa el adapter)
-  - `ingestBatch(positions)` — inserta lote (batch de 20-50)
-- **Test**: `api-vehicle-positions.spec.js` — ~12 tests
-
----
-
-### Fase 2: Mapa — Constantes + Utilidades
-
-#### Tarea 2.1: Constantes de mapa
-
-- **Archivo nuevo**: `src/constants/map-config.js`
-- **Contenido**:
-  ```js
-  export const MAP_CONFIG = Object.freeze({
-    DEFAULT_CENTER: { lat: 40.4168, lng: -3.7038 }, // Madrid
-    DEFAULT_ZOOM: 6,
-    ZOOM_MOBILE: 5,
-    ZOOM_DETAIL: 12,
-    MARKER_COLORS: Object.freeze({
-      on_route: '#4CAF50',
-      in_maintenance: '#FFC107',
-      active: '#2196F3',
-      inactive: '#9E9E9E',
-      decommissioned: '#616161',
-    }),
-    FILTERS: Object.freeze([
-      { key: 'all', label: 'Todos', icon: 'mdi-map-marker' },
-      { key: 'on_route', label: 'En Ruta', icon: 'mdi-truck-fast' },
-      { key: 'in_maintenance', label: 'Mantenimiento', icon: 'mdi-wrench' },
-      { key: 'has_alerts', label: 'Con Alertas', icon: 'mdi-alert-circle' },
-    ]),
-  })
-  ```
-- **Test**: `map-config.spec.js` — valores, inmutabilidad
-
-#### Tarea 2.2: Utilidad de carga de Google Maps
-
-- **Archivo nuevo**: `src/utils/load-google-maps.js`
-- **Contenido**: Función lazy con `@googlemaps/js-api-loader`, caching singleton
-- **Test**: `load-google-maps.spec.js` — mock de Loader, verificar caching
-
----
-
-### Fase 3: Composable + Página
-
-#### Tarea 3.1: Composable `use-fleet-map.js`
-
-- **Archivo nuevo**: `src/composables/use-fleet-map.js`
-- **Estado reactivo**:
-  - `vehicles` (array con posiciones), `isLoading`, `error`
-  - `activeFilter` (default: 'all'), `selectedVehicle`, `isDetailOpen`
-  - `isGpsConnected` (boolean — indica si hay proveedor GPS activo)
-- **Computed**:
-  - `filteredVehicles`, `vehiclesWithPosition`, `vehiclesOnRoute`, etc.
-- **Métodos**:
-  - `fetch()`, `setFilter()`, `selectVehicle()`, `closeDetail()`
-  - `toggleMockGps()` — activa/desactiva simulación (solo dev)
-- **Realtime**: Suscripción a `vehicle_positions` (INSERT → actualizar posición en mapa)
-- **Test**: `use-fleet-map.spec.js` — ~25 tests
-
-#### Tarea 3.2: Página `FleetMapPage.vue`
-
-- **Archivo nuevo**: `src/pages/FleetMapPage.vue`
-- **Contenido**: Wrapper full-height, monta `FleetMap.vue`, muestra indicador de conexión GPS
-
----
-
-### Fase 4: Componentes UI
-
-#### Tarea 4.1: `FleetMap.vue`
-
-- **Archivo nuevo**: `src/components/map/FleetMap.vue`
-- **Responsabilidad**: Mapa Google Maps + marcadores + overlays
-- **Lógica**:
-  - `onMounted`: carga Google Maps, inicializa mapa
-  - Watch `filteredVehicles`: actualiza marcadores (diff, no recrear todos)
-  - Click marcador: abre panel detalle
-  - Cleanup en `onUnmounted`
-- **Responsive**:
-  - Mobile: fullscreen (100vh), panel como bottom sheet
-  - Desktop: sidebar derecho 320px
-- **Test**: `FleetMap.spec.js` — ~12 tests
-
-#### Tarea 4.2: `MapControls.vue`
-
-- **Archivo nuevo**: `src/components/map/MapControls.vue`
-- **Responsabilidad**: Filtros overlay sobre el mapa
-- **Test**: `MapControls.spec.js` — ~8 tests
-
-#### Tarea 4.3: `VehicleDetailPanel.vue`
-
-- **Archivo nuevo**: `src/components/map/VehicleDetailPanel.vue`
-- **Contenido**: Matrícula, estado, posición, ruta activa, conductor, alertas, botón "Ver ficha"
-- **Test**: `VehicleDetailPanel.spec.js` — ~10 tests
-
----
-
-### Fase 5: Integración + Navegación
-
-#### Tarea 5.1: Ruta + Sidebar
-
-- **Modificar**: `src/plugins/routes.js` — añadir `/mapa`
-- **Modificar**: `src/components/layout/AppSidebar.vue` — item "Mapa" en grupo FLOTA
-
-#### Tarea 5.2: Instalar dependencia
-
-- **Acción**: `npm install @googlemaps/js-api-loader`
-
----
-
-### Fase 6: Tests de Integración Realtime
-
-#### Tarea 6.1: Test integración realtime
-
-- **Archivo nuevo**: `src/composables/use-fleet-map.integration.spec.js`
-- **Scope**: Mock de canal Supabase Realtime
-  - INSERT en `vehicle_positions` → marcador se mueve
-  - UPDATE en `vehicles` (status change) → marcador cambia color
-  - CHANNEL_ERROR → estado de error
-  - Reconexión → refetch
-
----
-
-## Archivos a crear (18 nuevos)
-
-| Archivo                                                  | Tipo             | Líneas est. | Tests   |
-| -------------------------------------------------------- | ---------------- | ----------- | ------- |
-| `supabase/migrations/20260403_032_vehicle_positions.sql` | Migración        | 50          | —       |
-| `src/constants/gps-config.js`                            | Constantes       | 10          | ✅ (5)  |
-| `src/services/gps-provider.js`                           | Interfaz         | 20          | ✅ (3)  |
-| `src/services/mock-gps-provider.js`                      | Adapter mock     | 120         | ✅ (15) |
-| `src/services/api-vehicle-positions.js`                  | Servicio         | 60          | ✅ (12) |
-| `src/constants/map-config.js`                            | Constantes       | 25          | ✅ (5)  |
-| `src/utils/load-google-maps.js`                          | Utilidad         | 30          | ✅ (8)  |
-| `src/composables/use-fleet-map.js`                       | Composable       | 140         | ✅ (25) |
-| `src/pages/FleetMapPage.vue`                             | Página           | 25          | —       |
-| `src/components/map/FleetMap.vue`                        | Componente       | 180         | ✅ (12) |
-| `src/components/map/MapControls.vue`                     | Componente       | 60          | ✅ (8)  |
-| `src/components/map/VehicleDetailPanel.vue`              | Componente       | 100         | ✅ (10) |
-| `src/composables/use-fleet-map.integration.spec.js`      | Test integración | 80          | ✅ (15) |
-
-**Total**: ~900 líneas de código + ~118 tests nuevos
-
-## Archivos a modificar (4)
-
-| Archivo                                | Cambio                             |
-| -------------------------------------- | ---------------------------------- |
-| `src/plugins/routes.js`                | Añadir ruta `/mapa`                |
-| `src/components/layout/AppSidebar.vue` | Añadir item "Mapa"                 |
-| `src/validations/settings-schema.js`   | Añadir 'mock' a GPS_PROVIDERS      |
-| `package.json`                         | Añadir `@googlemaps/js-api-loader` |
-
----
-
-## Orden de ejecución (TDD estricto)
-
-1. **Migración 032**: `vehicle_positions` + trigger + índices + RLS
-2. **Tarea 1.2**: RED → `gps-config.spec.js` → GREEN → `gps-config.js`
-3. **Tarea 1.3**: RED → `gps-provider.spec.js` → GREEN → `gps-provider.js`
-4. **Tarea 1.4**: RED → `mock-gps-provider.spec.js` → GREEN → `mock-gps-provider.js`
-5. **Tarea 1.5**: RED → `api-vehicle-positions.spec.js` → GREEN → `api-vehicle-positions.js`
-6. **Tarea 2.1**: RED → `map-config.spec.js` → GREEN → `map-config.js`
-7. **Tarea 2.2**: RED → `load-google-maps.spec.js` → GREEN → `load-google-maps.js`
-8. **Tarea 3.1**: RED → `use-fleet-map.spec.js` → GREEN → `use-fleet-map.js`
-9. **Tarea 4.2**: RED → `MapControls.spec.js` → GREEN → `MapControls.vue`
-10. **Tarea 4.3**: RED → `VehicleDetailPanel.spec.js` → GREEN → `VehicleDetailPanel.vue`
-11. **Tarea 4.1**: RED → `FleetMap.spec.js` → GREEN → `FleetMap.vue`
-12. **Tarea 3.2**: `FleetMapPage.vue`
-13. **Tarea 5.1**: Ruta + Sidebar
-14. **Tarea 5.2**: `npm install`
-15. **Tarea 6.1**: `use-fleet-map.integration.spec.js`
-
----
-
-## Criterios de Aceptación
-
-- [ ] Tabla `vehicle_positions` creada con RLS, índices BRIN, trigger de cache
-- [ ] Mock GPS Provider genera posiciones realistas entre origen/destino de rutas activas
-- [ ] Adapter pattern: interfaz `GpsProvider` con métodos documentados
-- [ ] Mapa carga con centro España (zoom 6) en < 3s
-- [ ] Marcadores con color según estado (verde=on_route, amarillo=maintenance, azul=active)
-- [ ] 4 filtros funcionales: Todos / En Ruta / Mantenimiento / Alertas
-- [ ] Click marcador → panel detalle con datos completos
-- [ ] Mobile: fullscreen + bottom sheet | Desktop: sidebar 320px
-- [ ] Realtime: INSERT en vehicle_positions actualiza marcador en mapa
-- [ ] Mock GPS se activa con `VITE_MOCK_GPS=true` y se desactiva sin tocar código
-- [ ] Todos tests pasan (~118 nuevos + existentes)
-- [ ] `npm run check` limpio (lint + typecheck)
-- [ ] Sin colores hardcodeados, sin `console.log`, archivos < 200 líneas
-- [ ] `AI_CONTEXT.md` actualizado
-
----
-
-## Notas Técnicas
-
-### Mock GPS — Algoritmo de interpolación
-
-El mock provider simula comportamiento real de telemática:
-
-```js
-// Pseudocode del algoritmo de interpolación
-function simulateMovement(route) {
-  const totalDistance = haversine(route.origin, route.destination)
-  const estimatedDuration = totalDistance / averageSpeed // ~85 km/h
-  const steps = estimatedDuration / (GPS_UPDATE_INTERVAL_MS / 1000)
-
-  for (let i = 0; i < steps; i++) {
-    const progress = i / steps
-    const lat = lerp(route.origin_lat, route.dest_lat, progress) + noise()
-    const lng = lerp(route.origin_lng, route.dest_lng, progress) + noise()
-    const speed = 85 + gaussianRandom(0, 5) // km/h con ruido
-
-    // Simular paradas aleatorias (15-30 min cada 2-3 horas)
-    if (shouldStop(progress)) {
-      yield { lat, lng, speed: 0, ignition_on: false }
-      wait(STOP_DURATION)
-    } else {
-      yield { lat, lng, speed, ignition_on: true }
-      wait(GPS_UPDATE_INTERVAL_MS)
-    }
-  }
-}
-```
-
-### Producción — Cómo se conecta un proveedor real
-
-Cuando la empresa contrate Webfleet/Frotcom/Geotab:
-
-1. Implementar el adapter correspondiente (extiende `GpsProvider`)
-2. Configurar webhook/ingestor que reciba posiciones del proveedor
-3. El ingestor llama a `api-vehicle-positions.ingestBatch()`
-4. El trigger actualiza automáticamente la cache en `vehicles`
-5. Supabase Realtime.broadcast → mapa se actualiza
-6. **Cero cambios en el UI** — el adapter pattern lo abstrae todo
-
-### Compliance y Retención de Datos
-
-- **GDPR Art. 13**: Posición de conductores requiere información explícita
-- **CE 561/2006**: Histórico de posiciones correlacionable con tacógrafo
-- **Ley 9/2025**: Desde 05/10/2026, cadena de ubicación/timestamp verificable
-- **Retención recomendada**: Raw 12 meses → Downsampled 5 años (implementar con particiones mensuales + job de archivado)
-
-### Performance
-
-- BRIN indexes para consultas por rango de tiempo (mucho más pequeños que B-tree)
-- Trigger es síncrono pero mínimo (3 columnas UPDATE por PK)
-- Mock GPS corre en Web Worker para no bloquear el main thread
-- Marcadores se actualizan por diff (no se recrean todos en cada cambio)
-
----
-
-## Riesgos y Mitigaciones
-
-| Riesgo                             | Impacto              | Mitigación                                                                              |
-| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| Google Maps API key no configurada | Mapa no carga        | Fallback con mensaje "Configura API key en Configuración"                               |
-| Mock GPS consume recursos          | Lentitud en dev      | Control start/stop, intervalo configurable, Web Worker                                  |
-| Muchos vehículos (>500)            | Performance del mapa | MarkerClusterer si >100 marcadores visibles                                             |
-| Trigger causa lock en vehicles     | Contención en writes | El trigger es mínimo (3 cols, PK lookup). Si hay problemas, pasar a logical replication |
-| Posiciones desactualizadas         | Datos incorrectos    | Timestamp de última actualización + indicador "offline" si >15 min                      |
-
----
-
-## Archivos docs/plans a eliminar
-
-- `docs/plans/SESSION_C_PLAN.md` — ya completado
-- `docs/plans/realtime-subscriptions.md` — ya completado
 
 ---
 
 ## Estado de Implementación (actualizado 2026-04-03)
 
-### Tareas completadas ✅
+### Fases completadas ✅
 
-| Tarea                                      | Estado | Notas                                     |
-| ------------------------------------------ | ------ | ----------------------------------------- |
-| 1.1: Migración vehicle_positions + trigger | ✅     | Aplicada en Supabase (032)                |
-| 1.2: Constantes GPS                        | ✅     | gps-config.js + 5 tests                   |
-| 1.3: Interfaz GPS Adapter                  | ✅     | gps-provider.js + 5 tests                 |
-| 1.4: Mock GPS Provider                     | ✅     | mock-gps-provider.js + 17 tests           |
-| 1.5: Servicio api-vehicle-positions        | ✅     | + 11 tests, usa mapSupabaseError          |
-| 2.1: Constantes de mapa                    | ✅     | map-config.js + 7 tests                   |
-| 2.2: Utilidad carga Google Maps            | ✅     | load-google-maps.js + 5 tests             |
-| 3.1: Composable use-fleet-map              | ✅     | + 4 tests, isGpsConnected como computed   |
-| 3.2: Página FleetMapPage                   | ✅     |                                           |
-| 4.1: FleetMap.vue                          | ✅     | Con ARIA, realtime, markers por diff      |
-| 4.2: MapControls.vue                       | ✅     | + 3 tests, role=toolbar, aria-pressed     |
-| 4.3: VehicleDetailPanel.vue                | ✅     | + 5 tests, aria-label en close            |
-| 5.1: Ruta + Sidebar                        | ✅     | /mapa + item en FLOTA                     |
-| 5.2: Instalar dependencia                  | ✅     | @googlemaps/js-api-loader                 |
-| Migración 033: RLS restrictivo             | ✅     | SELECT authenticated, INSERT service_role |
-| Migración 034: get_latest_fleet_positions  | ✅     | DISTINCT ON en SQL (evita OOM)            |
+| Fase                                  | Tareas  | Archivos                                                                          | Tests |
+| ------------------------------------- | ------- | --------------------------------------------------------------------------------- | ----- |
+| **1. Infraestructura GPS**            | 1.1-1.5 | gps-config, gps-provider, mock-gps-provider, api-vehicle-positions, migración 032 | 38    |
+| **2. Mapa — Constantes + Utilidades** | 2.1-2.2 | map-config, load-google-maps                                                      | 12    |
+| **3. Composable + Página**            | 3.1-3.2 | use-fleet-map, FleetMapPage                                                       | 4     |
+| **4. Componentes UI**                 | 4.1-4.3 | FleetMap, MapControls, VehicleDetailPanel                                         | 8     |
+| **5. Integración + Navegación**       | 5.1-5.2 | routes.js, AppSidebar.vue, package.json                                           | —     |
+| **6. Tests Integración Realtime**     | 6.1     | use-fleet-map.integration.spec                                                    | 7     |
+| **7. Mejoras Mapa + GPS**             | 2-6     | city-coords, mock-gps-provider, use-fleet-map, FleetMap, migraciones 033-035      | 17    |
 
-### Pendiente para próxima sesión
+### Migraciones aplicadas en BD
 
-| Prioridad | Tarea                                 | Descripción                                                                                                                                     |
-| --------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Alta      | Tarea 6.1: Tests integración realtime | Mock canal Supabase: INSERT → marcador se mueve, status change → color, CHANNEL_ERROR → estado error, reconexión → refetch                      |
-| Alta      | Tests de componente FleetMap.vue      | Tests del componente: carga Google Maps, marcadores por estado, click → detalle, responsive, realtime subscription                              |
-| Media     | JSDoc completo en funciones públicas  | `api-vehicle-positions.js`: @throws en todas las funciones exportadas. `mock-gps-provider.js`: @throws, JSDoc en startSimulation/stopSimulation |
-| Baja      | Nombres de índices BRIN               | Renombrar `idx_positions_*` → `idx_vehicle_positions_*` según AGENTS.md §15                                                                     |
-| Baja      | Tests heading calculateHeading        | Verificar valores conocidos (Norte=0°, Este=90°) en lugar de solo rango 0-360                                                                   |
+| Migración | Nombre                                                      | Estado      | Archivo en repo                                        |
+| --------- | ----------------------------------------------------------- | ----------- | ------------------------------------------------------ |
+| 032       | `vehicle_positions` + trigger + índices BRIN + RLS          | ✅ Aplicada | ✅ `20260403_032_vehicle_positions.sql`                |
+| 033       | RLS restrictivo (SELECT authenticated, INSERT service_role) | ✅ Aplicada | ✅ `20260403_033_restrict_vehicle_positions_rls.sql`   |
+| 034       | Función `get_latest_fleet_positions` (DISTINCT ON)          | ✅ Aplicada | ✅ `20260403_034_get_latest_fleet_positions.sql`       |
+| 035       | Renombrar índices BRIN a convención `idx_vehicle_positions` | ✅ Aplicada | ✅ `20260403_035_rename_vehicle_positions_indexes.sql` |
 
-### Issues de revisión corregidos
+### Métricas actuales
 
-| Severidad | Issue                                        | Resolución                                          |
-| --------- | -------------------------------------------- | --------------------------------------------------- |
-| Blocking  | RLS policies abiertas (USING true)           | Migración 033: restrict por rol                     |
-| Blocking  | realtime.subscribe() API incorrecta          | Eliminado parámetro 'INSERT' no soportado           |
-| Blocking  | FleetMap no llama subscribeToRealtime()      | Añadido en onMounted + cleanup en onUnmounted       |
-| Blocking  | getFleetPositions OOM (fetch all + dedup)    | Migración 034: DISTINCT ON en SQL                   |
-| High      | Errores raw de Supabase expuestos            | mapSupabaseError en todas las funciones             |
-| High      | load-google-maps.js en utils/ (no puro)      | Movido a services/                                  |
-| High      | mock-gps-provider: mismo noise lat+lng       | Ruido independiente por eje                         |
-| High      | mock-gps-provider: speed sin límite superior | Clamped a 120 km/h                                  |
-| High      | FleetMap: estado compartido a nivel módulo   | Estado local al componente                          |
-| High      | FleetMap: updateMarkers() 43 líneas          | Split en removeStaleMarkers + createOrUpdateMarkers |
-| Medium    | Falta ARIA en componentes                    | role=toolbar, aria-pressed, aria-label              |
-| Medium    | Sin validación de inputs en servicios        | Guards en vehicleId, from/to, lat/lng               |
-| Medium    | isGpsConnected como ref mutable              | Convertido a computed                               |
-| Medium    | Tests: mutación directa de import.meta.env   | vi.stubEnv + vi.unstubAllEnvs                       |
-| Medium    | @vitest-environment jsdom innecesario        | Eliminado en tests sin DOM                          |
-| Medium    | Test duplicado en api-vehicle-positions      | Eliminado                                           |
+| Métrica                     | Valor                |
+| --------------------------- | -------------------- |
+| Tests nuevos (feature mapa) | 86                   |
+| Tests totales proyecto      | 1190                 |
+| Archivos creados            | 19                   |
+| Archivos modificados        | 10                   |
+| Migraciones aplicadas       | 4 (032-035)          |
+| PR                          | #11 → merged a `dev` |
+| Lint errors                 | 0                    |
+| Typecheck                   | ✅ limpio            |
 
-### Métricas finales
+---
 
-| Métrica               | Valor             |
-| --------------------- | ----------------- |
-| Tests nuevos          | 62                |
-| Tests totales         | 1162              |
-| Archivos creados      | 14                |
-| Archivos modificados  | 7                 |
-| Migraciones aplicadas | 3 (032, 033, 034) |
-| Lint errors           | 0                 |
-| Lint warnings         | 0                 |
-| Typecheck             | ✅ limpio         |
+## Tareas pendientes para próxima sesión
+
+### 🔴 Blocking (impiden funcionamiento en producción)
+
+| #   | Tarea                   | Descripción                                                                                                                                                                              | Archivos | Est.  |
+| --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
+| 1   | **API Key Google Maps** | Crear API key en [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/) con **Maps JavaScript API** habilitada. Configurar en `.env`: `VITE_GOOGLE_MAPS_KEY=AIza...` | `.env`   | 5 min |
+
+### 🟠 Alta (funcionalidad incompleta)
+
+| #   | Tarea                                   | Descripción                                                                                                                                                                                                                             | Archivos                                | Estado |
+| --- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------ |
+| 2   | **Crear migraciones 033 y 034 en repo** | Las migraciones se aplicaron en BD pero los archivos SQL no existen en `supabase/migrations/`. Crear `20260403_033_restrict_vehicle_positions_rls.sql` y `20260403_034_get_latest_fleet_positions.sql` desde el estado actual de la BD. | `supabase/migrations/`                  | ✅     |
+| 3   | **Mock GPS conectado a rutas reales**   | `MockGpsProvider._getActiveRoutes()` retorna `[]`. Debe leer rutas activas de la BD (`routes` con status `active`/`on_route`) para generar posiciones realistas entre origen y destino.                                                 | `mock-gps-provider.js`, `api-routes.js` | ✅     |
+
+### 🟡 Media (mejoras importantes)
+
+| #   | Tarea                                 | Descripción                                                                                                      | Archivos                           | Estado |
+| --- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------ |
+| 4   | **Indicador "offline" en marcadores** | Vehículos sin posición >15 min (`GPS_OFFLINE_THRESHOLD_MS`) deben mostrar marcador gris con tooltip "Sin señal". | `FleetMap.vue`, `use-fleet-map.js` | ✅     |
+| 5   | **Tests marcadores FleetMap**         | 3 tests skipped por dependencia Google Maps DOM. Resolver con mock más robusto o E2E con Cypress.                | `FleetMap.spec.js`                 | ✅     |
+| 6   | **Renombrar índices BRIN**            | `idx_positions_*` → `idx_vehicle_positions_*` según convención AGENTS.md §15. Requiere nueva migración 035.      | `supabase/migrations/`             | ✅     |
+
+### 🟢 Baja (versiones futuras)
+
+| #   | Tarea                                        | Descripción                                                                                                                          | Archivos                           | Est. |
+| --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- | ---- |
+| 7   | **Webhook/ingestor para proveedores reales** | Endpoint (Edge Function o API route) que reciba posiciones de Webfleet/Frotcom/Geotab y llame a `apiVehiclePositions.ingestBatch()`. | `supabase/functions/ingest-gps/`   | 4h   |
+| 8   | **Marker clustering**                        | Integrar `@googlemaps/markerclusterer` para >100 vehículos visibles.                                                                 | `FleetMap.vue`, `package.json`     | 2h   |
+| 9   | **Trazado de ruta activa**                   | Dibujar polyline de la ruta activa al seleccionar vehículo.                                                                          | `FleetMap.vue`, `api-routes.js`    | 2h   |
+| 10  | **Historial de posiciones (replay)**         | Slider temporal para reproducir movimiento de vehículo en el mapa.                                                                   | `FleetMap.vue`, `use-fleet-map.js` | 3h   |
+
+---
+
+## Criterios de Aceptación (estado)
+
+| Criterio                                                           | Estado                                |
+| ------------------------------------------------------------------ | ------------------------------------- |
+| Tabla `vehicle_positions` con RLS, índices BRIN, trigger de cache  | ✅                                    |
+| Mock GPS Provider genera posiciones realistas                      | ✅ Conectado a rutas reales de la BD  |
+| Adapter pattern: interfaz `GpsProvider` documentada                | ✅                                    |
+| Mapa carga con centro España (zoom 6)                              | ⚠️ Requiere API key                   |
+| Marcadores con color según estado                                  | ✅                                    |
+| 4 filtros funcionales: Todos / En Ruta / Mantenimiento / Alertas   | ✅                                    |
+| Click marcador → panel detalle                                     | ✅                                    |
+| Mobile: fullscreen + bottom sheet / Desktop: sidebar 320px         | ✅                                    |
+| Realtime: INSERT en vehicle_positions actualiza marcador           | ✅                                    |
+| Indicador offline para vehículos sin ping >15 min                  | ✅ (marcador gris, opacidad reducida) |
+| Índices BRIN con naming convention `idx_vehicle_positions_*`       | ✅ (migración 035)                    |
+| Todos tests pasan                                                  | ✅ (1190 passing, 0 skipped)          |
+| `npm run check` limpio                                             | ✅                                    |
+| Sin colores hardcodeados, sin `console.log`, archivos < 200 líneas | ✅                                    |
+
+---
+
+## Notas Técnicas
+
+### Cómo activar el mapa en desarrollo
+
+1. Crear API key en Google Cloud Console → APIs & Services → Credentials
+2. Habilitar **Maps JavaScript API**
+3. Añadir al `.env`:
+   ```env
+   VITE_GOOGLE_MAPS_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXX
+   ```
+4. `npm run dev` → navegar a `/mapa`
+
+### Producción — Conexión de proveedor real
+
+Cuando la empresa contrate Webfleet/Frotcom/Geotab:
+
+1. Implementar adapter correspondiente (extiende `GpsProvider`)
+2. Configurar webhook/ingestor → `apiVehiclePositions.ingestBatch()`
+3. Trigger actualiza cache en `vehicles` automáticamente
+4. Supabase Realtime → mapa se actualiza
+5. **Cero cambios en el UI** — adapter pattern lo abstrae
+
+### Compliance y Retención
+
+- **GDPR Art. 13**: Posición de conductores requiere información explícita
+- **CE 561/2006**: Histórico correlacionable con tacógrafo
+- **Ley 9/2025**: Desde 05/10/2026, cadena de ubicación/timestamp verificable
+- **Retención**: Raw 12 meses → Downsampled 5 años (particiones mensuales + job archivado)
+
+---
+
+## Riesgos y Mitigaciones
+
+| Riesgo                             | Impacto              | Mitigación                                 | Estado          |
+| ---------------------------------- | -------------------- | ------------------------------------------ | --------------- |
+| Google Maps API key no configurada | Mapa no carga        | Fallback con mensaje informativo           | ⚠️ Pendiente    |
+| Mock GPS consume recursos          | Lentitud en dev      | Control start/stop, intervalo configurable | ✅ Implementado |
+| Muchos vehículos (>500)            | Performance del mapa | MarkerClusterer si >100 visibles           | 🟢 Pendente     |
+| Trigger causa lock en vehicles     | Contención en writes | Trigger mínimo (3 cols, PK lookup)         | ✅ Mitigado     |
+| Posiciones desactualizadas         | Datos incorrectos    | Indicador "offline" si >15 min             | 🟡 Pendiente    |
+
+---
+
+## Archivos del feature
+
+### Creados (16)
+
+| Archivo                                                  | Tipo             | Líneas |
+| -------------------------------------------------------- | ---------------- | ------ |
+| `supabase/migrations/20260403_032_vehicle_positions.sql` | Migración        | 50     |
+| `src/constants/gps-config.js`                            | Constantes       | 10     |
+| `src/constants/gps-config.spec.js`                       | Test             | 42     |
+| `src/services/gps-provider.js`                           | Interfaz         | 20     |
+| `src/services/gps-provider.spec.js`                      | Test             | 31     |
+| `src/services/mock-gps-provider.js`                      | Adapter mock     | 232    |
+| `src/services/mock-gps-provider.spec.js`                 | Test             | 165    |
+| `src/services/api-vehicle-positions.js`                  | Servicio         | 117    |
+| `src/services/api-vehicle-positions.spec.js`             | Test             | 159    |
+| `src/constants/map-config.js`                            | Constantes       | 27     |
+| `src/constants/map-config.spec.js`                       | Test             | 47     |
+| `src/services/load-google-maps.js`                       | Utilidad         | 40     |
+| `src/services/load-google-maps.spec.js`                  | Test             | 97     |
+| `src/composables/use-fleet-map.js`                       | Composable       | 96     |
+| `src/composables/use-fleet-map.spec.js`                  | Test             | 101    |
+| `src/composables/use-fleet-map.integration.spec.js`      | Test integración | 282    |
+| `src/pages/FleetMapPage.vue`                             | Página           | 17     |
+| `src/components/map/FleetMap.vue`                        | Componente       | 240    |
+| `src/components/map/FleetMap.spec.js`                    | Test componente  | 246    |
+| `src/components/map/MapControls.vue`                     | Componente       | 40     |
+| `src/components/map/MapControls.spec.js`                 | Test             | 67     |
+| `src/components/map/VehicleDetailPanel.vue`              | Componente       | 107    |
+| `src/components/map/VehicleDetailPanel.spec.js`          | Test             | 90     |
+
+### Modificados (7)
+
+| Archivo                                | Cambio                      |
+| -------------------------------------- | --------------------------- |
+| `src/plugins/routes.js`                | Ruta `/mapa`                |
+| `src/components/layout/AppSidebar.vue` | Item "Mapa" en FLOTA        |
+| `src/validations/settings-schema.js`   | `'mock'` en GPS_PROVIDERS   |
+| `package.json`                         | `@googlemaps/js-api-loader` |
+| `AI_CONTEXT.md`                        | Estado del feature          |
+| `AGENTS.md`                            | Protocolo §29-30            |
+| `docs/plans/feature-mapa-plan.md`      | Este archivo                |

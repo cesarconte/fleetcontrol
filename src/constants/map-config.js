@@ -17,6 +17,7 @@ export const MAP_CONFIG = Object.freeze({
     active: '#2196F3',
     inactive: '#9E9E9E',
     decommissioned: '#616161',
+    offline: '#757575', // Sin señal GPS >15 min
   }),
   FILTERS: Object.freeze([
     { key: 'all', label: 'Todos', icon: 'mdi-map-marker' },

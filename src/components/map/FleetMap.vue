@@ -142,7 +142,8 @@ function createOrUpdateMarkers() {
 }
 
 function createMarker(vehicle) {
-  const color = MAP_CONFIG.MARKER_COLORS[vehicle.vehicles?.status] || '#9E9E9E'
+  const status = vehicle._isOffline ? 'offline' : vehicle.vehicles?.status
+  const color = MAP_CONFIG.MARKER_COLORS[status] || '#9E9E9E'
   const marker = new google.maps.Marker({
     position: { lat: vehicle.latitude, lng: vehicle.longitude },
     map,
@@ -153,9 +154,13 @@ function createMarker(vehicle) {
       fillOpacity: 1,
       strokeColor: '#ffffff',
       strokeWeight: 2,
-      scale: 10,
+      scale: vehicle._isOffline ? 8 : 10,
     },
   })
+
+  if (vehicle._isOffline) {
+    marker.setOpacity(0.6)
+  }
 
   marker.addListener('click', () => {
     selectVehicle(vehicle)

@@ -3,82 +3,31 @@
  *
  * Genera posiciones GPS simuladas realistas para desarrollo.
  * Interpola entre origen y destino de rutas activas con ruido gaussiano.
+ * Lee rutas activas de la BD para generar posiciones realistas.
  *
- * @see docs/plans/feature-mapa-plan.md — Tarea 1.4
+ * @see docs/plans/feature-mapa-plan.md — Tarea 1.4, Tarea 3
  */
 
 import { GpsProvider } from './gps-provider.js'
 import { GPS_UPDATE_INTERVAL_MS } from '@/constants/gps-config.js'
-
-const EARTH_RADIUS_KM = 6371
-
-/**
- * Calcula distancia entre dos puntos (fórmula Haversine).
- * @param {{ lat: number, lng: number }} a
- * @param {{ lat: number, lng: number }} b
- * @returns {number} Distancia en km
- */
-export function haversine(a, b) {
-  const dLat = toRad(b.lat - a.lat)
-  const dLng = toRad(b.lng - a.lng)
-  const lat1 = toRad(a.lat)
-  const lat2 = toRad(b.lat)
-
-  const x = Math.sin(dLat / 2) ** 2 + Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2)
-  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x))
-}
+import { getCityCoords } from '@/constants/city-coords.js'
+import { haversine, interpolate, calculateHeading, gaussianRandom } from '@/utils/gps-math.js'
+import { supabase } from './supabase-client.js'
+import { mapSupabaseError } from '@/utils/error-map.js'
 
 /**
- * Interpola linealmente entre dos puntos.
- * @param {{ lat: number, lng: number }} from
- * @param {{ lat: number, lng: number }} to
- * @param {number} progress - 0 a 1
+ * Resuelve coordenadas desde nombre de ciudad.
+ * @param {string} cityName
  * @returns {{ lat: number, lng: number }}
  */
-export function interpolate(from, to, progress) {
+function resolveCoords(cityName) {
+  const coords = getCityCoords(cityName)
+  if (coords) return coords
+  // Fallback: Madrid + offset aleatorio para ciudades no mapeadas
   return {
-    lat: from.lat + (to.lat - from.lat) * progress,
-    lng: from.lng + (to.lng - from.lng) * progress,
+    lat: 40.4168 + (Math.random() - 0.5) * 4,
+    lng: -3.7038 + (Math.random() - 0.5) * 4,
   }
-}
-
-/**
- * Calcula heading (rumbo) entre dos puntos en grados (0-360).
- * @param {{ lat: number, lng: number }} from
- * @param {{ lat: number, lng: number }} to
- * @returns {number} Heading en grados
- */
-export function calculateHeading(from, to) {
-  const dLng = toRad(to.lng - from.lng)
-  const lat1 = toRad(from.lat)
-  const lat2 = toRad(to.lat)
-
-  const y = Math.sin(dLng) * Math.cos(lat2)
-  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng)
-
-  let heading = toDeg(Math.atan2(y, x))
-  if (heading < 0) heading += 360
-  return heading
-}
-
-function toRad(deg) {
-  return (deg * Math.PI) / 180
-}
-
-function toDeg(rad) {
-  return (rad * 180) / Math.PI
-}
-
-/**
- * Genera número aleatorio con distribución normal (media 0, desviación 1).
- * @returns {number}
- */
-function gaussianRandom() {
-  let u = 0
-  let v = 0
-  while (u === 0) u = Math.random()
-  while (v === 0) v = Math.random()
-  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
 }
 
 /**
@@ -93,6 +42,9 @@ export class MockGpsProvider extends GpsProvider {
     this._intervalId = null
     this._vehicleProgress = new Map()
     this._positions = []
+    this._cachedRoutes = []
+    this._lastRouteFetch = 0
+    this._routeFetchIntervalMs = 60000 // Refetch routes cada 1 min
   }
 
   get isRunning() {
@@ -101,13 +53,13 @@ export class MockGpsProvider extends GpsProvider {
 
   /**
    * Genera una posición simulada para un vehículo en ruta.
-   * @param {{ origin_lat: number, origin_lng: number, dest_lat: number, dest_lng: number }} route
+   * @param {{ origin: {lat, lng}, dest: {lat, lng}, distance_km: number }} route
    * @param {number} progress - 0 a 1
    * @returns {object} Posición simulada
    */
   _generatePosition(route, progress) {
-    const origin = { lat: route.origin_lat, lng: route.origin_lng }
-    const dest = { lat: route.dest_lat, lng: route.dest_lng }
+    const origin = route.origin
+    const dest = route.dest
     const point = interpolate(origin, dest, progress)
 
     const latNoise = 0.0001 * gaussianRandom()
@@ -139,6 +91,9 @@ export class MockGpsProvider extends GpsProvider {
     this._intervalId = setInterval(() => {
       this._tick()
     }, this.updateIntervalMs)
+
+    // Fetch routes immediately
+    this._refreshRoutes()
   }
 
   /**
@@ -153,11 +108,62 @@ export class MockGpsProvider extends GpsProvider {
   }
 
   /**
+   * Refresca rutas activas desde la BD.
+   * @private
+   */
+  async _refreshRoutes() {
+    try {
+      const { data, error } = await supabase
+        .from('routes')
+        .select('id, vehicle_id, origin_city, destination_city, distance_total_km')
+        .in('status', ['planned', 'in_progress'])
+
+      if (error) throw mapSupabaseError(error)
+
+      this._cachedRoutes = (data || []).map(route => ({
+        id: route.id,
+        vehicle_id: route.vehicle_id,
+        origin: resolveCoords(route.origin_city),
+        dest: resolveCoords(route.destination_city),
+        distance_km: route.distance_total_km
+          ? Number(route.distance_total_km)
+          : haversine(resolveCoords(route.origin_city), resolveCoords(route.destination_city)),
+      }))
+
+      // Initialize progress for new routes
+      for (const route of this._cachedRoutes) {
+        if (!this._vehicleProgress.has(route.vehicle_id)) {
+          this._vehicleProgress.set(route.vehicle_id, 0)
+        }
+      }
+
+      // Remove progress for completed routes
+      const activeVehicleIds = new Set(this._cachedRoutes.map(r => r.vehicle_id))
+      for (const vehicleId of this._vehicleProgress.keys()) {
+        if (!activeVehicleIds.has(vehicleId)) {
+          this._vehicleProgress.delete(vehicleId)
+        }
+      }
+
+      this._lastRouteFetch = Date.now()
+    } catch (err) {
+      console.error('MockGpsProvider: Error fetching routes:', err.message)
+    }
+  }
+
+  /**
    * Tick de simulación — avanza posiciones y las guarda.
    * @private
    */
   _tick() {
-    const routes = this._getActiveRoutes()
+    // Refresh routes periodically
+    if (Date.now() - this._lastRouteFetch > this._routeFetchIntervalMs) {
+      this._refreshRoutes()
+    }
+
+    const routes = this._cachedRoutes
+    if (routes.length === 0) return
+
     for (const route of routes) {
       const progress = this._vehicleProgress.get(route.vehicle_id) || 0
       if (progress >= 1) {
@@ -165,10 +171,7 @@ export class MockGpsProvider extends GpsProvider {
         continue
       }
 
-      const totalDistance = haversine(
-        { lat: route.origin_lat, lng: route.origin_lng },
-        { lat: route.dest_lat, lng: route.dest_lng },
-      )
+      const totalDistance = route.distance_km
       const estimatedSteps = totalDistance / 85 / (this.updateIntervalMs / 1000 / 3600)
       const step = 1 / Math.max(estimatedSteps, 1)
       const newProgress = progress + step
@@ -185,7 +188,7 @@ export class MockGpsProvider extends GpsProvider {
    * @returns {Array}
    */
   _getActiveRoutes() {
-    return []
+    return this._cachedRoutes
   }
 
   async getPositions(vehicleId, { from, to }) {

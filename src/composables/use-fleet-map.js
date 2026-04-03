@@ -11,6 +11,7 @@
 import { ref, computed } from 'vue'
 import { apiVehiclePositions } from '@/services/api-vehicle-positions.js'
 import { useRealtime } from '@/composables/use-realtime.js'
+import { GPS_OFFLINE_THRESHOLD_MS } from '@/constants/gps-config.js'
 
 /**
  * Composable para el mapa de flota.
@@ -24,6 +25,17 @@ export function useFleetMap() {
   const selectedVehicle = ref(null)
   const isDetailOpen = ref(false)
   const isGpsConnected = computed(() => vehicles.value.length > 0 && !error.value)
+
+  /**
+   * Determina si un vehículo está offline (sin ping >15 min).
+   * @param {object} vehicle
+   * @returns {boolean}
+   */
+  function isVehicleOffline(vehicle) {
+    if (!vehicle.recorded_at) return true
+    const lastPing = new Date(vehicle.recorded_at).getTime()
+    return Date.now() - lastPing > GPS_OFFLINE_THRESHOLD_MS
+  }
 
   const filteredVehicles = computed(() => {
     if (activeFilter.value === 'all') return vehicles.value
@@ -46,7 +58,10 @@ export function useFleetMap() {
     error.value = null
     try {
       const positions = await apiVehiclePositions.getFleetPositions()
-      vehicles.value = positions
+      vehicles.value = positions.map(v => ({
+        ...v,
+        _isOffline: isVehicleOffline(v),
+      }))
     } catch (err) {
       error.value = err.message
     } finally {

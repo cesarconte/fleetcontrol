@@ -2,12 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import {
-  MockGpsProvider,
-  haversine,
-  interpolate,
-  calculateHeading,
-} from '@/services/mock-gps-provider.js'
+import { MockGpsProvider } from '@/services/mock-gps-provider.js'
+import { haversine, interpolate, calculateHeading } from '@/utils/gps-math.js'
 
 describe('mock-gps-provider.js', () => {
   describe('Utility functions', () => {
@@ -94,7 +90,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería generar posición con interpolación correcta', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       expect(pos.latitude).toBeGreaterThan(40)
@@ -105,7 +101,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería generar velocidad dentro de rango realista (0-120 km/h)', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       expect(pos.speed_kph).toBeGreaterThanOrEqual(0)
@@ -114,7 +110,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería calcular heading correctamente', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       expect(pos.heading_degrees).toBeGreaterThanOrEqual(0)
@@ -123,7 +119,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería tener ignition_on=true para vehículos en ruta', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       expect(pos.ignition_on).toBe(true)
@@ -131,7 +127,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería devolver posición con provider="mock"', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       expect(pos.provider).toBe('mock')
@@ -139,7 +135,7 @@ describe('mock-gps-provider.js', () => {
 
     it('debería tener gps_fix_type válido', () => {
       const pos = provider._generatePosition(
-        { origin_lat: 40.4168, origin_lng: -3.7038, dest_lat: 41.3874, dest_lng: 2.1686 },
+        { origin: { lat: 40.4168, lng: -3.7038 }, dest: { lat: 41.3874, lng: 2.1686 } },
         0.5,
       )
       const validTypes = ['GPS_2D', 'GPS_3D', 'DEAD_RECKONING', 'CELL_TOWER', 'UNKNOWN']
