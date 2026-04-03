@@ -699,6 +699,8 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 | Tarea                            | Módulo    | Descripción                                                                                                         |
 | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| Tests integración realtime mapa  | Mapa      | Tarea 6.1 del feature-mapa-plan: mock canal Supabase, INSERT → marcador se mueve, status change → color, reconexión |
+| Tests componente FleetMap.vue    | Mapa      | Tests del componente FleetMap (carga Google Maps, marcadores por estado, click → detalle, responsive)               |
 | Generación automática de alertas | Alertas   | Detectar vencimientos doc, límites HOS, consumo anómalo, mantenimiento pendiente e insertar alertas automáticamente |
 | Badge alertas activas            | Sidebar   | Mostrar contador de alertas no leídas/no silenciadas en el icono del sidebar                                        |
 | Dashboard principal              | Dashboard | Reemplazar placeholder con KPIs reales desde `get_dashboard_kpis()` + gráficos desde datos                          |
