@@ -81,6 +81,8 @@ Integración de Google Maps Platform en FleetControl con infraestructura GPS pro
 | --- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
 | 1   | **API Key Google Maps** | Crear API key en [Google Cloud Console](https://console.cloud.google.com/google/maps-apis/) con **Maps JavaScript API** habilitada. Configurar en `.env`: `VITE_GOOGLE_MAPS_KEY=AIza...` | `.env`   | 5 min |
 
+> **Alternativa gratuita**: Si no se quiere vincular tarjeta, cambiar a **Leaflet + OpenStreetMap** (100% gratis, sin API key). Solo afectaría `FleetMap.vue` y `load-google-maps.js`. El resto de la arquitectura (composable, mock GPS, realtime) funciona sin cambios.
+
 ### 🟠 Alta (funcionalidad incompleta)
 
 | #   | Tarea                                   | Descripción                                                                                                                                                                                                                             | Archivos                                | Estado |

@@ -2,10 +2,12 @@
  * FleetControl — Google Maps Loader
  *
  * Carga lazy de Google Maps Platform con caching singleton.
- * Usa @googlemaps/js-api-loader para carga asíncrona.
+ * Usa @googlemaps/js-api-loader v2 (API funcional).
  *
  * @see docs/plans/feature-mapa-plan.md — Tarea 2.2
  */
+
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 
 let googleMapsPromise = null
 
@@ -21,13 +23,13 @@ export async function loadGoogleMaps() {
     throw new Error('VITE_GOOGLE_MAPS_KEY no configurada')
   }
 
-  const { Loader } = await import('@googlemaps/js-api-loader')
-
-  googleMapsPromise = new Loader({
-    apiKey,
-    version: 'weekly',
+  setOptions({
+    key: apiKey,
+    v: 'weekly',
     libraries: ['places', 'marker'],
-  }).load()
+  })
+
+  googleMapsPromise = Promise.all([importLibrary('maps'), importLibrary('marker')])
 
   return googleMapsPromise
 }

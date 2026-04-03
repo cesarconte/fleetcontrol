@@ -12,12 +12,14 @@ import { ref, computed } from 'vue'
 import { apiVehiclePositions } from '@/services/api-vehicle-positions.js'
 import { useRealtime } from '@/composables/use-realtime.js'
 import { GPS_OFFLINE_THRESHOLD_MS } from '@/constants/gps-config.js'
+import { useSettings } from '@/composables/use-settings.js'
 
 /**
  * Composable para el mapa de flota.
  * @returns {object} Reactive state and methods
  */
 export function useFleetMap() {
+  const settingsStore = useSettings()
   const vehicles = ref([])
   const isLoading = ref(false)
   const error = ref(null)
@@ -25,6 +27,12 @@ export function useFleetMap() {
   const selectedVehicle = ref(null)
   const isDetailOpen = ref(false)
   const isGpsConnected = computed(() => vehicles.value.length > 0 && !error.value)
+
+  const isMockGpsEnabled = computed(
+    () =>
+      settingsStore.companySettings?.gps_provider === 'mock' &&
+      settingsStore.companySettings?.mock_gps_enabled === true,
+  )
 
   /**
    * Determina si un vehículo está offline (sin ping >15 min).
@@ -99,6 +107,7 @@ export function useFleetMap() {
     selectedVehicle,
     isDetailOpen,
     isGpsConnected,
+    isMockGpsEnabled,
     filteredVehicles,
     vehiclesWithPosition,
     vehiclesOnRoute,

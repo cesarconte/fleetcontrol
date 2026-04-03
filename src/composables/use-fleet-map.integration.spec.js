@@ -44,6 +44,15 @@ vi.mock('@/composables/use-vehicles.js', () => ({
   })),
 }))
 
+vi.mock('@/composables/use-settings.js', () => ({
+  useSettings: vi.fn(() => ({
+    companySettings: {
+      gps_provider: '',
+      mock_gps_enabled: false,
+    },
+  })),
+}))
+
 describe('use-fleet-map — integración realtime', () => {
   const mockPositions = [
     {

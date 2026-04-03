@@ -33,21 +33,28 @@
       <v-progress-circular indeterminate color="primary" />
     </div>
 
-    <div v-if="!isGpsConnected && !isLoading" class="map-warning" data-testid="gps-disconnected">
+    <div v-if="showMockDisabledWarning" class="map-warning" data-testid="gps-mock-disabled">
+      <v-alert type="info" variant="tonal" density="compact">
+        Mock GPS desactivado. Actívalo en Configuración → Integraciones → GPS / Telemática.
+      </v-alert>
+    </div>
+
+    <div v-if="showNoPositionsWarning" class="map-warning" data-testid="gps-no-positions">
       <v-alert type="warning" variant="tonal" density="compact">
-        Sin proveedor GPS activo. Activa el mock GPS en Configuración.
+        No hay posiciones GPS disponibles. Asegúrate de que haya rutas activas asignadas.
       </v-alert>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { MAP_CONFIG } from '@/constants/map-config.js'
 import { useFleetMap } from '@/composables/use-fleet-map.js'
 import { loadGoogleMaps } from '@/services/load-google-maps.js'
+import { MockGpsProvider } from '@/services/mock-gps-provider.js'
 import MapControls from './MapControls.vue'
 import VehicleDetailPanel from './VehicleDetailPanel.vue'
 
@@ -59,6 +66,7 @@ const mapElement = ref(null)
 let map = null
 let markers = {}
 let unsubscribeRealtime = null
+let mockGpsProvider = null
 
 const {
   filteredVehicles,
@@ -67,6 +75,7 @@ const {
   isDetailOpen,
   isLoading,
   isGpsConnected,
+  isMockGpsEnabled,
   setFilter,
   selectVehicle,
   closeDetail,
@@ -74,11 +83,19 @@ const {
   subscribeToRealtime,
 } = useFleetMap()
 
+const showMockDisabledWarning = computed(() => !isMockGpsEnabled.value && !isGpsConnected.value)
+const showNoPositionsWarning = computed(() => isMockGpsEnabled.value && !isGpsConnected.value)
+
 onMounted(async () => {
   try {
     await loadGoogleMaps()
     initMap()
     unsubscribeRealtime = subscribeToRealtime()
+
+    if (isMockGpsEnabled.value) {
+      startMockGps()
+    }
+
     await fetch()
     updateMarkers()
   } catch (err) {
@@ -87,6 +104,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  stopMockGps()
   if (map) {
     google.maps.event.clearInstanceListeners(map)
   }
@@ -94,6 +112,27 @@ onUnmounted(() => {
     unsubscribeRealtime()
   }
   markers = {}
+})
+
+function startMockGps() {
+  if (mockGpsProvider) return
+  mockGpsProvider = new MockGpsProvider()
+  mockGpsProvider.startSimulation()
+}
+
+function stopMockGps() {
+  if (mockGpsProvider) {
+    mockGpsProvider.stopSimulation()
+    mockGpsProvider = null
+  }
+}
+
+watch(isMockGpsEnabled, enabled => {
+  if (enabled) {
+    startMockGps()
+  } else {
+    stopMockGps()
+  }
 })
 
 function initMap() {

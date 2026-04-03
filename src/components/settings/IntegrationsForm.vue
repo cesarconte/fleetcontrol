@@ -39,6 +39,29 @@
                   data-testid="integrations-gps-api-secret"
                 />
               </VCol>
+              <VCol v-if="gps.gps_provider === 'mock'" cols="12">
+                <VAlert type="info" variant="tonal" density="compact" class="mb-3">
+                  <template #prepend>
+                    <VIcon>mdi-information</VIcon>
+                  </template>
+                  El proveedor Mock genera posiciones GPS simuladas leyendo las rutas activas de la
+                  BD. Ideal para desarrollo sin hardware de telemática.
+                </VAlert>
+                <VSwitch
+                  v-model="gps.mock_gps_enabled"
+                  label="Mock GPS activo"
+                  color="primary"
+                  inset
+                  data-testid="integrations-gps-mock-enabled"
+                />
+                <div class="text-caption text-medium-emphasis mt-1">
+                  {{
+                    gps.mock_gps_enabled
+                      ? 'Simulación GPS activa — los vehículos generarán posiciones en el mapa'
+                      : 'Simulación GPS desactivada'
+                  }}
+                </div>
+              </VCol>
             </VRow>
             <div class="d-flex justify-end ga-3 mt-2">
               <VBtn
@@ -419,6 +442,7 @@ const gpsProviders = [
   { title: 'Webfleet', value: 'webfleet' },
   { title: 'Frotcom', value: 'frotcom' },
   { title: 'Geotab', value: 'geotab' },
+  { title: 'Mock (desarrollo)', value: 'mock' },
 ]
 const emailProviders = [
   { title: 'Brevo', value: 'brevo' },
@@ -452,7 +476,12 @@ const SECTION_FIELDS = {
 }
 
 // ── Section forms ───────────────────────────────────────
-const gps = reactive({ gps_provider: '', gps_api_key: '', gps_api_secret: '' })
+const gps = reactive({
+  gps_provider: '',
+  gps_api_key: '',
+  gps_api_secret: '',
+  mock_gps_enabled: false,
+})
 const email = reactive({
   email_provider: '',
   email_api_key: '',
