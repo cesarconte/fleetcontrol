@@ -119,4 +119,35 @@ describe('LEGAL_LIMITS', () => {
       expect(LEGAL_LIMITS.ALERT_THRESHOLDS.SPEED_LIMIT_KMH).toBe(90)
     })
   })
+
+  describe('DOCUMENT_MANAGEMENT', () => {
+    it('aviso vencimiento: 30 días', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_EXPIRY_WARNING_DAYS).toBe(30)
+    })
+
+    it('crítico: 7 días', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_EXPIRY_CRITICAL_DAYS).toBe(7)
+    })
+
+    it('tamaño máximo archivo: 10 MB', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_MAX_FILE_SIZE_MB).toBe(10)
+    })
+
+    it('tipos de archivo permitidos', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_ALLOWED_FILE_TYPES).toEqual([
+        'pdf',
+        'jpeg',
+        'jpg',
+        'png',
+      ])
+    })
+
+    it('retención legal: 5 años', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_RETENTION_YEARS).toBe(5)
+    })
+
+    it('paginación por defecto: 25', () => {
+      expect(LEGAL_LIMITS.DOCUMENT_MANAGEMENT.DOCUMENT_PAGE_SIZE_DEFAULT).toBe(25)
+    })
+  })
 })
