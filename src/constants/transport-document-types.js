@@ -4,9 +4,7 @@
  * Catalog of transport document types supported by the system.
  * Each type defines its fields, data source mapping, and legal basis.
  *
- * Based on PRD §4.9 — Documentación de Transporte.
- *
- * @see Convenio CMR 1956 — Carta de Porte Internacional
+ * @see Convenio CMR 1956 — Carta de Porte Internacional (arts. 5-6)
  * @see LCTTM (Ley 15/2009) — Albarán y Factura
  * @see LOTT / RD 70/2019 — Hoja de Ruta
  * @see RD 1619/2012 + Ley 18/2022 — Factura de Transporte
@@ -22,35 +20,163 @@ function deepFreeze(obj) {
   return Object.freeze(obj)
 }
 
+/**
+ * Carta de Porte Nacional — 10 secciones obligatorias (Ley 15/2009, art. 10).
+ * Cada sección agrupa campos por dominio funcional.
+ */
+const CARTA_PORTE_NACIONAL_SECTIONS = deepFreeze({
+  identificacion: {
+    label: 'Identificación de las partes',
+    fields: [
+      'shipper_name',
+      'shipper_nif',
+      'shipper_address',
+      'shipper_city',
+      'shipper_province',
+      'shipper_phone',
+      'carrier_name',
+      'carrier_nif',
+      'carrier_address',
+      'carrier_transport_license',
+      'consignee_name',
+      'consignee_nif',
+      'consignee_address',
+      'consignee_city',
+      'consignee_province',
+      'consignee_phone',
+    ],
+  },
+  lugaresFechas: {
+    label: 'Lugares y fechas',
+    fields: [
+      'issue_place',
+      'issue_date',
+      'loading_address',
+      'loading_date',
+      'loading_time',
+      'delivery_address',
+      'delivery_date',
+      'delivery_time_window',
+    ],
+  },
+  mercancias: {
+    label: 'Descripción de mercancías',
+    fields: [
+      'goods_nature',
+      'goods_description',
+      'packages_count',
+      'gross_weight_kg',
+      'net_weight_kg',
+      'volume_m3',
+      'adr_class',
+      'adr_un_number',
+      'temperature_required',
+    ],
+  },
+  embalaje: {
+    label: 'Embalaje y etiquetado',
+    fields: ['packaging_type', 'pallet_count', 'seal_number', 'container_number', 'marking_codes'],
+  },
+  instrucciones: {
+    label: 'Instrucciones de transporte',
+    fields: ['special_handling', 'sealing_instructions', 'delivery_deadline', 'transit_notes'],
+  },
+  valorSeguros: {
+    label: 'Valor declarado y seguros',
+    fields: ['declared_value', 'insurance_company', 'insurance_policy_number', 'coverage_limit'],
+  },
+  flete: {
+    label: 'Precio del flete',
+    fields: [
+      'freight_price',
+      'fuel_surcharge',
+      'toll_fees',
+      'waiting_fees',
+      'total_amount',
+      'payment_terms',
+      'payment_method',
+    ],
+  },
+  firmas: {
+    label: 'Firmas',
+    fields: ['shipper_signature', 'carrier_signature', 'consignee_signature', 'signature_date'],
+  },
+  reservaComprobacion: {
+    label: 'Reserva de comprobación',
+    fields: ['damage_notes', 'missing_packages', 'condition_notes'],
+  },
+  observaciones: {
+    label: 'Observaciones',
+    fields: ['order_reference', 'tms_reference', 'additional_notes'],
+  },
+})
+
+function flattenSections(sections) {
+  const fields = []
+  Object.values(sections).forEach(section => {
+    fields.push(...section.fields)
+  })
+  return fields
+}
+
 export const TRANSPORT_DOCUMENT_TYPES = deepFreeze({
+  CARTA_PORTE_NACIONAL: {
+    value: 'carta_porte_nacional',
+    label: 'Carta de Porte Nacional',
+    description: 'Ley 15/2009 (LCTTM), arts. 10-12 — transporte nacional por carretera',
+    baseLegal: 'Ley 15/2009 (LCTTM), arts. 10-12; Orden FOM/2861/2012',
+    icon: 'mdi-file-document-outline',
+    sections: CARTA_PORTE_NACIONAL_SECTIONS,
+    fields: flattenSections(CARTA_PORTE_NACIONAL_SECTIONS),
+    copiesRequired: 3,
+  },
   CMR: {
     value: 'cmr',
     label: 'Carta de Porte CMR',
     description: 'Convenio CMR 1956 (arts. 5-6) — transporte internacional de mercancías',
-    baseLegal: 'Convenio CMR 1956',
-    icon: 'mdi-file-document-outline',
+    baseLegal: 'Convenio CMR 1956, arts. 5-6; Reg. UE 1072/2009',
+    icon: 'mdi-earth-box-outline',
     fields: [
-      'sender_name',
-      'sender_address',
-      'sender_tax_id',
-      'recipient_name',
-      'recipient_address',
+      'issue_place',
+      'issue_date',
+      'shipper_name',
+      'shipper_address',
+      'shipper_tax_id',
+      'carrier_name',
+      'carrier_address',
+      'carrier_tax_id',
+      'consignee_name',
+      'consignee_address',
+      'consignee_tax_id',
       'pickup_place',
+      'pickup_date',
       'delivery_place',
+      'goods_nature',
+      'goods_description',
+      'packaging_type',
+      'packages_count',
+      'package_marks',
+      'gross_weight_kg',
+      'freight_charges',
+      'payment_terms',
+      'cod_amount',
+      'goods_value',
+      'customs_instructions',
+      'transit_notes',
       'vehicle_plate',
       'vehicle_type',
       'driver_name',
       'driver_license',
-      'cargo_description',
-      'cargo_weight_kg',
-      'cargo_volume_m3',
-      'cargo_packages',
-      'cargo_value',
-      'route_origin',
-      'route_destination',
-      'transport_price',
-      'carrier_notes',
+      'driver_national_id',
+      'adr_class',
+      'adr_un_number',
+      'adr_packing_group',
+      'shipper_signature',
+      'carrier_signature',
+      'consignee_signature',
+      'signature_date',
     ],
+    copiesRequired: 3,
   },
   ALBARAN: {
     value: 'albaran',
@@ -160,78 +286,46 @@ export const TRANSPORT_DOCUMENT_TYPES = deepFreeze({
   },
 })
 
-/**
- * Array of all transport document type values (for selects and validation).
- * @type {string[]}
- */
 export const TRANSPORT_DOCUMENT_TYPE_VALUES = Object.freeze(
   Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => t.value),
 )
 
-/**
- * Get the Spanish label for a transport document type value.
- * @param {string} value
- * @returns {string}
- */
 export function getTransportDocumentTypeLabel(value) {
   const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
   return entry?.label ?? value
 }
 
-/**
- * Get the field list for a transport document type.
- * @param {string} value - Document type value
- * @returns {string[]}
- */
 export function getTransportDocumentTypeFields(value) {
   const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
   return entry?.fields ?? []
 }
 
-/**
- * Get all document types as {value, label} for selects.
- * @returns {Array<{value: string, label: string}>}
- */
 export function getActiveTransportDocumentTypes() {
-  return Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => ({
-    value: t.value,
-    label: t.label,
-  }))
+  return Object.values(TRANSPORT_DOCUMENT_TYPES).map(t => ({ value: t.value, label: t.label }))
 }
 
-/**
- * CMR field mapping: maps field groups to their data source tables and columns.
- * Used by document-generator.js to auto-fill CMR fields from DB data.
- */
+export function getCopiesRequired(value) {
+  const entry = Object.values(TRANSPORT_DOCUMENT_TYPES).find(t => t.value === value)
+  return entry?.copiesRequired ?? 1
+}
+
+export function getCartaPorteNacionalSections() {
+  return TRANSPORT_DOCUMENT_TYPES.CARTA_PORTE_NACIONAL?.sections ?? {}
+}
+
 export const CMR_FIELD_MAPPING = deepFreeze({
   sender: {
     source: 'company_settings',
-    fields: {
-      sender_name: 'company_name',
-      sender_address: 'address',
-      sender_tax_id: 'cif',
-    },
+    fields: { sender_name: 'company_name', sender_address: 'address', sender_tax_id: 'cif' },
   },
   recipient: {
     source: 'cargo_records',
-    fields: {
-      recipient_name: 'cmr_recipient',
-      recipient_address: 'cmr_delivery_place',
-    },
+    fields: { recipient_name: 'cmr_recipient', recipient_address: 'cmr_delivery_place' },
   },
-  vehicle: {
-    source: 'vehicles',
-    fields: {
-      vehicle_plate: 'plate',
-      vehicle_type: 'vehicle_type',
-    },
-  },
+  vehicle: { source: 'vehicles', fields: { vehicle_plate: 'plate', vehicle_type: 'vehicle_type' } },
   driver: {
     source: 'drivers',
-    fields: {
-      driver_name: 'full_name',
-      driver_license: 'license_number',
-    },
+    fields: { driver_name: 'full_name', driver_license: 'license_number' },
   },
   cargo: {
     source: 'cargo_records',

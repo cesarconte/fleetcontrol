@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión mapa-fix — Panel detalle completo, AdvancedMarkerElement, Mock GPS en composable, protocolo seguridad Git)
+> **Última actualización:** 2026-04-03 (sesión doc-transport — 6 servicios de documentos independientes, Carta de Porte Nacional 10 secciones, schemas Zod, migración DB document_number, orquestador)
 > **Actualizado por:** AI Agent
 
 ---
@@ -75,7 +75,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
     ├── constants/                ← Enums, legal-limits, document-types
     ├── pages/                    ← Páginas Vue (lazy-loaded)
     ├── plugins/                  ← Vue Router, Pinia, Vuetify, TanStack Query
-    ├── services/                 ← api-*.js (comunicación con Supabase)
+    ├── services/                 ← api-*.js (comunicación con Supabase), document-*.js (generación PDF)
     ├── stores/                   ← Pinia stores
     ├── styles/                   ← tokens.css
     ├── types/                    ← Definiciones JSDoc
@@ -113,7 +113,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                                                  |
 | GPS/Telemática             | 🟢 Completado  | Infraestructura GPS, adapter pattern, mock provider conectado a rutas reales, mapa FleetMap, offline indicator |
 | Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes                                    |
-| Testing (TDD)              | 🟢 Completado  | 1101 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
+| Testing (TDD)              | 🟢 Completado  | 1246 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
 
 ### Documentación de Transporte (v1.0)
 
