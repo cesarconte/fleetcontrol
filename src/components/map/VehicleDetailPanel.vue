@@ -7,6 +7,7 @@
         variant="text"
         size="small"
         data-testid="close-panel"
+        aria-label="Cerrar panel"
         @click="$emit('close')"
       />
     </v-card-title>

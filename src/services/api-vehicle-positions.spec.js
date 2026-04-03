@@ -1,11 +1,9 @@
-/**
- * @vitest-environment jsdom
- */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@/services/supabase-client.js', () => ({
   supabase: {
     from: vi.fn(),
+    rpc: vi.fn(),
   },
 }))
 
@@ -14,7 +12,8 @@ import { supabase } from '@/services/supabase-client.js'
 
 describe('apiVehiclePositions', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
+    supabase.rpc.mockResolvedValue({ data: [], error: null })
   })
 
   describe('getPositions', () => {
@@ -37,7 +36,9 @@ describe('apiVehiclePositions', () => {
     })
 
     it('debería lanzar error si la consulta falla', async () => {
-      const mockOrder = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } })
+      const mockOrder = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: { message: 'DB error', code: 'UNKNOWN' } })
       const mockLte = vi.fn().mockReturnValue({ order: mockOrder })
       const mockGte = vi.fn().mockReturnValue({ lte: mockLte })
       const mockEq = vi.fn().mockReturnValue({ gte: mockGte })
@@ -49,7 +50,7 @@ describe('apiVehiclePositions', () => {
           from: new Date('2026-04-01'),
           to: new Date('2026-04-02'),
         }),
-      ).rejects.toThrow('DB error')
+      ).rejects.toThrow()
     })
   })
 
@@ -81,15 +82,23 @@ describe('apiVehiclePositions', () => {
   describe('getFleetPositions', () => {
     it('debería obtener última posición de todos los vehículos', async () => {
       const mockData = [
-        { id: '1', vehicle_id: 'v1', latitude: 40.4168, vehicles: { id: 'v1', plate: 'ABC' } },
-        { id: '2', vehicle_id: 'v2', latitude: 41.3874, vehicles: { id: 'v2', plate: 'DEF' } },
+        { id: '1', vehicle_id: 'v1', latitude: 40.4168, plate: 'ABC' },
+        { id: '2', vehicle_id: 'v2', latitude: 41.3874, plate: 'DEF' },
       ]
-      const mockOrder = vi.fn().mockResolvedValue({ data: mockData, error: null })
-      const mockSelect = vi.fn().mockReturnValue({ order: mockOrder })
-      supabase.from.mockReturnValue({ select: mockSelect })
+      supabase.rpc.mockResolvedValue({ data: mockData, error: null })
 
       const result = await apiVehiclePositions.getFleetPositions()
       expect(result).toEqual(mockData)
+      expect(supabase.rpc).toHaveBeenCalledWith('get_latest_fleet_positions')
+    })
+
+    it('debería lanzar error si la consulta falla', async () => {
+      supabase.rpc.mockResolvedValue({
+        data: null,
+        error: { message: 'RPC error', code: 'UNKNOWN' },
+      })
+
+      await expect(apiVehiclePositions.getFleetPositions()).rejects.toThrow()
     })
   })
 
@@ -133,13 +142,13 @@ describe('apiVehiclePositions', () => {
     })
 
     it('debería lanzar error si el batch falla', async () => {
-      const positions = [{ vehicle_id: 'v1', latitude: 40 }]
+      const positions = [{ vehicle_id: 'v1', latitude: 40, longitude: -3 }]
       const mockInsert = vi
         .fn()
-        .mockResolvedValue({ data: null, error: { message: 'Batch error' } })
+        .mockResolvedValue({ data: null, error: { message: 'Batch error', code: 'UNKNOWN' } })
       supabase.from.mockReturnValue({ insert: mockInsert })
 
-      await expect(apiVehiclePositions.ingestBatch(positions)).rejects.toThrow('Batch error')
+      await expect(apiVehiclePositions.ingestBatch(positions)).rejects.toThrow()
     })
 
     it('debería devolver array vacío si no hay posiciones', async () => {

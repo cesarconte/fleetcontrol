@@ -1,5 +1,11 @@
 <template>
-  <div ref="mapContainer" class="fleet-map-container" data-testid="fleet-map">
+  <div
+    ref="mapContainer"
+    class="fleet-map-container"
+    data-testid="fleet-map"
+    role="application"
+    aria-label="Mapa de flota en tiempo real"
+  >
     <div ref="mapElement" class="map-element" />
 
     <MapControls
@@ -13,6 +19,8 @@
       class="detail-panel"
       :class="{ 'detail-panel--mobile': isMobile }"
       data-testid="detail-panel"
+      role="complementary"
+      aria-label="Detalle del vehículo"
     >
       <VehicleDetailPanel
         :vehicle="selectedVehicle"
@@ -34,23 +42,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
 import { MAP_CONFIG } from '@/constants/map-config.js'
 import { useFleetMap } from '@/composables/use-fleet-map.js'
-import { loadGoogleMaps } from '@/utils/load-google-maps.js'
+import { loadGoogleMaps } from '@/services/load-google-maps.js'
 import MapControls from './MapControls.vue'
 import VehicleDetailPanel from './VehicleDetailPanel.vue'
 
 const router = useRouter()
 const { mobile } = useDisplay()
-const isMobile = computed(() => mobile.value)
 
 const mapContainer = ref(null)
 const mapElement = ref(null)
 let map = null
 let markers = {}
+let unsubscribeRealtime = null
 
 const {
   filteredVehicles,
@@ -63,12 +71,14 @@ const {
   selectVehicle,
   closeDetail,
   fetch,
+  subscribeToRealtime,
 } = useFleetMap()
 
 onMounted(async () => {
   try {
     await loadGoogleMaps()
     initMap()
+    unsubscribeRealtime = subscribeToRealtime()
     await fetch()
     updateMarkers()
   } catch (err) {
@@ -80,13 +90,16 @@ onUnmounted(() => {
   if (map) {
     google.maps.event.clearInstanceListeners(map)
   }
+  if (unsubscribeRealtime) {
+    unsubscribeRealtime()
+  }
   markers = {}
 })
 
 function initMap() {
   map = new google.maps.Map(mapElement.value, {
     center: MAP_CONFIG.DEFAULT_CENTER,
-    zoom: isMobile.value ? MAP_CONFIG.ZOOM_MOBILE : MAP_CONFIG.DEFAULT_ZOOM,
+    zoom: mobile.value ? MAP_CONFIG.ZOOM_MOBILE : MAP_CONFIG.DEFAULT_ZOOM,
     styles: getDarkMapStyles(),
     disableDefaultUI: false,
     zoomControl: true,
@@ -99,15 +112,21 @@ function initMap() {
 function updateMarkers() {
   if (!map) return
 
-  const currentIds = new Set(filteredVehicles.value.map(v => v.vehicle_id))
+  removeStaleMarkers()
+  createOrUpdateMarkers()
+}
 
+function removeStaleMarkers() {
+  const currentIds = new Set(filteredVehicles.value.map(v => v.vehicle_id))
   for (const id in markers) {
     if (!currentIds.has(id)) {
       markers[id].setMap(null)
       delete markers[id]
     }
   }
+}
 
+function createOrUpdateMarkers() {
   for (const vehicle of filteredVehicles.value) {
     if (vehicle.latitude == null || vehicle.longitude == null) continue
 
@@ -117,28 +136,32 @@ function updateMarkers() {
         lng: vehicle.longitude,
       })
     } else {
-      const color = MAP_CONFIG.MARKER_COLORS[vehicle.vehicles?.status] || '#9E9E9E'
-      const marker = new google.maps.Marker({
-        position: { lat: vehicle.latitude, lng: vehicle.longitude },
-        map,
-        title: vehicle.vehicles?.plate || vehicle.vehicle_id,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-          scale: 10,
-        },
-      })
-
-      marker.addListener('click', () => {
-        selectVehicle(vehicle)
-      })
-
-      markers[vehicle.vehicle_id] = marker
+      markers[vehicle.vehicle_id] = createMarker(vehicle)
     }
   }
+}
+
+function createMarker(vehicle) {
+  const color = MAP_CONFIG.MARKER_COLORS[vehicle.vehicles?.status] || '#9E9E9E'
+  const marker = new google.maps.Marker({
+    position: { lat: vehicle.latitude, lng: vehicle.longitude },
+    map,
+    title: vehicle.vehicles?.plate || vehicle.vehicle_id,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: color,
+      fillOpacity: 1,
+      strokeColor: '#ffffff',
+      strokeWeight: 2,
+      scale: 10,
+    },
+  })
+
+  marker.addListener('click', () => {
+    selectVehicle(vehicle)
+  })
+
+  return marker
 }
 
 watch(

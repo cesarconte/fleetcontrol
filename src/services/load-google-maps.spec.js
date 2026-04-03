@@ -1,7 +1,7 @@
 /**
- * @vitest-environment jsdom
+ * @vitest-environment node
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 vi.mock('@googlemaps/js-api-loader', () => {
   const MockLoader = vi.fn()
@@ -14,6 +14,10 @@ describe('load-google-maps.js', () => {
     vi.clearAllMocks()
   })
 
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('debería cargar Google Maps con la API key correcta', async () => {
     const { Loader } = await import('@googlemaps/js-api-loader')
     const mockLoad = vi.fn().mockResolvedValue(undefined)
@@ -21,9 +25,9 @@ describe('load-google-maps.js', () => {
       return { load: mockLoad }
     })
 
-    import.meta.env.VITE_GOOGLE_MAPS_KEY = 'test-api-key'
+    vi.stubEnv('VITE_GOOGLE_MAPS_KEY', 'test-api-key')
 
-    const { loadGoogleMaps } = await import('@/utils/load-google-maps.js')
+    const { loadGoogleMaps } = await import('@/services/load-google-maps.js')
     await loadGoogleMaps()
 
     expect(Loader).toHaveBeenCalledWith({
@@ -41,9 +45,9 @@ describe('load-google-maps.js', () => {
       return { load: mockLoad }
     })
 
-    import.meta.env.VITE_GOOGLE_MAPS_KEY = 'test-api-key'
+    vi.stubEnv('VITE_GOOGLE_MAPS_KEY', 'test-api-key')
 
-    const { loadGoogleMaps } = await import('@/utils/load-google-maps.js')
+    const { loadGoogleMaps } = await import('@/services/load-google-maps.js')
     await loadGoogleMaps()
     await loadGoogleMaps()
 
@@ -52,9 +56,9 @@ describe('load-google-maps.js', () => {
   })
 
   it('debería lanzar error si no hay API key', async () => {
-    import.meta.env.VITE_GOOGLE_MAPS_KEY = ''
+    vi.stubEnv('VITE_GOOGLE_MAPS_KEY', '')
 
-    const { loadGoogleMaps, resetGoogleMapsCache } = await import('@/utils/load-google-maps.js')
+    const { loadGoogleMaps, resetGoogleMapsCache } = await import('@/services/load-google-maps.js')
     resetGoogleMapsCache()
     await expect(loadGoogleMaps()).rejects.toThrow()
   })
@@ -66,10 +70,28 @@ describe('load-google-maps.js', () => {
       return { load: mockLoad }
     })
 
-    import.meta.env.VITE_GOOGLE_MAPS_KEY = 'test-api-key'
+    vi.stubEnv('VITE_GOOGLE_MAPS_KEY', 'test-api-key')
 
-    const { loadGoogleMaps, resetGoogleMapsCache } = await import('@/utils/load-google-maps.js')
+    const { loadGoogleMaps, resetGoogleMapsCache } = await import('@/services/load-google-maps.js')
     resetGoogleMapsCache()
     await expect(loadGoogleMaps()).rejects.toThrow('Network error')
+  })
+
+  it('debería resetear el cache con resetGoogleMapsCache', async () => {
+    const { Loader } = await import('@googlemaps/js-api-loader')
+    const mockLoad = vi.fn().mockResolvedValue(undefined)
+    Loader.mockImplementation(function () {
+      return { load: mockLoad }
+    })
+
+    vi.stubEnv('VITE_GOOGLE_MAPS_KEY', 'test-api-key')
+
+    const { loadGoogleMaps, resetGoogleMapsCache } = await import('@/services/load-google-maps.js')
+    await loadGoogleMaps()
+    expect(Loader).toHaveBeenCalledTimes(1)
+
+    resetGoogleMapsCache()
+    await loadGoogleMaps()
+    expect(Loader).toHaveBeenCalledTimes(2)
   })
 })

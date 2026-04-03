@@ -49,7 +49,7 @@ describe('use-fleet-map.js', () => {
     expect(activeFilter.value).toBe('all')
     expect(selectedVehicle.value).toBeNull()
     expect(isDetailOpen.value).toBe(false)
-    expect(isGpsConnected.value).toBe(false)
+    expect(isGpsConnected.value).toBe(false) // computed, false when vehicles is empty
   })
 
   it('debería tener filteredVehicles que filtra por activeFilter', async () => {

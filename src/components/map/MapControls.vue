@@ -1,11 +1,12 @@
 <template>
-  <div class="map-controls" data-testid="map-controls">
+  <div class="map-controls" data-testid="map-controls" role="toolbar" aria-label="Filtros del mapa">
     <v-btn
       v-for="filter in filters"
       :key="filter.key"
       :data-testid="`filter-${filter.key}`"
       :variant="activeFilter === filter.key ? 'flat' : 'outlined'"
       :color="activeFilter === filter.key ? 'primary' : undefined"
+      :aria-pressed="activeFilter === filter.key"
       size="small"
       class="mr-2 mb-2"
       @click="$emit('update:activeFilter', filter.key)"

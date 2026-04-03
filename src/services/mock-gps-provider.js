@@ -110,13 +110,14 @@ export class MockGpsProvider extends GpsProvider {
     const dest = { lat: route.dest_lat, lng: route.dest_lng }
     const point = interpolate(origin, dest, progress)
 
-    const noise = 0.0001 * gaussianRandom()
-    const speed = Math.max(0, 85 + gaussianRandom() * 5)
+    const latNoise = 0.0001 * gaussianRandom()
+    const lngNoise = 0.0001 * gaussianRandom()
+    const speed = Math.min(120, Math.max(0, 85 + gaussianRandom() * 5))
     const heading = calculateHeading(origin, dest)
 
     return {
-      latitude: Math.round((point.lat + noise) * 1e6) / 1e6,
-      longitude: Math.round((point.lng + noise) * 1e6) / 1e6,
+      latitude: Math.round((point.lat + latNoise) * 1e6) / 1e6,
+      longitude: Math.round((point.lng + lngNoise) * 1e6) / 1e6,
       speed_kph: Math.round(speed * 100) / 100,
       heading_degrees: Math.round(heading * 100) / 100,
       ignition_on: speed > 0,
