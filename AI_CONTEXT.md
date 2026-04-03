@@ -112,8 +112,8 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Documentos Transporte      | 🟢 Completado  | 6 tipos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR), generación PDF auto    |
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                |
 | GPS/Telemática             | 🔴 Sin empezar | Integración con proveedor                                                    |
-| Sistema Realtime           | 🔴 Sin empezar | Tablas Tier 1                                                                |
-| Testing (TDD)              | 🟢 Completado  | 1081 tests (Vitest), Cypress configurado, E2E smoke test                     |
+| Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes  |
+| Testing (TDD)              | 🟢 Completado  | 1101 tests (Vitest), Cypress configurado, E2E smoke test                     |
 
 ### Documentación de Transporte (v1.0)
 
@@ -219,16 +219,47 @@ _(Complementa las de AGENTS.md)_
 
 ## 8. Contexto de la Última Sesión
 
-**Fecha:** 2026-04-02 (sesión C — Documentos Transporte + limpieza integraciones)
-**Branch:** feature/sesion-c-mejoras (desde `dev`)
-**Tests:** 1081 pasando, 0 errores lint, 0 warnings, typecheck limpio
-**Migraciones:** 27 aplicadas (001-027)
+**Fecha:** 2026-04-03 (sesión realtime — Suscripciones Supabase Realtime)
+**Branch:** feature/realtime (desde `dev`)
+**Tests:** 1101 pasando (20 nuevos de use-realtime), 0 errores lint, 0 warnings, typecheck limpio
+**Migraciones:** 31 aplicadas (001-031)
 
 **Trabajo realizado:**
 
+- **Composable `use-realtime.js`**: genérico de suscripciones Supabase Realtime
+  - Singleton con canales compartidos por tabla
+  - Reconexión automática con backoff exponencial (1s → 2s → 4s → ... → max 30s)
+  - Máx 10 reintentos antes de error permanente
+  - Manejo de INSERT/UPDATE/DELETE con handlers
+  - Cleanup en `onUnmounted`
+  - 20 tests TDD (150 líneas)
+- **Integración en composables**:
+  - `use-alerts.js`: INSERT → toast crítico/warning, UPDATE → reemplazo, DELETE → filtrado
+  - `use-vehicles.js`: INSERT → toast info, UPDATE → reemplazo, DELETE → filtrado
+  - `use-drivers.js`: INSERT → toast info, UPDATE → reemplazo, DELETE → filtrado
+  - `use-routes.js`: INSERT → toast info, UPDATE → toast por cambio de estado (en_curso/completada/incidencia), DELETE → filtrado
+- **AppTopBar**: Dropdown de notificaciones con alertas recientes, marcar leídas, navegar a detalle
+- **AppSidebar**: Badge de alertas activas con fetchActiveCount
+- **RLS Policies**: Fix alerts_update (USING true), alerts_delete (admin/traffic_manager only)
+- **Realtime**: Habilitado en alerts, vehicles, drivers, routes (migración 031)
+- **Archivos creados**: `src/composables/use-realtime.js`, `src/composables/use-realtime.spec.js`
+- **Archivos modificados**: `use-alerts.js`, `use-vehicles.js`, `use-drivers.js`, `use-routes.js`, `AppTopBar.vue`, `AppSidebar.vue`
+- **Migraciones creadas**: 028 (fix alerts RLS), 029 (fix delete), 030 (role-based delete), 031 (enable realtime)
+
+**Pendiente para la Edge Function:**
+
+- Configurar `SUPABASE_SERVICE_ROLE_KEY` como secret: `supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<key>`
+- Desplegar Edge Function: `supabase functions deploy invite-user`
+- Obtener service_role key del dashboard: Settings → API → Project API keys
+
 ### Sesión C — Documentos de Transporte + Limpieza Integraciones
 
-**Tareas completadas:**
+**Fecha:** 2026-04-02
+**Branch:** feature/sesion-c-mejoras (desde `dev`)
+**Tests:** 1081 pasando
+**Migraciones:** 27 aplicadas (001-027)
+
+**Trabajo realizado:**
 
 1. **Task 9 — Eliminar "Otro" de integraciones:** `'otro'` eliminado de `GPS_PROVIDERS`, `FUEL_CARD_PROVIDERS`, `ACCOUNTING_PROVIDERS` en `settings-schema.js`. VListItem 'Otro' eliminado de 3 paneles en `IntegrationsForm.vue`.
 2. **Task 10a — Constantes transport-document-types.js:** 6 tipos definidos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR) con fields, icon, baseLegal. CMR_FIELD_MAPPING agrupado por entidad.
@@ -630,6 +661,7 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 **Bloqueos activos:**
 
 - Ninguno. Conexión Supabase operativa. BD completamente en inglés.
+  > > > > > > > origin/dev
 
 ---
 
@@ -640,24 +672,22 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 | Tarea                            | Módulo    | Descripción                                                                                                         |
 | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
 | Generación automática de alertas | Alertas   | Detectar vencimientos doc, límites HOS, consumo anómalo, mantenimiento pendiente e insertar alertas automáticamente |
-| Realtime subscriptions           | Alertas   | Suscripción Supabase Realtime en tabla `alerts` para actualización en tiempo real (Tier 1 según AGENTS.md §17)      |
 | Badge alertas activas            | Sidebar   | Mostrar contador de alertas no leídas/no silenciadas en el icono del sidebar                                        |
 | Dashboard principal              | Dashboard | Reemplazar placeholder con KPIs reales desde `get_dashboard_kpis()` + gráficos desde datos                          |
 | Deploy Edge Function invite-user | Config    | Configurar SUPABASE_SERVICE_ROLE_KEY como secret + desplegar `supabase functions deploy invite-user`                |
 
 ### Media — Siguientes iteraciones
 
-| Tarea                          | Módulo          | Descripción                                                              |
-| ------------------------------ | --------------- | ------------------------------------------------------------------------ |
-| Comparación período vs período | Informes        | Añadir selector "comparar con" (mes anterior, año anterior) con deltas % |
-| Drill-down en gráficos         | Informes        | Click en gráfico → ver datos filtrados en tabla                          |
-| Notificaciones por email       | Alertas         | Integración Brevo para alertas configurables por tipo y por usuario      |
-| Configuración de umbrales      | Alertas         | UI para editar `company_settings` (alert_days_vehicle_doc, etc.)         |
-| Exportación PDF con gráficos   | Informes        | Incluir capturas de gráficos ECharts en el PDF exportado                 |
-| Informes programados           | Informes        | Envío automático por email de informes en horarios configurados          |
-| Módulo Tacógrafos              | Gestión         | CRUD descargas DDD, análisis conducción/descanso, infracciones           |
-| Gestión Documental completa    | Gestión         | Documentos centralizados con flujo de aprobación y auditoría             |
-| Sistema Realtime               | Infraestructura | Suscripciones en tablas Tier 1 (alerts, routes, vehicles, drivers)       |
+| Tarea                          | Módulo   | Descripción                                                              |
+| ------------------------------ | -------- | ------------------------------------------------------------------------ |
+| Comparación período vs período | Informes | Añadir selector "comparar con" (mes anterior, año anterior) con deltas % |
+| Drill-down en gráficos         | Informes | Click en gráfico → ver datos filtrados en tabla                          |
+| Notificaciones por email       | Alertas  | Integración Brevo para alertas configurables por tipo y por usuario      |
+| Configuración de umbrales      | Alertas  | UI para editar `company_settings` (alert_days_vehicle_doc, etc.)         |
+| Exportación PDF con gráficos   | Informes | Incluir capturas de gráficos ECharts en el PDF exportado                 |
+| Informes programados           | Informes | Envío automático por email de informes en horarios configurados          |
+| Módulo Tacógrafos              | Gestión  | CRUD descargas DDD, análisis conducción/descanso, infracciones           |
+| Gestión Documental completa    | Gestión  | Documentos centralizados con flujo de aprobación y auditoría             |
 
 ### Baja — Futuras ampliaciones
 
@@ -694,32 +724,32 @@ Pendiente para futuras sesiones: generación automática de alertas, realtime su
 
 ## 9. Referencias y Recursos
 
-| Recurso                         | Tipo         | Ubicación                                               |
-| ------------------------------- | ------------ | ------------------------------------------------------- |
-| PRD completo                    | Documento    | `PRD.md`                                                |
-| Reglas del agente               | Documento    | `AGENTS.md`                                             |
-| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                    |
-| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`                           |
-| Constantes legales              | Código       | `src/constants/legal-limits.js`                         |
-| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                     |
-| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                    |
-| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                        |
-| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                         |
-| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`                |
-| Tipos de alerta                 | Código       | `src/constants/alert-types.js`                          |
-| Tipos de informe                | Código       | `src/constants/report-types.js`                         |
-| Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                      |
-| Tipos de documentos             | Código       | `src/constants/transport-document-types.js`             |
-| Plantillas documentos           | Composable   | `src/composables/use-document-templates.js`             |
-| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                 |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-027, 027 pendiente aplicar) |
-| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                      |
-| Material Design 3               | Docs         | https://m3.material.io                                  |
-| Vuetify 4                       | Docs         | https://vuetifyjs.com                                   |
-| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                               |
-| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                     |
-| ADR 2025                        | Normativa    | UNECE                                                   |
-| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                          |
+| Recurso                         | Tipo         | Ubicación                                                      |
+| ------------------------------- | ------------ | -------------------------------------------------------------- |
+| PRD completo                    | Documento    | `PRD.md`                                                       |
+| Reglas del agente               | Documento    | `AGENTS.md`                                                    |
+| Workflows del agente            | Plantillas   | `.opencode/workflows/` (10 archivos)                           |
+| Skills del agente               | Documento    | `/home/cesar/.agents/skills/`, `/home/cesar/.opencode/skills/` |
+| Constantes legales              | Código       | `src/constants/legal-limits.js`                                |
+| Taxonomía de cargas             | Código       | `src/constants/cargo-categories.js`                            |
+| Equipamiento vehículos          | Código       | `src/constants/vehicle-equipment.js`                           |
+| Tipos de vehículo (UE)          | Código       | `src/constants/vehicle-types.js`                               |
+| Compliance de cargas            | Código       | `src/utils/cargo-compliance.js`                                |
+| Tipos de documentos conductor   | Código       | `src/constants/driver-document-types.js`                       |
+| Tipos de alerta                 | Código       | `src/constants/alert-types.js`                                 |
+| Tipos de informe                | Código       | `src/constants/report-types.js`                                |
+| Agregaciones informes           | Código       | `src/utils/report-aggregations.js`                             |
+| Tipos de documentos             | Código       | `src/constants/transport-document-types.js`                    |
+| Plantillas documentos           | Composable   | `src/composables/use-document-templates.js`                    |
+| Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                        |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-031)                               |
+| Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                             |
+| Material Design 3               | Docs         | https://m3.material.io                                         |
+| Vuetify 4                       | Docs         | https://vuetifyjs.com                                          |
+| Reglamento CE 561/2006          | Normativa UE | https://eur-lex.europa.eu                                      |
+| LCTTM (Ley 15/2009)             | Normativa ES | BOE                                                            |
+| ADR 2025                        | Normativa    | UNECE                                                          |
+| Ley 9/2025 Movilidad Sostenible | Normativa ES | BOE 04/12/2025                                                 |
 
 ---
 

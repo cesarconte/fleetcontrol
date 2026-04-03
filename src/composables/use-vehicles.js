@@ -5,9 +5,10 @@
  * Template for all other CRUD composites.
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { apiVehicles } from '@/services/api-vehicles.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { useRealtime } from './use-realtime.js'
 
 export function useVehicles(initialFilters = {}) {
   const items = ref([])
@@ -22,8 +23,37 @@ export function useVehicles(initialFilters = {}) {
   const sort = ref({ col: 'plate', asc: true })
 
   const notifications = useNotificationStore()
+  const realtime = useRealtime()
 
   const totalPages = computed(() => Math.ceil(total.value / pageSize.value) || 1)
+
+  function handleVehicleChange({ eventType, new: record, old: oldRecord }) {
+    try {
+      if (eventType === 'INSERT') {
+        items.value.unshift(record)
+        total.value++
+        notifications.info(`Vehículo añadido: ${record.plate}`)
+      }
+      if (eventType === 'UPDATE') {
+        const idx = items.value.findIndex(v => v.id === record.id)
+        if (idx !== -1) items.value[idx] = record
+      }
+      if (eventType === 'DELETE') {
+        items.value = items.value.filter(v => v.id !== oldRecord.id)
+        total.value--
+      }
+    } catch (err) {
+      console.error('[useVehicles] Realtime handler error:', err)
+    }
+  }
+
+  onMounted(() => {
+    realtime.subscribe('vehicles', handleVehicleChange)
+  })
+
+  onUnmounted(() => {
+    realtime.unsubscribe('vehicles')
+  })
 
   async function fetch() {
     isLoading.value = true

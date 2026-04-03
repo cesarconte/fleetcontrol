@@ -4,9 +4,10 @@
  * Reactive driver list with pagination, filtering, and CRUD operations.
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { apiDrivers } from '@/services/api-drivers.js'
 import { useNotificationStore } from '@/stores/notifications.js'
+import { useRealtime } from './use-realtime.js'
 
 export function useDrivers(initialFilters = {}) {
   const items = ref([])
@@ -21,8 +22,37 @@ export function useDrivers(initialFilters = {}) {
   const sort = ref({ col: 'full_name', asc: true })
 
   const notifications = useNotificationStore()
+  const realtime = useRealtime()
 
   const totalPages = computed(() => Math.ceil(total.value / pageSize.value) || 1)
+
+  function handleDriverChange({ eventType, new: record, old: oldRecord }) {
+    try {
+      if (eventType === 'INSERT') {
+        items.value.unshift(record)
+        total.value++
+        notifications.info(`Conductor añadido: ${record.full_name}`)
+      }
+      if (eventType === 'UPDATE') {
+        const idx = items.value.findIndex(d => d.id === record.id)
+        if (idx !== -1) items.value[idx] = record
+      }
+      if (eventType === 'DELETE') {
+        items.value = items.value.filter(d => d.id !== oldRecord.id)
+        total.value--
+      }
+    } catch (err) {
+      console.error('[useDrivers] Realtime handler error:', err)
+    }
+  }
+
+  onMounted(() => {
+    realtime.subscribe('drivers', handleDriverChange)
+  })
+
+  onUnmounted(() => {
+    realtime.unsubscribe('drivers')
+  })
 
   async function fetch() {
     isLoading.value = true
