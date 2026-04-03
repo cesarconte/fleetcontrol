@@ -30,6 +30,7 @@
     ]
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@mdi/font": "^7.4.47",
     "@supabase/supabase-js": "^2.100.1",
     "@tanstack/vue-query": "^5.95.2",

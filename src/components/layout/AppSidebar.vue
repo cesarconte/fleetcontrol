@@ -143,6 +143,7 @@ const navGroups = computed(() => [
     items: [
       { title: 'Vehículos', icon: 'mdi-truck', to: '/vehiculos', testId: 'vehicles' },
       { title: 'Conductores', icon: 'mdi-account-group', to: '/conductores', testId: 'drivers' },
+      { title: 'Mapa', icon: 'mdi-map', to: '/mapa', testId: 'map' },
     ],
   },
   {

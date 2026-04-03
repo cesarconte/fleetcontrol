@@ -1465,17 +1465,19 @@ ci(scope): description
 
 ### Code Reviews
 
-When reviewing code (own or others):
+When reviewing code (own or others), follow the **Pre-Commit / Pre-Push Review Protocol (§29)**:
 
-1. Check against all coding standards in this document
-2. Verify color palette compliance (no hardcoded colors)
-3. Check legal domain rules if applicable
-4. Verify JS/JSDoc compliance
-5. Check file size limits (max 200 lines)
-6. Verify tests exist and pass
-7. Check error handling completeness
-8. Verify mobile-first responsive design
-9. Check that TDD was followed (tests written before code)
+1. Run automated checks (§29.1)
+2. Review each changed file against applicable checklists (§29.3–§29.10)
+3. Categorize findings by severity (Blocking / High / Medium / Low)
+4. Fix all Blocking and High before committing
+5. Document Medium/Low as tech debt if not fixed
+6. Re-run automated checks after fixes
+7. Propose commit to user with summary of review findings
+
+**Quick review** (before any commit): §29.1 + §29.2
+**Full review** (before merge to `dev`): §29.1 through §29.8
+**Full review + Supabase advisors** (before push to `dev`/`main`): all sections
 
 ### Definition of Done
 
@@ -1496,6 +1498,7 @@ Before merging ANY branch to `dev`:
 - [ ] No inline credentials or API keys
 - [ ] Composition API used (`<script setup>`)
 - [ ] Mobile-first responsive design verified
+- [ ] **Pre-Commit Review performed** (§29) — all Blocking and High issues resolved
 - [ ] **Propose commit to user** — ask before executing, never commit unilaterally
 
 ---
@@ -1560,6 +1563,8 @@ When facing ambiguity:
 - ❌ Committing changes without asking user first
 - ❌ Producing UI without considering accessible and mobile behavior
 - ❌ Suggesting a dependency without knowing its maintenance status and bundle impact
+- ❌ Committing code without running the Pre-Commit Review Protocol (§29)
+- ❌ Pushing to `dev` or `main` without running Supabase advisors
 
 ---
 
@@ -1693,13 +1698,14 @@ Antes de proponer cerrar una sesión, el agente DEBE:
 
 1. `npm test` — todos los tests pasan
 2. `npm run check` — lint + typecheck limpios
-3. Commit de todos los cambios
-4. Push a la rama correspondiente
-5. Actualizar `AI_CONTEXT.md` con:
+3. **Pre-Commit Review** (§29) — Blocking y High resueltos
+4. Commit de todos los cambios
+5. Push a la rama correspondiente
+6. Actualizar `AI_CONTEXT.md` con:
    - Qué se hizo
    - Qué queda pendiente (con prioridad)
    - Siguiente paso recomendado
-6. Confirmar que el working tree está limpio (`git status --short` vacío)
+7. Confirmar que el working tree está limpio (`git status --short` vacío)
 
 ### Señal de cierre
 
@@ -1728,3 +1734,274 @@ Se permite sesiones más largas SOLO cuando:
 - Un solo módulo complejo requiere continuidad (ej: migración BD + API + UI de un feature)
 - Un bug requiere debugging profundo con múltiples iteraciones
 - El usuario explícitamente pide continuar
+
+---
+
+## 29. Pre-Commit / Pre-Push Review Protocol
+
+**MANDATORY**: Before ANY commit (and absolutely before ANY push to `dev` or `main`), the agent MUST perform a comprehensive code review covering ALL dimensions below. This is NOT optional — code that has not been reviewed MUST NOT be committed.
+
+> **Rationale**: A single feature implementation review (sesión mapa, 2026-04-03) found 37 issues including 4 blocking security bugs, 7 high-severity architectural problems, and 18 medium-severity quality issues. Without this protocol, those would have reached production.
+
+### When to trigger
+
+| Trigger                                                                   | Scope                             |
+| ------------------------------------------------------------------------- | --------------------------------- |
+| Before ANY commit                                                         | Quick check (§29.1 + §29.2)       |
+| Before merge to `dev`                                                     | Full review (§29.1 through §29.8) |
+| Before push to `dev`/`main`                                               | Full review + Supabase advisors   |
+| After any code change > 10 files                                          | Full review                       |
+| After any code change > 500 lines                                         | Full review                       |
+| After touching security-sensitive code (auth, RLS, env vars, credentials) | Full review + security focus      |
+| After touching database schema (migrations)                               | Full review + DB focus            |
+
+### §29.1 Automated Checks (ALWAYS run)
+
+```bash
+npm test           # ALL tests must pass — zero failures
+npm run check      # lint + typecheck — zero errors, zero warnings
+git status --short # working tree must be clean before commit
+```
+
+### §29.2 Definition of Done Checklist (§20)
+
+Verify ALL items in the Definition of Done checklist (§20). If any item fails, fix it before committing.
+
+### §29.3 Code Quality & Architecture
+
+| Check                        | What to verify                                                                      |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| **SRP**                      | Each file, function, component does ONE thing                                       |
+| **DRY**                      | No duplicated logic across files                                                    |
+| **KISS**                     | Simplest solution that works — no over-engineering                                  |
+| **File size**                | Max 200 lines (soft), 300 lines (hard)                                              |
+| **Function size**            | Max 30 lines per function                                                           |
+| **Naming**                   | Follows §4 conventions (PascalCase, camelCase, SCREAMING_SNAKE_CASE)                |
+| **Import order**             | Vue → External → Internal (Composables → Services → Constants → Utils → Components) |
+| **No relative imports**      | Use `@/` alias exclusively                                                          |
+| **No magic numbers/strings** | All constants extracted to named constants                                          |
+| **Directory placement**      | Utils = pure functions only; Services = side effects; Composables = reactive logic  |
+
+### §29.4 Framework Compliance
+
+#### Vue 3
+
+| Check                                                                                                    | What to verify |
+| -------------------------------------------------------------------------------------------------------- | -------------- |
+| Composition API only — no Options API                                                                    |
+| `<script setup>` syntax exclusively                                                                      |
+| Script setup order: imports → props/emits → stores → state → computed → watchers → lifecycle → functions |
+| No `this` in `<script setup>`                                                                            |
+| No prop mutation — emit events instead                                                                   |
+| No `v-if` + `v-for` on same element                                                                      |
+| `v-for` always with `:key` — never array index                                                           |
+| Business logic in composables, NOT in components                                                         |
+| Module-level mutable state NOT shared across component instances                                         |
+| Watchers cleaned up in `onUnmounted`                                                                     |
+| No direct DOM manipulation — use template refs                                                           |
+
+#### Vuetify 4
+
+| Check                                                        | What to verify |
+| ------------------------------------------------------------ | -------------- |
+| Use Vuetify props/slots instead of custom CSS overrides      |
+| Color references use theme tokens, never hardcoded hex       |
+| Responsive: mobile-first with `cols`, `sm`, `md` breakpoints |
+| Touch targets ≥ 44×44px                                      |
+
+### §29.5 Security
+
+| Check                                                                                  | What to verify |
+| -------------------------------------------------------------------------------------- | -------------- |
+| **No inline credentials** — API keys, secrets, tokens in `.env` only                   |
+| **No secrets in commits** — `.env`, `*.local`, `node_modules` excluded                 |
+| **Input validation** — ALL external data validated with Zod schemas                    |
+| **Error mapping** — Supabase errors mapped via `mapSupabaseError()`, never raw         |
+| **RLS policies** — NOT `USING (true)` for sensitive tables; restrict by role/ownership |
+| **RLS completeness** — SELECT, INSERT, UPDATE, DELETE all have explicit policies       |
+| **SECURITY DEFINER** — functions must have `SET search_path = public`                  |
+| **No SQL injection** — parameterized queries (Supabase handles this)                   |
+| **No PII in logs** — driver NIF, emails, passwords never logged                        |
+| **Auth verification** — check auth status before ANY data operation                    |
+| **File uploads** — validate type, size, no execution risk                              |
+
+### §29.6 Database & Supabase
+
+| Check                                                                                         | What to verify |
+| --------------------------------------------------------------------------------------------- | -------------- |
+| **Migration naming** — `YYYYMMDD_NNN_description.sql`                                         |
+| **Column naming** — `snake_case`, English                                                     |
+| **Table naming** — `snake_case`, plural                                                       |
+| **Index naming** — `idx_{table}_{columns}`                                                    |
+| **Required columns** — `id`, `created_at`, `updated_at`, `created_by` on every table          |
+| **RLS enabled** — every table has `ENABLE ROW LEVEL SECURITY`                                 |
+| **RLS policies** — at least one policy per table, not overly permissive                       |
+| **Foreign keys** — indexed, with appropriate `ON DELETE` behavior                             |
+| **Indexes** — appropriate for query patterns (B-tree for point lookups, BRIN for time-series) |
+| **No `SELECT *`** in production queries                                                       |
+| **Triggers** — documented with WHY comment, `SECURITY DEFINER SET search_path = public`       |
+| **No direct `auth.users` JOINs** in public views                                              |
+| **Run `supabase_get_advisors`** — check for security and performance warnings                 |
+
+### §29.7 Testing
+
+| Check                                                                               | What to verify |
+| ----------------------------------------------------------------------------------- | -------------- |
+| **TDD followed** — tests written BEFORE implementation code                         |
+| **Each source file has `*.spec.js`** — exceptions documented in §18                 |
+| **All tests pass** — `npm test` zero failures                                       |
+| **Coverage not decreased** — from current baseline                                  |
+| **Edge cases tested** — null, empty, invalid input, boundary values                 |
+| **Error paths tested** — not just happy path                                        |
+| **Mocks are realistic** — test behavior, not implementation details                 |
+| **No unnecessary `@vitest-environment jsdom`** — use `node` when no DOM interaction |
+| **No dead mock code** — remove unused mocks                                         |
+| **No probabilistic tests** — seed random or clamp values                            |
+| **Test names are descriptive** — "debería..." in Spanish                            |
+
+### §29.8 Accessibility (WCAG 2.1 AA)
+
+| Check                                                             | What to verify |
+| ----------------------------------------------------------------- | -------------- |
+| All interactive elements: keyboard focusable + visible focus ring |
+| `data-testid` on all interactive elements                         |
+| Form inputs: associated `<label>` or `aria-label`                 |
+| Status changes: `role="alert"` + `aria-live="polite"`             |
+| Modals: focus trap + `aria-modal="true"` + ESC to close           |
+| Tables: `<th scope="col">` headers                                |
+| Color NOT sole indicator of status — pair with icon/text          |
+| Toggle buttons: `aria-pressed`                                    |
+| Icon-only buttons: `aria-label`                                   |
+| Interactive containers: `role` + `aria-label`                     |
+| Content works at 200% zoom                                        |
+| `prefers-reduced-motion` respected                                |
+
+### §29.9 Performance
+
+| Check                                                                                | What to verify |
+| ------------------------------------------------------------------------------------ | -------------- |
+| Route lazy loading — ALL page components use `() => import()`                        |
+| Server-side pagination for lists > 25 items                                          |
+| No N+1 queries — use JOINs or batch queries                                          |
+| No fetching ALL rows for "latest per entity" — use `DISTINCT ON` or window functions |
+| Images: lazy load, WebP, specified dimensions (no CLS)                               |
+| No unbounded loops in render/template                                                |
+| Debounce/throttle on scroll, resize, input listeners                                 |
+| No creating new object/function references on every render                           |
+
+### §29.10 PRD & Regulatory Compliance
+
+| Check                                                         | What to verify |
+| ------------------------------------------------------------- | -------------- |
+| Feature matches PRD requirements for the module               |
+| Regulatory constants from `legal-limits.js` — never hardcoded |
+| Metric units used (km, kg, t, m, °C, EUR)                     |
+| Dates: DD/MM/YYYY (UI), ISO 8601 (API)                        |
+| Spanish labels in UI, English in code/DB                      |
+
+### Review Execution Process
+
+When a review is triggered (before commit/push):
+
+1. **Identify scope** — which files changed, which modules affected
+2. **Run automated checks** (§29.1) — if any fail, STOP and fix
+3. **Review each changed file** against applicable checklists (§29.3–§29.10)
+4. **Categorize findings** by severity:
+   - 🔴 **Blocking** — security vulnerability, data loss, production crash, API contract violation. MUST fix before commit.
+   - 🟠 **High** — architectural violation, performance risk, framework misuse. SHOULD fix before commit.
+   - 🟡 **Medium** — code quality, missing tests, accessibility gap. SHOULD fix before commit, MUST fix before merge to `main`.
+   - 🟢 **Low** — naming, JSDoc, minor style. CAN fix now or track as tech debt.
+5. **Fix all Blocking and High issues** before committing
+6. **Fix Medium issues** when feasible in the same session
+7. **Document Low issues** as tech debt in `AI_CONTEXT.md` if not fixed
+8. **Re-run automated checks** (§29.1) after fixes
+9. **Propose commit to user** with summary of review findings
+
+### Review Output Format
+
+When reporting review results:
+
+```
+## Pre-Commit Review — [feature name]
+
+### Automated Checks
+- [ ] npm test: ✅/❌
+- [ ] npm run check: ✅/❌
+- [ ] git status: clean/dirty
+
+### Findings
+| Severity | File | Issue | Status |
+|----------|------|-------|--------|
+| 🔴       |      |       | Fixed/Pending |
+| 🟠       |      |       | Fixed/Pending |
+| 🟡       |      |       | Fixed/Pending |
+| 🟢       |      |       | Fixed/Deferred |
+
+### Summary
+- Blocking: X (all fixed / X pending)
+- High: X (all fixed / X pending)
+- Medium: X (all fixed / X pending)
+- Low: X (all fixed / X deferred)
+
+### Recommendation
+[Proceed to commit / Fix X issues first]
+```
+
+### Supabase Advisors Integration
+
+Before push to `dev` or `main`, run:
+
+```
+supabase_get_advisors(type: "security")
+supabase_get_advisors(type: "performance")
+```
+
+Address all HIGH and MEDIUM findings. Document LOW findings in `AI_CONTEXT.md`.
+
+---
+
+## 30. Industry Standards Reference
+
+All code MUST conform to these industry standards. The agent is expected to know and apply them without being reminded:
+
+### Web Standards
+
+| Standard                | Scope         | Key Requirements                                                      |
+| ----------------------- | ------------- | --------------------------------------------------------------------- |
+| **HTML5**               | Markup        | Semantic elements, valid structure, no deprecated tags                |
+| **CSS3**                | Styling       | CSS custom properties, no browser hacks, `prefers-reduced-motion`     |
+| **ES2022**              | JavaScript    | Modern syntax, strict mode, no `var`, proper error handling           |
+| **WCAG 2.1 AA**         | Accessibility | Contrast 4.5:1, keyboard nav, screen reader support, focus management |
+| **OWASP Top 10 (2025)** | Security      | Input validation, auth, session management, CSP, rate limiting        |
+
+### Framework Standards
+
+| Framework/Lib          | Standard             | Key Requirements                                                                   |
+| ---------------------- | -------------------- | ---------------------------------------------------------------------------------- |
+| **Vue 3**              | Official Style Guide | Composition API, single-file components, prop validation, emit naming              |
+| **Vuetify 4**          | MD3 Guidelines       | Theme tokens, responsive breakpoints, built-in a11y, component props               |
+| **Pinia**              | Official Guide       | Setup syntax, 3-layer state (data/loading/error), no server data                   |
+| **Vue Router 4**       | Official Guide       | Lazy loading, navigation guards, route param validation                            |
+| **TanStack Query**     | Official Guide       | Query key structure, stale time, error boundaries, no Pinia duplication            |
+| **Vee-Validate + Zod** | Official Docs        | Schema validation, error messages in Spanish, server error display                 |
+| **Supabase**           | Official Docs        | RLS on all tables, parameterized queries, error mapping, no service role in client |
+| **PostgreSQL**         | Official Docs        | Proper types, indexes, constraints, `EXPLAIN ANALYZE` for slow queries             |
+
+### Development Practices
+
+| Practice          | Standard             | Key Requirements                                                    |
+| ----------------- | -------------------- | ------------------------------------------------------------------- |
+| **TDD**           | Red-Green-Refactor   | Tests before code, minimal implementation, refactor only when green |
+| **Git**           | Conventional Commits | Type(scope): description, signed commits, no force push to main     |
+| **CI/CD**         | Pipeline gates       | Lint → typecheck → test → e2e — all must pass                       |
+| **SemVer**        | Semantic Versioning  | MAJOR.MINOR.PATCH for releases                                      |
+| **12-Factor App** | Methodology          | Config in env, stateless processes, disposability, dev/prod parity  |
+
+### Security Standards
+
+| Standard                | Scope                   | Key Requirements                                                  |
+| ----------------------- | ----------------------- | ----------------------------------------------------------------- |
+| **RGPD (EU 2016/679)**  | Data Protection         | Consent, data minimization, right to erasure, breach notification |
+| **LOPDGDD (LO 3/2018)** | Data Protection (Spain) | Spanish implementation of RGPD                                    |
+| **OWASP ASVS L2**       | Application Security    | Auth, session, access control, input validation, cryptography     |
+| **CIS Benchmarks**      | Infrastructure          | Secure defaults, least privilege, audit logging                   |
