@@ -222,7 +222,7 @@ _(Complementa las de AGENTS.md)_
 **Fecha:** 2026-04-03 (sesión realtime — Suscripciones Supabase Realtime)
 **Branch:** feature/realtime (desde `dev`)
 **Tests:** 1101 pasando (20 nuevos de use-realtime), 0 errores lint, 0 warnings, typecheck limpio
-**Migraciones:** 27 aplicadas (001-027)
+**Migraciones:** 31 aplicadas (001-031)
 
 **Trabajo realizado:**
 
@@ -238,14 +238,430 @@ _(Complementa las de AGENTS.md)_
   - `use-vehicles.js`: INSERT → toast info, UPDATE → reemplazo, DELETE → filtrado
   - `use-drivers.js`: INSERT → toast info, UPDATE → reemplazo, DELETE → filtrado
   - `use-routes.js`: INSERT → toast info, UPDATE → toast por cambio de estado (en_curso/completada/incidencia), DELETE → filtrado
+- **AppTopBar**: Dropdown de notificaciones con alertas recientes, marcar leídas, navegar a detalle
+- **AppSidebar**: Badge de alertas activas con fetchActiveCount
+- **RLS Policies**: Fix alerts_update (USING true), alerts_delete (admin/traffic_manager only)
+- **Realtime**: Habilitado en alerts, vehicles, drivers, routes (migración 031)
 - **Archivos creados**: `src/composables/use-realtime.js`, `src/composables/use-realtime.spec.js`
-- **Archivos modificados**: `use-alerts.js`, `use-vehicles.js`, `use-drivers.js`, `use-routes.js`
+- **Archivos modificados**: `use-alerts.js`, `use-vehicles.js`, `use-drivers.js`, `use-routes.js`, `AppTopBar.vue`, `AppSidebar.vue`
+- **Migraciones creadas**: 028 (fix alerts RLS), 029 (fix delete), 030 (role-based delete), 031 (enable realtime)
 
 **Pendiente para la Edge Function:**
 
 - Configurar `SUPABASE_SERVICE_ROLE_KEY` como secret: `supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<key>`
 - Desplegar Edge Function: `supabase functions deploy invite-user`
 - Obtener service_role key del dashboard: Settings → API → Project API keys
+
+### Sesión C — Documentos de Transporte + Limpieza Integraciones
+
+**Fecha:** 2026-04-02
+**Branch:** feature/sesion-c-mejoras (desde `dev`)
+**Tests:** 1081 pasando
+**Migraciones:** 27 aplicadas (001-027)
+
+**Trabajo realizado:**
+
+1. **Task 9 — Eliminar "Otro" de integraciones:** `'otro'` eliminado de `GPS_PROVIDERS`, `FUEL_CARD_PROVIDERS`, `ACCOUNTING_PROVIDERS` en `settings-schema.js`. VListItem 'Otro' eliminado de 3 paneles en `IntegrationsForm.vue`.
+2. **Task 10a — Constantes transport-document-types.js:** 6 tipos definidos (CMR, Albarán, Hoja Ruta, Factura, POD, ADR) con fields, icon, baseLegal. CMR_FIELD_MAPPING agrupado por entidad.
+3. **Task 10b — Migración 027:** Tablas `document_templates` + `generated_documents`, RLS, bucket Storage `transport-documents`, seed de 6 plantillas.
+4. **Task 10c — Schema Zod:** `generateDocumentSchema` + `documentTemplateSchema` en `transport-document-schema.js`.
+5. **Task 10d — Servicio API:** `apiDocumentTemplates` (CRUD + getActiveTemplates, getByType, toggleActive) + `apiGeneratedDocuments` (getByRoute, delete).
+6. **Task 10e — Generador PDF:** `document-generator.js` con `generateDocument()` que fetch datos, genera PDF con jsPDF (layouts CMR, Albarán, Hoja Ruta, Factura, POD, ADR + stub genérico), sube a Storage, registra en BD.
+7. **Task 10f — Composable:** `use-document-templates.js` con templates, isLoading, error, isGenerating, generateError + funciones fetchTemplates, toggleTemplate, generateDocument, deleteGeneratedDocument.
+8. **Task 10g — DocumentTemplatesForm.vue:** Componente de pestaña Configuración con expansion panels por tipo, toggle activo/inactivo, read-only para no-admins.
+9. **Task 10h — GenerateDocumentDialog.vue:** Diálogo con selector tipo doc + selector ruta + selector carga opcional + botón generar PDF.
+10. **Task 10i — SettingsPage.vue:** Nueva pestaña "Documentos" con RBAC (acceso para todos los roles con permiso de empresa).
+11. **Task 10j — Botones en rutas/cargas:** Botón "Generar documento" (icon mdi-file-document-plus-outline) en RouteDetail y CargoDetail con route_id y cargo_id pre-rellenados.
+
+**Archivos creados (13):**
+
+- `src/constants/transport-document-types.js` + spec — 6 tipos documento, CMR_FIELD_MAPPING (23 tests)
+- `supabase/migrations/20260402_027_transport_documents.sql` — tablas + RLS + bucket + seed
+- `src/validations/transport-document-schema.js` + spec — Zod schemas (13 tests)
+- `src/services/api-document-templates.js` + spec — CRUD service (12 tests)
+- `src/services/document-generator.js` + spec — PDF generation service (6 tests)
+- `src/composables/use-document-templates.js` + spec — composable (10 tests)
+- `src/components/settings/DocumentTemplatesForm.vue` — settings tab component
+- `src/components/documents/GenerateDocumentDialog.vue` — generate dialog component
+
+**Archivos modificados (7):**
+
+- `src/validations/settings-schema.js` — eliminar 'otro' de 3 arrays de providers
+- `src/validations/settings-schema.spec.js` — +3 tests (rechazar 'otro')
+- `src/components/settings/IntegrationsForm.vue` — eliminar VListItem 'Otro' de 3 paneles
+- `src/pages/SettingsPage.vue` — nueva pestaña "Documentos" + import DocumentTemplatesForm
+- `src/constants/role-permissions.js` — +case 'documentos' en hasSettingsAccess
+- `src/components/routes/RouteDetail.vue` — +botón generar documento + GenerateDocumentDialog
+- `src/components/cargo/CargoDetail.vue` — +botón generar documento + GenerateDocumentDialog
+
+**Resultado:** 1081 tests (1014 + 67 nuevos). Lint + typecheck limpios. 1 migración pendiente de aplicar en Supabase (027).
+
+### Sesión B — Funcionalidad PRD + Integraciones completas
+
+**Tareas completadas:**
+
+1. **Migración 026:** Columnas nuevas en `company_settings` (alert*driving_hours, alert_tachograph_days, alert_speed_limit, email*\_, maps\__, fuel*card*_, accounting\_\_). Bucket Storage `company-logos` creado con políticas RLS.
+2. **Task 5 — Nuevos umbrales de alerta:** 3 constantes en `ALERT_THRESHOLDS` (DRIVING_HOURS: 9, TACHOGRAPH_DOWNLOAD_DAYS: 28, SPEED_LIMIT_KMH: 90). Schema Zod extendido. Form actualizado con 3 campos nuevos.
+3. **Task 6 — Upload logo empresa:** `CompanyForm.vue` con VFileInput + preview + upload a bucket `company-logos` + validación (formato, max 2MB). `logo_url` añadido a `companySettingsSchema`.
+4. **Task 8 — Refactor IntegrationsForm:** Reescrito como 5 `VExpansionPanel` (GPS, Email, Maps, Tarjetas Combustible, Contabilidad). 4 nuevos schemas Zod por sección. Guardado por sección independiente. Read-only con secrets enmascarados.
+5. **Task 7 — Edge Function invite-user:** `supabase/functions/invite-user/index.ts` con verificación JWT + check admin + `auth.admin.inviteUserByEmail()` + creación perfil. Método `inviteUser()` en `api-profiles.js` + store `settings.js`. `UsersTable.vue` conectado con `handleCreate()`.
+
+**Archivos creados (2):**
+
+- `supabase/migrations/20260402_026_session_b_settings.sql`
+- `supabase/functions/invite-user/index.ts`
+
+**Archivos modificados (9):**
+
+- `src/constants/legal-limits.js` — +3 constantes (umbrales conducción, tacógrafo, velocidad)
+- `src/constants/legal-limits.spec.js` — +3 tests
+- `src/validations/settings-schema.js` — +logo_url en companySettings, +3 campos alertThresholds, +4 schemas integraciones por sección
+- `src/validations/settings-schema.spec.js` — +12 tests (3 alertas + 9 integraciones)
+- `src/components/settings/AlertThresholdsForm.vue` — +3 campos (conducción, tacógrafo, velocidad) + read-only
+- `src/components/settings/CompanyForm.vue` — upload logo (VFileInput, preview, bucket upload)
+- `src/components/settings/IntegrationsForm.vue` — rewrite completo con 5 VExpansionPanels
+- `src/components/settings/UsersTable.vue` — `handleCreate()` conectado con Edge Function
+- `src/services/api-profiles.js` — +`inviteUser()` método
+- `src/stores/settings.js` — +`inviteUser()` acción
+
+**Resultado:** 1014 tests (989 + 25 nuevos). Lint + typecheck limpios. 1 migración aplicada en Supabase.
+
+**Pendiente para la Edge Function:**
+
+- Configurar `SUPABASE_SERVICE_ROLE_KEY` como secret: `supabase secrets set SUPABASE_SERVICE_ROLE_KEY=<key>`
+- Desplegar Edge Function: `supabase functions deploy invite-user`
+- Obtener service_role key del dashboard: Settings → API → Project API keys
+
+**Trabajo realizado:**
+
+### Sesión 15 — Sesión A: Correcciones críticas y seguridad
+
+**Tareas completadas:**
+
+1. **Verificación defaults alerta (BD):** Valores en `company_settings` confirmados correctos: km=5000, days=30, critical=7. Sin cambios necesarios.
+2. **`DRIVER_DOC_EXPIRY_WARNING_DAYS`:** Constante añadida a `legal-limits.js` (sección `ALERT_THRESHOLDS`, valor 30). Test verificatorio en `legal-limits.spec.js`.
+3. **Admin auto-degradación:** Guard clause en `updateUserRole()` de `stores/settings.js` — impide que un admin cambie su propio rol. Nuevo archivo `stores/settings.spec.js` con 3 tests.
+4. **Validación Zod IntegrationsForm:** Nuevo `integrationsSchema` en `settings-schema.js` (gps_provider enum + strings opcionales). `IntegrationsForm.vue` actualizado con `safeParse()` y manejo de errores inline. 5 tests nuevos en `settings-schema.spec.js`.
+
+**Archivos creados (2):**
+
+- `src/stores/settings.spec.js` — 3 tests (admin permisos, auto-degradación)
+- _(schema integrations ya existía, solo se amplió)_
+
+**Archivos modificados (4):**
+
+- `src/constants/legal-limits.js` — +1 constante (`DRIVER_DOC_EXPIRY_WARNING_DAYS`)
+- `src/constants/legal-limits.spec.js` — +1 test
+- `src/stores/settings.js` — guard clause auto-degradación en `updateUserRole()`
+- `src/validations/settings-schema.js` — +`integrationsSchema` (3 campos)
+- `src/validations/settings-schema.spec.js` — +5 tests
+- `src/components/settings/IntegrationsForm.vue` — import schema, `safeParse()`, errores inline
+
+**Resultado:** 989 tests (980 + 9 nuevos). Lint + typecheck limpios.
+
+---
+
+### PLAN PENDIENTE — Mejoras módulo Configuración (siguiente sesión)
+
+**Contexto:** Revisión de las 4 pestañas de configuración contra PRD §4.10, legal-limits.js, y estándares del sector transporte. Se identificaron discrepancias y funcionalidades faltantes.
+
+#### ~~Sesión A — Correcciones críticas y seguridad~~ ✅ COMPLETADA
+
+| #   | Tarea                                                              | Archivos                                      | Estado                    |
+| --- | ------------------------------------------------------------------ | --------------------------------------------- | ------------------------- |
+| 1   | Corregir defaults alerta: km 10000→5000, days 90→30, critical 15→7 | `AlertThresholdsForm.vue`                     | ✅ BD verificada correcta |
+| 2   | Añadir `DRIVER_DOC_EXPIRY_WARNING_DAYS: 30` a `legal-limits.js`    | `legal-limits.js` + spec                      | ✅                        |
+| 3   | Admin no puede auto-degradar su rol                                | `stores/settings.js` + spec                   | ✅                        |
+| 4   | Validación Zod en IntegrationsForm                                 | `IntegrationsForm.vue` + `settings-schema.js` | ✅                        |
+
+#### ~~Sesión B — Funcionalidad PRD + Integraciones completas~~ ✅ COMPLETADA
+
+| #   | Tarea                                                                  | Archivos                                 | Estado |
+| --- | ---------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| 5   | Nuevos umbrales: conducción (9h), tacógrafo (28d), velocidad (90 km/h) | `AlertThresholdsForm.vue` + migración BD | ✅     |
+| 6   | Upload logo empresa (Supabase Storage)                                 | `CompanyForm.vue`                        | ✅     |
+| 7   | Creación usuario (Edge Function Supabase Admin API)                    | `UsersTable.vue` + Edge Function         | ✅     |
+| 8   | Refactor IntegrationsForm → VExpansionPanels con 5 secciones           | `IntegrationsForm.vue` + migración BD    | ✅     |
+
+**Secciones de Integraciones (VExpansionPanels):**
+
+- GPS/Telemática: Webfleet, Frotcom, Geotab
+- Email: Brevo, SendGrid
+- Maps: Google Maps
+- Tarjetas combustible: DKV, WABCO
+- Contabilidad: Sage, A3, Holded
+
+Cada sección: selector proveedor + campos credenciales + botón guardar + botón "Probar conexión" (deshabilitado, pendiente GPS en producción).
+
+#### ~~Sesión C — Mejoras adicionales~~ ✅ COMPLETADA
+
+> **Plan:** `docs/plans/SESSION_C_PLAN.md`
+
+| #   | Tarea                                                                | Archivos                                      | Estado |
+| --- | -------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| 9   | Eliminar "Otro" de 3 paneles de integraciones                        | `IntegrationsForm.vue` + `settings-schema.js` | ✅     |
+| 10  | Sistema documentos transporte (catálogo + PDF auto-rellenado por ID) | 13 archivos nuevos + 7 modificados            | ✅     |
+
+#### Migraciones BD necesarias
+
+- **Sesión A**: 0 migraciones (solo correcciones de código) ✅ COMPLETADA
+- **Sesión B**: 1 migración (columnas nuevas en company_settings para umbrales extra + credenciales integraciones) ✅ COMPLETADA
+- **Sesión C**: 1 migración (tabla document_templates + generated_documents) ✅ PENDIENTE APLICAR EN SUPABASE
+
+**Archivos creados Sesión A (11):**
+
+- `src/constants/role-permissions.js` + spec — 5 roles, matriz permisos, helpers RBAC (29 tests)
+- `src/validations/settings-schema.js` + spec — Zod para empresa, umbrales, usuarios
+- `src/services/api-company-settings.js` + spec — getSettings, updateSettings
+- `src/services/api-profiles.js` + spec — getAll, getById, updateRole, deactivate, reactivate
+- `src/composables/use-settings.js` + spec — isAdmin, currentRole, acciones con RBAC check
+- `src/components/settings/CompanyForm.vue` — Form empresa (editable/readonly por rol)
+- `src/components/settings/UsersTable.vue` — Tabla usuarios con cambio rol y activación
+- `src/components/settings/AlertThresholdsForm.vue` — 6 umbrales con validación Zod
+- `src/components/settings/IntegrationsForm.vue` — GPS provider + API keys
+- `src/pages/SettingsPage.vue` — VTabs con RBAC gate (4 pestañas)
+- PRD.md actualizado §4.10.1 — Política RBAC completa
+
+**Archivos creados Sesión B (2):**
+
+- `supabase/migrations/20260402_026_session_b_settings.sql`
+- `supabase/functions/invite-user/index.ts`
+
+**Archivos modificados Sesión B (9):**
+
+- `src/constants/legal-limits.js` — +3 constantes (umbrales conducción, tacógrafo, velocidad)
+- `src/constants/legal-limits.spec.js` — +3 tests
+- `src/validations/settings-schema.js` — +logo_url, +3 campos alertas, +4 schemas integraciones
+- `src/validations/settings-schema.spec.js` — +12 tests
+- `src/components/settings/AlertThresholdsForm.vue` — +3 campos umbrales
+- `src/components/settings/CompanyForm.vue` — upload logo (VFileInput, bucket upload)
+- `src/components/settings/IntegrationsForm.vue` — rewrite completo con 5 VExpansionPanels
+- `src/components/settings/UsersTable.vue` — handleCreate() con Edge Function
+- `src/services/api-profiles.js` — +inviteUser() método
+- `src/stores/settings.js` — +inviteUser() acción
+
+### Sesión 12 — Módulo Informes (completo)
+
+**Alcance:** Sistema de informes profesional con 9 tipos, gráficos ECharts, exportación PDF/Excel, y esquema BD financiera completa.
+
+**Migraciones BD aplicadas (6):** 019-024 (routes_financials, vehicle_annual_costs, driver_compensation, financial_functions, financial_indexes, financial_rls)
+
+**Archivos creados (~40):** 10 tipos informe, 7 componentes UI, 10 páginas, servicios, agregaciones, export utils
+
+- `FuelReportPage.vue` — Combustible con precio/L, consumo, CO2
+- `MaintenanceReportPage.vue` — Mantenimiento costes, preventivo/correctivo
+- `ComplianceReportPage.vue` — Cumplimiento doc vehículos + conductores
+- `TachographReportPage.vue` — Tacógrafos descargas, infracciones, horas
+- `CargoReportPage.vue` — Cargas por tipo, peso, ADR
+
+Rutas: 10 nuevas (hub + 9 informes), sidebar actualizado
+
+**Resultado:** 920 tests (789 + 131 nuevos). Lint + typecheck limpios. 0 warnings Supabase advisors.
+
+---
+
+### Sesión 11 — Módulo Alertas (CRUD + UI)
+
+**Alcance:** CRUD completo de alertas con filtros, acciones (leer, silenciar, eliminar) y página UI.
+Pendiente para futuras sesiones: generación automática de alertas, realtime subscriptions, badge sidebar.
+
+**Archivos creados (11):**
+
+- `src/constants/alert-types.spec.js` — 31 tests (tipos, severidades, helpers)
+- `src/constants/alert-types.js` — 9 tipos alerta + 3 severidades + helpers (label, icon, color)
+- `src/validations/alert-schema.spec.js` — 19 tests (dismiss + filter validation)
+- `src/validations/alert-schema.js` — Schemas Zod para dismiss y filtros
+- `src/services/api-alerts.spec.js` — 13 tests (CRUD + alert-specific queries)
+- `src/services/api-alerts.js` — Servicio: getPaginated, getActiveCount, markAsRead, markAllAsRead, dismiss, getByVehicle, getByDriver
+- `src/composables/use-alerts.spec.js` — 27 tests (estado, fetch, acciones, paginación)
+- `src/composables/use-alerts.js` — Composable reactivo con 3-layer state + acciones alerta
+- `src/components/alerts/AlertDismissDialog.vue` — Diálogo silenciar con justificación (VDialog + VTextarea)
+- `src/components/alerts/AlertList.vue` — Tabla desktop (VDataTableServer) + cards mobile + filtros por tipo/severidad/estado
+- `src/pages/AlertsListPage.vue` — Página principal (reescribida desde placeholder)
+
+**Resultado:** 789 tests (699 + 90 nuevos). Lint + typecheck limpios.
+
+**Tareas pendientes documentadas:**
+
+1. Generación automática de alertas (detección vencimientos, HOS, consumo)
+2. Realtime subscriptions en tabla alerts (Tier 1)
+3. Badge de alertas activas en sidebar/navegación
+4. Notificaciones por email (integración Brevo)
+5. Configuración de umbrales desde UI (company_settings)
+
+**Problema:** La BD desplegada en Supabase tenía diferencias significativas con las migraciones locales y con el código:
+
+- Enums de la BD real usaban valores diferentes a los del código (ej: `in_route` vs `on_route`, `archived` vs `decommissioned`)
+- Algunas columnas tenían nombres diferentes (ej: `planned_departure` vs `departure_date`)
+
+**Solución:**
+
+1. Eliminadas TODAS las tablas, tipos, funciones e índices de Supabase
+2. Re-aplicadas migraciones 001-018 desde archivos locales en orden
+3. Migración 017 aplicada (estandarización a inglés: columnas + enums + índices + funciones)
+4. Migración 018 aplicada (bucket Storage `vehicle-documents`)
+5. Verificación: BD coincide exactamente con el código fuente
+
+**Estado final BD Supabase:**
+
+- 14 tablas con RLS habilitado (12 originales + vehicle_annual_costs + driver_compensation)
+- Todas las columnas en inglés
+- Todos los valores de enum en inglés
+- 2 buckets Storage: `documentos-conductores` + `vehicle-documents`
+- 24 migraciones aplicadas (001-024)
+- Código y BD 100% sincronizados
+- Vista `v_route_financials` con security_invoker
+- Función `calculate_route_fixed_cost()` para allocation de costes fijos
+- RLS restrictivo en tablas financieras (created_by = auth.uid())
+
+**Problema 1: BD en español vs código en inglés**
+
+- Se descubrió que TODAS las columnas de la BD estaban en español (migraciones 001-009) mientras los servicios API usaban inglés
+- **Migración 017** creada: renombra ~200 columnas, ~30 valores de enum, ~20 índices, 2 funciones SQL y 3 políticas storage a inglés
+- **Migración 016** corregida: WHERE clauses usaban valores enum ingleses inexistentes ('tractor') en vez de españoles ('tractora')
+- Servicios API actualizados: api-drivers, api-routes, api-maintenance (column names + enum values)
+- Todos los componentes Vue, schemas Zod, utils, composables y tests actualizados para usar valores enum ingles
+- **Regla confirmada**: Columnas BD = inglés, Valores enum = inglés, Etiquetas UI = español
+
+**Problema 2: CRUD documentos vehículo**
+
+- `api-vehicle-documents.js` corregido: nombres de columna alineados con BD (doc_type, expiry_date, file_url)
+- `use-vehicle-documents.js` extendido: createDocument, updateDocument, deleteDocument, uploadFile
+- `VehicleDocumentFormDialog.vue` creado: formulario CRUD con VDialog, VForm, VFileInput
+- `vehicle-document-schema.js` creado: schema Zod para validación de documentos
+- `VehicleDocuments.vue` reescrito: tabla CRUD completa con añadir/editar/eliminar/descargar
+- Migración 018: bucket `vehicle-documents` en Supabase Storage con políticas RLS
+
+**Archivos creados (7):**
+
+- `supabase/migrations/20260331_017_standardize_english.sql`
+- `supabase/migrations/20260331_018_vehicle_documents_storage.sql`
+- `src/validations/vehicle-document-schema.js`
+- `src/validations/vehicle-document-schema.spec.js`
+- `src/components/vehicles/VehicleDocumentFormDialog.vue`
+
+**Archivos modificados (~35):**
+
+- `supabase/migrations/20260330_016_vehicle_types.sql` (fix WHERE clauses)
+- `src/services/api-vehicle-documents.js` (fix column names)
+- `src/services/api-drivers.js` (fix column names, notes field)
+- `src/services/api-routes.js` (departure_date, English enum values)
+- `src/services/api-maintenance.js` (English enum values)
+- `src/services/api-vehicles.spec.js`, `api-drivers.spec.js`, `api-routes.spec.js`, `api-maintenance.spec.js`, `api-vehicle-documents.spec.js`
+- `src/composables/use-vehicle-documents.js` (CRUD + upload)
+- `src/composables/use-vehicle-documents.spec.js` (11 new tests)
+- `src/components/vehicles/VehicleDocuments.vue` (CRUD UI)
+- `src/validations/maintenance-schema.spec.js` (fix syntax error)
+- `src/utils/cargo-helpers.js`, `src/utils/cargo-helpers.spec.js` (English enum keys)
+- Todos los componentes Vue (~15) con valores enum ingles
+- Todos los schemas Zod y utils ya estaban en inglés (no cambios necesarios)
+
+**Resultado**: Sistema completamente alineado — BD inglés, código inglés, UI español.
+
+### Sesión 3 — Refactor completo: Alineación código → BD (inglés)
+
+**Problema resuelto:** La BD Supabase usaba nombres en inglés pero todo el código usaba español. Se realizó un refactor completo de ~60 archivos para alinearlos al esquema real de la BD.
+
+**Migraciones aplicadas:**
+
+- M015: `subcategoria_id` en cargo_records + 11 nuevos valores vehicle_type enum (inglés)
+- M016: Nuevos enums `eu_category` (7 valores) y `body_type` (21 valores), columnas en vehicles
+
+**Archivos refactorizados (resumen):**
+
+- **Constantes:** `vehicle-types.js` + spec (values español → inglés)
+- **Utils:** `cargo-compliance.js` + spec (tipo_carroceria → body_type, status activo → active)
+- **Schemas Zod:** 6 módulos (vehicle, driver, route, fuel, maintenance, cargo) + specs
+- **Servicios API:** 6 módulos (api-vehicles, api-drivers, api-routes, api-fuel, api-maintenance, api-cargo) + specs
+- **Composables:** use-vehicles, use-drivers, use-driver-documents, use-routes, use-fuel, use-maintenance
+- **Componentes Vue:** ~25 archivos (Form, Detail, List, Card × 6 módulos + DriverDetailCarnets, DriverFormCarnets, DriverDocumentUploader)
+
+**Reglas de idioma establecidas:**
+
+- Columnas BD: inglés (plate, brand, body_type, eu_category...)
+- Etiquetas UI: español ("Matrícula", "Marca", "Cisterna"...)
+- Enums BD: inglés (rigid, tractor, curtain, tanker...)
+- Labels JS: español (Rígido, Cabeza Tractora, Lona/Tauliner, Cisterna...)
+
+**Conexión MCP Supabase:** Configurada exitosamente con PAT en `~/.config/opencode/opencode.json`.
+
+### Sesión 4 — Compliance en planificación de rutas
+
+- `RouteCompliancePanel.vue` creado: banner reactivo que muestra compliance vehículo-carga
+- `RouteForm.vue` actualizado:
+  - Guarda objeto vehículo completo (`selectedVehicle`) al seleccionar
+  - Selector de subcategoría agrupado (elimina paso intermedio de tipo legado)
+  - Panel de compliance reactivo (aparece al seleccionar vehículo + subcategoría)
+  - Form reactivo renombrado a inglés (corrección del refactor sesión 3)
+- `route-schema.js`: campo `subcategoria_id` opcional añadido
+- Peso de carga validado contra `max_payload_kg` del vehículo
+
+### Sesión 5 — Equipamiento normativo subcategorías
+
+- Equipamiento obligatorio para 5 clases ADR (2, 4, 5, 6, 7) según ADR 2025 + RD 97/2014
+- Equipamiento recomendado para 6 subcategorías GEN según práctica sector
+- Nuevo campo `elementosRecomendados` en estructura de equipamiento
+- Nueva función `getRecommendedEquipmentElements()` (no afecta compliance)
+- Las 27 subcategorías ahora tienen equipamiento definido
+- Tests: 402 passing
+
+### Sesión 6 — Integración vehicle_documents con compliance
+
+- `vehicle-document-types.js`: 8 tipos documentales (5 obligatorios, 3 opcionales)
+- `api-vehicle-documents.js`: servicio CRUD con getByVehicle, getByVehicleAndType
+- `use-vehicle-documents.js`: composable reactivo para estado de documentos
+- `VehicleDocuments.vue`: corregido (usa composable + labels de tipos)
+- `checkVehicleCompliance()`: extensión con validación documental (3er parámetro)
+- `RouteCompliancePanel.vue`: carga documentos y pasa al compliance check
+- CSVs semilla: 7 archivos en `seed/` con datos de prueba interconectados
+- Tests: 445 passing (37 nuevos). Skill `testing-patterns` aplicada.
+- Acciones pendientes: CRUD UI documentos, validación certificado ADR vehículo
+
+### Sesión 7 — Cobertura completa de tests (composables + utils)
+
+- 11 nuevos archivos de test: 8 composables + 3 utils
+- Todos los composables cubiertos (9/9): use-auth, use-vehicles, use-drivers, use-routes, use-fuel, use-maintenance, use-cargo, use-driver-documents, use-vehicle-documents
+- Todas las utils cubiertas (7/7): format-helpers, maintenance-helpers, status-helpers, cargo-compliance, cargo-helpers, error-map, validate-driver-hours
+- Patrón TDD aplicado (testing-patterns skill): factory mocks, behavior-driven tests
+- Tests: 677 passing, 39 test files, 0 lint errors
+- Solo infraestructura sin test (main.js, router.js, vuetify.js) — no requiere unit tests
+
+### Sesiones anteriores
+
+<details>
+<summary>Sesión 1 — Taxonomía de Cargas (completada)</summary>
+
+- Taxonomía jerárquica completa: 4 categorías, 27 subcategorías con requisitos de vehículo
+- Equipamiento normativo por subcategoría (ADR, ATP, Animales, Carga General) con referencias legales
+- Módulo de compliance: verificación vehículo-carga con auto-checks y checklists
+- Selector jerárquico en CargoForm (categoría → subcategoría)
+- Sección "Requisitos y Normativa" en CargoDetail
+- Validación Zod con `subcategoria_id` y cross-validation
+</details>
+
+<details>
+<summary>Sesión 2 — Reestructuración Modelo Vehículos (EU)</summary>
+
+- Nuevo modelo de 3 campos según normativa UE/RD 2822/1998
+- Constantes `vehicle-types.js` con 3 enums congeladas
+- Migración SQL `20260330_016_vehicle_types.sql`
+- Schema Zod, componentes UI, compliance actualizados
+</details>
+
+**Próximos pasos (tareas pendientes):**
+
+1. **COMPLETADO**: Integrar `checkVehicleCompliance()` en planificación de rutas.
+2. **COMPLETADO**: Definir equipamiento para 11 subcategorías (sesión 5).
+3. **COMPLETADO**: Integrar `vehicle_documents` con compliance real contra documentos vigentes (sesión 6).
+4. **COMPLETADO (sesión 9)**: CRUD completo de documentos en UI (formulario subida/edición/borrado).
+5. **COMPLETADO (sesión 9)**: Validación de certificado ADR vehículo en subcategorías ADR (ya implementado en sesiones anteriores, verificado).
+6. **COMPLETADO (sesión 9)**: Eliminar columnas de backup en BD — verificado que no existen columnas backup.
+7. **COMPLETADO (sesión 9)**: Estandarizar TODOS los identificadores de BD a inglés (columnas, enums, índices, funciones, políticas).
+
+**Bloqueos activos:**
+
+- Ninguno. Conexión Supabase operativa. BD completamente en inglés.
+  > > > > > > > origin/dev
 
 ---
 
@@ -326,7 +742,7 @@ _(Complementa las de AGENTS.md)_
 | Tipos de documentos             | Código       | `src/constants/transport-document-types.js`                    |
 | Plantillas documentos           | Composable   | `src/composables/use-document-templates.js`                    |
 | Schema BD (esquema real)        | SQL          | `information_schema` (fuente de verdad)                        |
-| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-027, 027 pendiente aplicar)        |
+| Migraciones SQL                 | SQL          | `supabase/migrations/` (001-031)                               |
 | Configuración MCP Supabase      | Config       | `~/.config/opencode/opencode.json`                             |
 | Material Design 3               | Docs         | https://m3.material.io                                         |
 | Vuetify 4                       | Docs         | https://vuetifyjs.com                                          |
