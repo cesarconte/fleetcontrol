@@ -22,6 +22,7 @@ describe('load-google-maps.js', () => {
     const { setOptions, importLibrary } = await import('@googlemaps/js-api-loader')
 
     vi.stubEnv('VITE_GOOGLE_MAPS_KEY', 'test-api-key')
+    vi.stubEnv('VITE_GOOGLE_MAPS_MAP_ID', 'test-map-id')
 
     const { loadGoogleMaps } = await import('@/services/load-google-maps.js')
     await loadGoogleMaps()
@@ -30,6 +31,7 @@ describe('load-google-maps.js', () => {
       key: 'test-api-key',
       v: 'weekly',
       libraries: ['places', 'marker'],
+      mapId: 'test-map-id',
     })
     expect(importLibrary).toHaveBeenCalledWith('maps')
     expect(importLibrary).toHaveBeenCalledWith('marker')

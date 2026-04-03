@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import FleetMap from '@/components/map/FleetMap.vue'
 
 const mockSetCenter = vi.fn()
@@ -30,8 +31,22 @@ global.google = {
     event: {
       clearInstanceListeners: mockClearListeners,
     },
+    marker: {
+      PinElement: vi.fn().mockImplementation(function () {
+        this.element = document.createElement('div')
+      }),
+      AdvancedMarkerElement: vi.fn().mockImplementation(function (opts) {
+        this.position = opts.position
+        this.map = opts.map
+        this.content = opts.content
+        this.addEventListener = mockAddListener
+      }),
+    },
   },
 }
+
+const mockIsGpsConnected = ref(true)
+const mockIsMockGpsEnabled = ref(false)
 
 const mockFleetMapState = {
   vehicles: [],
@@ -40,13 +55,14 @@ const mockFleetMapState = {
   selectedVehicle: null,
   isDetailOpen: false,
   isLoading: false,
-  isGpsConnected: true,
-  isMockGpsEnabled: { value: false },
+  isGpsConnected: mockIsGpsConnected,
+  isMockGpsEnabled: mockIsMockGpsEnabled,
   setFilter: vi.fn(),
   selectVehicle: vi.fn(),
   closeDetail: vi.fn(),
   fetch: vi.fn(),
   subscribeToRealtime: vi.fn(() => vi.fn()),
+  stopMockGps: vi.fn(),
 }
 
 vi.mock('@/composables/use-fleet-map.js', () => ({
@@ -104,35 +120,14 @@ vi.mock('@/composables/use-settings.js', () => ({
   })),
 }))
 
-vi.mock('vuetify/components', () => ({
-  VProgressCircular: {
-    name: 'VProgressCircular',
-    props: ['indeterminate', 'color'],
-    template: '<div data-testid="progress-circular" />',
-  },
-  VAlert: {
-    name: 'VAlert',
-    props: ['type', 'variant', 'density'],
-    template: '<div data-testid="alert"><slot /></div>',
-  },
-}))
-
 function createWrapper() {
   return mount(FleetMap, {
     global: {
       stubs: {
-        MapControls: {
-          template: '<div data-testid="map-controls" />',
-          props: ['filters', 'activeFilter'],
-        },
-        VehicleDetailPanel: {
-          template: '<div data-testid="vehicle-detail-panel" />',
-          props: ['vehicle'],
-          emits: ['close', 'view-detail'],
-        },
+        MapControls: true,
+        VehicleDetailPanel: true,
       },
     },
-    attachTo: document.body,
   })
 }
 
@@ -153,22 +148,23 @@ describe('FleetMap.vue — estructura y estados UI', () => {
         event: {
           clearInstanceListeners: mockClearListeners,
         },
+        marker: {
+          PinElement: vi.fn().mockImplementation(function () {
+            this.element = document.createElement('div')
+          }),
+          AdvancedMarkerElement: vi.fn().mockImplementation(function () {
+            this.addListener = mockAddListener
+          }),
+        },
       },
     }
-
-    mockSetPosition.mockClear()
-    mockSetMap.mockClear()
-    mockAddListener.mockClear()
-    mockClearListeners.mockClear()
-    mockSetCenter.mockClear()
-    mockSetZoom.mockClear()
-    mockFleetMapState.vehicles = []
-    mockFleetMapState.filteredVehicles = []
-    mockFleetMapState.activeFilter = 'all'
-    mockFleetMapState.selectedVehicle = null
-    mockFleetMapState.isDetailOpen = false
+    vi.clearAllMocks()
+    mockIsGpsConnected.value = true
     mockFleetMapState.isLoading = false
-    mockFleetMapState.isGpsConnected = true
+    mockFleetMapState.isDetailOpen = false
+    mockFleetMapState.selectedVehicle = null
+    mockFleetMapState.activeFilter = 'all'
+    mockIsMockGpsEnabled.value = false
   })
 
   it('debería renderizar el contenedor del mapa con atributos ARIA', async () => {
@@ -185,7 +181,7 @@ describe('FleetMap.vue — estructura y estados UI', () => {
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const controls = wrapper.find('[data-testid="map-controls"]')
+    const controls = wrapper.findComponent({ name: 'MapControls' })
     expect(controls.exists()).toBe(true)
   })
 
@@ -194,8 +190,8 @@ describe('FleetMap.vue — estructura y estados UI', () => {
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const loading = wrapper.find('[data-testid="map-loading"]')
-    expect(loading.exists()).toBe(true)
+    const overlay = wrapper.find('[data-testid="map-loading"]')
+    expect(overlay.exists()).toBe(true)
   })
 
   it('debería ocultar overlay de carga cuando isLoading es false', async () => {
@@ -203,12 +199,12 @@ describe('FleetMap.vue — estructura y estados UI', () => {
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const loading = wrapper.find('[data-testid="map-loading"]')
-    expect(loading.exists()).toBe(false)
+    const overlay = wrapper.find('[data-testid="map-loading"]')
+    expect(overlay.exists()).toBe(false)
   })
 
   it('debería mostrar advertencia GPS cuando isGpsConnected es false', async () => {
-    mockFleetMapState.isGpsConnected = false
+    mockIsGpsConnected.value = false
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
@@ -217,11 +213,11 @@ describe('FleetMap.vue — estructura y estados UI', () => {
   })
 
   it('debería ocultar advertencia GPS cuando isGpsConnected es true', async () => {
-    mockFleetMapState.isGpsConnected = true
+    mockIsGpsConnected.value = true
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const warning = wrapper.find('[data-testid="gps-disconnected"]')
+    const warning = wrapper.find('[data-testid="gps-mock-disabled"]')
     expect(warning.exists()).toBe(false)
   })
 

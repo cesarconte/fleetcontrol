@@ -468,7 +468,7 @@ const SECTION_SCHEMAS = {
 }
 
 const SECTION_FIELDS = {
-  gps: ['gps_provider', 'gps_api_key', 'gps_api_secret'],
+  gps: ['gps_provider', 'gps_api_key', 'gps_api_secret', 'mock_gps_enabled'],
   email: ['email_provider', 'email_api_key', 'email_sender_email', 'email_sender_name'],
   maps: ['maps_provider', 'maps_api_key'],
   fuel: ['fuel_card_provider', 'fuel_card_api_key', 'fuel_card_api_secret'],

@@ -50,7 +50,22 @@ vi.mock('@/composables/use-settings.js', () => ({
       gps_provider: '',
       mock_gps_enabled: false,
     },
+    fetchCompanySettings: vi.fn().mockResolvedValue(undefined),
   })),
+}))
+
+vi.mock('@/services/supabase-client.js', () => ({
+  supabase: {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        in: vi.fn().mockResolvedValue({ data: [], error: null }),
+      })),
+    })),
+  },
+}))
+
+vi.mock('@/utils/error-map.js', () => ({
+  mapSupabaseError: vi.fn(err => err),
 }))
 
 describe('use-fleet-map — integración realtime', () => {

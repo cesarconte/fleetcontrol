@@ -23,10 +23,13 @@ export async function loadGoogleMaps() {
     throw new Error('VITE_GOOGLE_MAPS_KEY no configurada')
   }
 
+  const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID
+
   setOptions({
     key: apiKey,
     v: 'weekly',
     libraries: ['places', 'marker'],
+    ...(mapId && { mapId }),
   })
 
   googleMapsPromise = Promise.all([importLibrary('maps'), importLibrary('marker')])

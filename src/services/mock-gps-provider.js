@@ -84,16 +84,19 @@ export class MockGpsProvider extends GpsProvider {
    * Genera posiciones periódicamente para vehículos en ruta.
    * @throws {Error} Si no hay rutas activas configuradas
    */
-  startSimulation() {
+  async startSimulation() {
     if (this._isRunning) return
+
+    // Fetch routes immediately and wait for them
+    await this._refreshRoutes()
 
     this._isRunning = true
     this._intervalId = setInterval(() => {
       this._tick()
     }, this.updateIntervalMs)
 
-    // Fetch routes immediately
-    this._refreshRoutes()
+    // Generate initial positions after routes are loaded
+    this._tick()
   }
 
   /**

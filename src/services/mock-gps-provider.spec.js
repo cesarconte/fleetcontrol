@@ -142,13 +142,13 @@ describe('mock-gps-provider.js', () => {
       expect(validTypes).toContain(pos.gps_fix_type)
     })
 
-    it('startSimulation() debería iniciar el ciclo de simulación', () => {
-      provider.startSimulation()
+    it('startSimulation() debería iniciar el ciclo de simulación', async () => {
+      await provider.startSimulation()
       expect(provider.isRunning).toBe(true)
     })
 
-    it('stopSimulation() debería detener el ciclo de simulación', () => {
-      provider.startSimulation()
+    it('stopSimulation() debería detener el ciclo de simulación', async () => {
+      await provider.startSimulation()
       provider.stopSimulation()
       expect(provider.isRunning).toBe(false)
     })

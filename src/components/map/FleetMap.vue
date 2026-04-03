@@ -17,7 +17,7 @@
     <div
       v-if="isDetailOpen && selectedVehicle"
       class="detail-panel"
-      :class="{ 'detail-panel--mobile': isMobile }"
+      :class="{ 'detail-panel--mobile': mobile }"
       data-testid="detail-panel"
       role="complementary"
       aria-label="Detalle del vehículo"
@@ -54,7 +54,6 @@ import { useDisplay } from 'vuetify'
 import { MAP_CONFIG } from '@/constants/map-config.js'
 import { useFleetMap } from '@/composables/use-fleet-map.js'
 import { loadGoogleMaps } from '@/services/load-google-maps.js'
-import { MockGpsProvider } from '@/services/mock-gps-provider.js'
 import MapControls from './MapControls.vue'
 import VehicleDetailPanel from './VehicleDetailPanel.vue'
 
@@ -66,7 +65,6 @@ const mapElement = ref(null)
 let map = null
 let markers = {}
 let unsubscribeRealtime = null
-let mockGpsProvider = null
 
 const {
   filteredVehicles,
@@ -81,6 +79,7 @@ const {
   closeDetail,
   fetch,
   subscribeToRealtime,
+  stopMockGps,
 } = useFleetMap()
 
 const showMockDisabledWarning = computed(() => !isMockGpsEnabled.value && !isGpsConnected.value)
@@ -91,10 +90,6 @@ onMounted(async () => {
     await loadGoogleMaps()
     initMap()
     unsubscribeRealtime = subscribeToRealtime()
-
-    if (isMockGpsEnabled.value) {
-      startMockGps()
-    }
 
     await fetch()
     updateMarkers()
@@ -114,32 +109,12 @@ onUnmounted(() => {
   markers = {}
 })
 
-function startMockGps() {
-  if (mockGpsProvider) return
-  mockGpsProvider = new MockGpsProvider()
-  mockGpsProvider.startSimulation()
-}
-
-function stopMockGps() {
-  if (mockGpsProvider) {
-    mockGpsProvider.stopSimulation()
-    mockGpsProvider = null
-  }
-}
-
-watch(isMockGpsEnabled, enabled => {
-  if (enabled) {
-    startMockGps()
-  } else {
-    stopMockGps()
-  }
-})
-
 function initMap() {
+  const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID
   map = new google.maps.Map(mapElement.value, {
     center: MAP_CONFIG.DEFAULT_CENTER,
     zoom: mobile.value ? MAP_CONFIG.ZOOM_MOBILE : MAP_CONFIG.DEFAULT_ZOOM,
-    styles: getDarkMapStyles(),
+    ...(mapId ? { mapId } : { styles: getDarkMapStyles() }),
     disableDefaultUI: false,
     zoomControl: true,
     mapTypeControl: false,
@@ -170,10 +145,10 @@ function createOrUpdateMarkers() {
     if (vehicle.latitude == null || vehicle.longitude == null) continue
 
     if (markers[vehicle.vehicle_id]) {
-      markers[vehicle.vehicle_id].setPosition({
+      markers[vehicle.vehicle_id].position = {
         lat: vehicle.latitude,
         lng: vehicle.longitude,
-      })
+      }
     } else {
       markers[vehicle.vehicle_id] = createMarker(vehicle)
     }
@@ -183,22 +158,24 @@ function createOrUpdateMarkers() {
 function createMarker(vehicle) {
   const status = vehicle._isOffline ? 'offline' : vehicle.vehicles?.status
   const color = MAP_CONFIG.MARKER_COLORS[status] || '#9E9E9E'
-  const marker = new google.maps.Marker({
+
+  const pin = new google.maps.marker.PinElement({
+    background: color,
+    borderColor: '#ffffff',
+  })
+
+  const markerEl = pin.element
+  markerEl.style.cursor = 'pointer'
+
+  const marker = new google.maps.marker.AdvancedMarkerElement({
     position: { lat: vehicle.latitude, lng: vehicle.longitude },
     map,
     title: vehicle.vehicles?.plate || vehicle.vehicle_id,
-    icon: {
-      path: google.maps.SymbolPath.CIRCLE,
-      fillColor: color,
-      fillOpacity: 1,
-      strokeColor: '#ffffff',
-      strokeWeight: 2,
-      scale: vehicle._isOffline ? 8 : 10,
-    },
+    content: markerEl,
   })
 
   if (vehicle._isOffline) {
-    marker.setOpacity(0.6)
+    markerEl.style.opacity = '0.6'
   }
 
   marker.addListener('click', () => {

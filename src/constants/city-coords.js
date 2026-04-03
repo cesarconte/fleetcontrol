@@ -198,14 +198,20 @@ export const CITY_COORDS = Object.freeze({
 export function getCityCoords(cityName) {
   if (!cityName) return null
 
-  const normalized = cityName.toLowerCase().trim()
+  // Normalize: remove accents for matching
+  const normalized = cityName
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 
   // Direct match
   if (CITY_COORDS[normalized]) return CITY_COORDS[normalized]
 
-  // Partial match — find first key that is contained in the city name or vice versa
+  // Partial match — normalize keys too
   for (const [key, coords] of Object.entries(CITY_COORDS)) {
-    if (normalized.includes(key) || key.includes(normalized)) return coords
+    const normalizedKey = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    if (normalized.includes(normalizedKey) || normalizedKey.includes(normalized)) return coords
   }
 
   return null
