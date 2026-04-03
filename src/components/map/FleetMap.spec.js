@@ -41,6 +41,7 @@ const mockFleetMapState = {
   isDetailOpen: false,
   isLoading: false,
   isGpsConnected: true,
+  isMockGpsEnabled: { value: false },
   setFilter: vi.fn(),
   selectVehicle: vi.fn(),
   closeDetail: vi.fn(),
@@ -85,6 +86,22 @@ vi.mock('vue-router', () => ({
 
 vi.mock('vuetify', () => ({
   useDisplay: vi.fn(() => ({ mobile: { value: false } })),
+}))
+
+vi.mock('@/services/mock-gps-provider.js', () => ({
+  MockGpsProvider: vi.fn().mockImplementation(() => ({
+    startSimulation: vi.fn(),
+    stopSimulation: vi.fn(),
+  })),
+}))
+
+vi.mock('@/composables/use-settings.js', () => ({
+  useSettings: vi.fn(() => ({
+    companySettings: {
+      gps_provider: '',
+      mock_gps_enabled: false,
+    },
+  })),
 }))
 
 vi.mock('vuetify/components', () => ({
@@ -195,7 +212,7 @@ describe('FleetMap.vue — estructura y estados UI', () => {
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const warning = wrapper.find('[data-testid="gps-disconnected"]')
+    const warning = wrapper.find('[data-testid="gps-mock-disabled"]')
     expect(warning.exists()).toBe(true)
   })
 

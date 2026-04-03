@@ -45,6 +45,7 @@ export const integrationsSchema = z.object({
   gps_provider: z.enum(GPS_PROVIDERS).optional().or(z.literal('')),
   gps_api_key: z.string().optional().or(z.literal('')),
   gps_api_secret: z.string().optional().or(z.literal('')),
+  mock_gps_enabled: z.boolean().optional(),
 })
 
 export const emailIntegrationsSchema = z.object({
