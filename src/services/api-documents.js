@@ -168,14 +168,12 @@ export async function getGeneratedDocumentsPaginated({
  * @returns {Promise<{ total: number, valid: number, expiringSoon: number, critical: number, expired: number, complianceRate: number }>}
  */
 export async function getDocumentKpis() {
-  // Vehicle documents counts by status
   const { data: vehicleStatuses, error: vError } = await supabase
     .from('vehicle_documents')
     .select('status')
 
   if (vError) throw mapSupabaseError(vError)
 
-  // Driver documents counts by status
   const { data: driverStatuses, error: dError } = await supabase
     .from('driver_documents')
     .select('status')
@@ -184,7 +182,6 @@ export async function getDocumentKpis() {
 
   const allStatuses = [...(vehicleStatuses || []), ...(driverStatuses || [])]
   const total = allStatuses.length
-
   const valid = allStatuses.filter(d => d.status === 'valid').length
   const expiringSoon = allStatuses.filter(d => d.status === 'expiring_soon').length
   const critical = allStatuses.filter(d => d.status === 'critical').length
@@ -206,7 +203,6 @@ export async function searchDocuments(query, { limit = 50 } = {}) {
 
   const searchTerm = `%${query.trim()}%`
 
-  // Search vehicle documents
   const { data: vehicleDocs, error: vError } = await supabase
     .from('vehicle_documents')
     .select(
@@ -232,7 +228,6 @@ export async function searchDocuments(query, { limit = 50 } = {}) {
 
   if (vError) throw mapSupabaseError(vError)
 
-  // Search driver documents
   const { data: driverDocs, error: dError } = await supabase
     .from('driver_documents')
     .select(

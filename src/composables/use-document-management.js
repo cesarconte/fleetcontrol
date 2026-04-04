@@ -16,15 +16,26 @@ import {
   getDocumentKpis,
   searchDocuments,
 } from '@/services/api-documents.js'
+import {
+  deleteVehicleDocument,
+  deleteDriverDocument,
+  deleteGeneratedDocument,
+} from '@/services/api-document-delete.js'
 import { documentsToCsv, downloadCsv, generateExportFilename } from '@/utils/export-documents.js'
 import { LEGAL_LIMITS } from '@/constants/legal-limits.js'
+import {
+  buildApiFilters,
+  getDefaultSortColumn,
+  resetSortForTab,
+  getCsvType,
+} from '@/utils/document-filters.js'
 
 /**
  * Centralized document management composable.
  */
 export function useDocumentManagement() {
   // ── State ──────────────────────────────────────────────────────────
-  const activeTab = ref('vehicles') // 'vehicles' | 'drivers' | 'transport'
+  const activeTab = ref('vehicles')
   const kpis = ref({
     total: 0,
     valid: 0,
@@ -57,20 +68,14 @@ export function useDocumentManagement() {
   // ── Debounced search ───────────────────────────────────────────────
   let searchTimeout = null
 
-  /**
-   * Set search query with debounce.
-   * @param {string} query
-   */
   async function setSearchQuery(query) {
     searchQuery.value = query
     if (searchTimeout) clearTimeout(searchTimeout)
-
     if (!query || query.trim().length < 2) {
       searchResults.value = []
       isSearching.value = false
       return
     }
-
     isSearching.value = true
     searchTimeout = setTimeout(async () => {
       try {
@@ -85,9 +90,6 @@ export function useDocumentManagement() {
 
   // ── Data fetching ──────────────────────────────────────────────────
 
-  /**
-   * Load KPIs cross-entity.
-   */
   async function fetchKpis() {
     try {
       kpis.value = await getDocumentKpis()
@@ -96,34 +98,14 @@ export function useDocumentManagement() {
     }
   }
 
-  /**
-   * Load documents based on active tab, filters, and pagination.
-   */
   async function fetchDocuments() {
     isLoading.value = true
     error.value = null
     try {
-      // Transport documents use generated_at, not expiry_date
-      const defaultSort = activeTab.value === 'transport' ? 'generated_at' : 'expiry_date'
-      const sortCol = pagination.sortBy || defaultSort
+      const sortCol = pagination.sortBy || getDefaultSortColumn(activeTab.value)
       const sort = { col: sortCol, asc: pagination.sortAsc }
-      const pageParams = {
-        page: pagination.page,
-        pageSize: pagination.pageSize,
-        sort,
-      }
-
-      // Build filters object for the API
-      const apiFilters = {}
-      if (filters.docType) apiFilters.docType = filters.docType
-      if (filters.status) apiFilters.status = filters.status
-      if (filters.entityId) {
-        if (activeTab.value === 'vehicles') apiFilters.vehicleId = filters.entityId
-        else if (activeTab.value === 'drivers') apiFilters.driverId = filters.entityId
-        else apiFilters.routeId = filters.entityId
-      }
-      if (filters.dateFrom) apiFilters.dateFrom = filters.dateFrom
-      if (filters.dateTo) apiFilters.dateTo = filters.dateTo
+      const apiFilters = buildApiFilters(filters, activeTab.value)
+      const pageParams = { page: pagination.page, pageSize: pagination.pageSize, sort }
 
       let result
       if (activeTab.value === 'vehicles') {
@@ -144,19 +126,12 @@ export function useDocumentManagement() {
     }
   }
 
-  /**
-   * Apply new filters and reset to page 1.
-   * @param {object} newFilters
-   */
   function applyFilters(newFilters) {
     Object.assign(filters, newFilters)
     pagination.page = 1
     fetchDocuments()
   }
 
-  /**
-   * Clear all filters.
-   */
   function clearFilters() {
     filters.docType = null
     filters.status = null
@@ -167,94 +142,55 @@ export function useDocumentManagement() {
     fetchDocuments()
   }
 
-  /**
-   * Change active tab and reload.
-   * @param {string} tab
-   */
   function setActiveTab(tab) {
     activeTab.value = tab
     pagination.page = 1
-    // Reset sort column if switching to transport (uses generated_at, not expiry_date)
-    if (tab === 'transport' && pagination.sortBy === 'expiry_date') {
-      pagination.sortBy = 'generated_at'
-    } else if (tab !== 'transport' && pagination.sortBy === 'generated_at') {
-      pagination.sortBy = 'expiry_date'
-    }
+    pagination.sortBy = resetSortForTab(tab, pagination.sortBy)
     fetchDocuments()
   }
 
-  /**
-   * Update pagination and reload.
-   * @param {number} page
-   * @param {number} pageSize
-   */
   function setPagination(page, pageSize) {
     pagination.page = page
     if (pageSize) pagination.pageSize = pageSize
     fetchDocuments()
   }
 
-  /**
-   * Handle sort change.
-   * @param {string} sortBy
-   * @param {boolean} sortAsc
-   */
   function setSort(sortBy, sortAsc) {
     pagination.sortBy = sortBy
     pagination.sortAsc = sortAsc
     fetchDocuments()
   }
 
-  /**
-   * Filter by status (from KPI click).
-   * @param {string} status
-   */
   function filterByStatus(status) {
     applyFilters({ status })
   }
 
-  /**
-   * Export current view to CSV.
-   */
   function exportToCsv() {
     if (!items.value.length) return
+    const csvContent = documentsToCsv(items.value, getCsvType(activeTab.value))
+    downloadCsv(csvContent, generateExportFilename())
+  }
 
-    const typeMap = {
-      vehicles: 'vehicle',
-      drivers: 'driver',
-      transport: 'transport',
-    }
-    const csvType = typeMap[activeTab.value] || 'vehicle'
-    const csvContent = documentsToCsv(items.value, csvType)
-    const filename = generateExportFilename()
-    downloadCsv(csvContent, filename)
+  async function deleteDocument(id, type) {
+    if (type === 'vehicle') await deleteVehicleDocument(id)
+    else if (type === 'driver') await deleteDriverDocument(id)
+    else if (type === 'transport') await deleteGeneratedDocument(id)
+    await Promise.all([fetchDocuments(), fetchKpis()])
   }
 
   // ── Watchers ───────────────────────────────────────────────────────
-
-  // Reload data when tab changes
   watch(activeTab, newTab => {
-    // Reset sort column based on tab (transport uses generated_at, others use expiry_date)
-    if (newTab === 'transport' && pagination.sortBy === 'expiry_date') {
-      pagination.sortBy = 'generated_at'
-    } else if (newTab !== 'transport' && pagination.sortBy === 'generated_at') {
-      pagination.sortBy = 'expiry_date'
-    }
+    pagination.sortBy = resetSortForTab(newTab, pagination.sortBy)
     fetchDocuments()
     fetchKpis()
   })
 
   // ── Cleanup ────────────────────────────────────────────────────────
-
-  /**
-   * Clean up search timeout.
-   */
   function cleanup() {
     if (searchTimeout) clearTimeout(searchTimeout)
   }
 
   return {
-    // State
     activeTab,
     kpis,
     filters,
@@ -265,8 +201,6 @@ export function useDocumentManagement() {
     items,
     isLoading,
     error,
-
-    // Actions
     fetchKpis,
     fetchDocuments,
     applyFilters,
@@ -277,6 +211,7 @@ export function useDocumentManagement() {
     setSearchQuery,
     filterByStatus,
     exportToCsv,
+    deleteDocument,
     cleanup,
   }
 }

@@ -660,47 +660,56 @@ Añadir a `src/constants/legal-limits.js`:
 | `src/constants/legal-limits.js` (ampliado)               | Constantes | +10    | ✅     |
 | `src/constants/legal-limits.spec.js` (ampliado)          | Test       | +30    | ✅     |
 
-### ✅ Modificados (6)
+### ✅ Modificados (10)
 
 | Archivo                                              | Cambio                                                                         | Líneas        | Fase |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------ | ------------- | ---- |
-| `src/pages/DocumentsListPage.vue`                    | Rewrite completo (stub → página funcional)                                     | ~294 (de 12)  | 4    |
+| `src/pages/DocumentsListPage.vue`                    | Rewrite completo (stub → página funcional) + eliminación con confirmación      | ~320 (de 12)  | 4    |
 | `src/components/routes/RouteDetail.vue`              | Vista detalle ampliada (vehículo, conductor, carga, cliente, costes, márgenes) | ~380 (de 310) | —    |
-| `src/composables/use-document-management.js`         | Fix sort column por pestaña (transport → generated_at)                         | +8            | 4    |
+| `src/composables/use-document-management.js`         | Fix sort column por pestaña (transport → generated_at) + deleteDocument        | +20           | 2,4  |
 | `src/services/document-cmr.js`                       | Fix jspdf-autotable v5 + formato fechas DD/MM/YYYY                             | +12           | —    |
 | `src/services/document-carta-porte-nacional.js`      | Reescritura completa con layout oficial FOM/2861/2012                          | ~290 (de 491) | —    |
 | `src/services/document-cmr.spec.js`                  | Fix mocks jspdf v4 (named exports)                                             | ~15           | —    |
 | `src/services/document-carta-porte-nacional.spec.js` | Fix mocks jspdf v4 + setFillColor                                              | ~15           | —    |
+| `src/services/api-documents.js`                      | +3 funciones de eliminación (vehicle, driver, generated)                       | +30           | 1    |
+| `src/services/api-documents.spec.js`                 | +9 tests de eliminación                                                        | +50           | 1    |
+| `src/composables/use-document-management.spec.js`    | +4 tests de eliminación                                                        | +30           | 2    |
+
+### Archivos creados en sesión finalización (2026-04-04)
+
+| Archivo                               | Tipo | Líneas |
+| ------------------------------------- | ---- | ------ |
+| `src/pages/DocumentsListPage.spec.js` | Test | ~160   |
 
 ### Progreso por Fase
 
 | Fase | Descripción                       | Estado      | Tests |
 | ---- | --------------------------------- | ----------- | ----- |
-| 1    | Servicio API centralizado         | ✅ Completa | 23    |
-| 2    | Composable centralizado           | ✅ Completa | 15    |
+| 1    | Servicio API centralizado         | ✅ Completa | 32    |
+| 2    | Composable centralizado           | ✅ Completa | 19    |
 | 5    | Constantes legales + export CSV   | ✅ Completa | 21    |
 | 3    | Componentes UI reutilizables      | ✅ Completa | 33    |
-| 4    | Página DocumentsListPage + tablas | ✅ Completa | 0     |
+| 4    | Página DocumentsListPage + tablas | ✅ Completa | 12    |
 
 ### Métricas actuales
 
 | Métrica                  | Valor     |
 | ------------------------ | --------- |
-| Tests totales proyecto   | 1330      |
-| Tests nuevos esta sesión | 15        |
-| Archivos creados         | 10        |
-| Archivos modificados     | 7         |
+| Tests totales proyecto   | 1351      |
+| Tests nuevos esta sesión | 21        |
+| Archivos creados         | 1         |
+| Archivos modificados     | 5         |
 | Lint errors              | 0         |
 | Typecheck                | ✅ limpio |
 
 ### ⏳ Pendiente para próxima sesión
 
-| Tarea                                                                  | Prioridad |
-| ---------------------------------------------------------------------- | --------- |
-| Probar Carta de Porte Nacional desde UI (layout oficial FOM/2861/2012) | Alta      |
-| Implementar acción eliminar documento en tablas                        | Media     |
-| Probar resto de generadores (albarán, hoja de ruta, factura, POD)      | Media     |
-| Añadir RLS policies para `generated_documents`                         | Media     |
+| Tarea                                                                      | Prioridad | Estado                                       |
+| -------------------------------------------------------------------------- | --------- | -------------------------------------------- |
+| ~~Probar Carta de Porte Nacional desde UI (layout oficial FOM/2861/2012)~~ | ~~Alta~~  | ✅ Completado                                |
+| ~~Implementar acción eliminar documento en tablas~~                        | ~~Media~~ | ✅ Completado (2026-04-04)                   |
+| Probar resto de generadores (albarán, hoja de ruta, factura, POD)          | Media     | ⏳ Pendiente                                 |
+| Añadir RLS policies para `generated_documents`                             | Media     | ✅ Verificadas (ya existen en migración 027) |
 
 ---
 

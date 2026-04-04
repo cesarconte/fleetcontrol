@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión documentos-centralizados — TODAS las fases completadas, página Documentos funcional, 1330 tests totales)
+> **Última actualización:** 2026-04-04 (sesión documentos-centralizados — eliminación implementada, tests página, 1351 tests totales)
 > **Actualizado por:** AI Agent
 
 ---
@@ -489,6 +489,42 @@ _(Complementa las de AGENTS.md)_
 - 7 anti-patrones explícitos (NEVER)
 
 **Limpieza:** 11 ramas remotas obsoletas eliminadas con `git remote prune origin`.
+
+---
+
+### Sesión documentos-centralizados — Eliminación + Tests página
+
+**Fecha:** 2026-04-04
+**Branch:** feature/documentos-centralizados
+**Tests:** 1351 pasando (+21 nuevos: 9 api-documents delete + 4 composable delete + 12 DocumentsListPage), 0 errores lint, 0 warnings críticos, typecheck limpio
+**Migraciones:** 35 aplicadas (001-035) — RLS policies para generated_documents ya existentes
+
+**Trabajo realizado:**
+
+- **Eliminación de documentos** implementada para las 3 entidades:
+  - `api-documents.js`: `deleteVehicleDocument()`, `deleteDriverDocument()`, `deleteGeneratedDocument()` (delega en `apiGeneratedDocuments.delete` que borra BD + Storage)
+  - `use-document-management.js`: método `deleteDocument(id, type)` con refresh automático de datos y KPIs
+  - `DocumentsListPage.vue`: diálogo de confirmación modal con `VDialog` persistente, información del documento a eliminar, notificación de éxito/error
+  - TODO eliminado: ya no hay `notifications.warning('Eliminación pendiente de implementar')`
+- **RLS policies verificadas**: `generated_documents` tiene SELECT (all authenticated), INSERT (authenticated), DELETE (owner)
+- **Tests**:
+  - `api-documents.spec.js`: +9 tests (delete vehicle, driver, generated + error paths)
+  - `use-document-management.spec.js`: +4 tests (deleteDocument vehicle/driver/transport + error propagation)
+  - `DocumentsListPage.spec.js`: +12 tests (renderizado, KPIs, tabs, delete confirm/cancel, view/edit actions, lifecycle)
+
+**Archivos creados (1):**
+
+- `src/pages/DocumentsListPage.spec.js` — 12 tests página
+
+**Archivos modificados (4):**
+
+- `src/services/api-documents.js` — +3 funciones de eliminación
+- `src/services/api-documents.spec.js` — +9 tests eliminación
+- `src/composables/use-document-management.js` — +función `deleteDocument()`
+- `src/composables/use-document-management.spec.js` — +4 tests eliminación
+- `src/pages/DocumentsListPage.vue` — eliminación con confirmación modal, diálogos
+
+**Resultado:** 1351 tests (1330 + 21 nuevos). Lint + typecheck limpios.
 
 ---
 

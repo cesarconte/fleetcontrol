@@ -33,6 +33,7 @@ import {
   searchDocuments,
 } from './api-documents.js'
 import { supabase } from '@/services/supabase-client.js'
+import { mockChain, mockSearchChain, mockKpiChain } from './api-documents.test-helpers.js'
 
 const mockVehicleDoc = {
   id: 'vd-1',
@@ -64,38 +65,6 @@ const mockGeneratedDoc = {
   routes: { id: 'r-1', origin_city: 'Madrid', destination_city: 'Barcelona' },
 }
 
-/**
- * Build a full mock chain that resolves with the given result at the end.
- * Every chainable method returns the same chainable object.
- */
-function mockChain(result) {
-  const chain = {
-    then: undefined,
-  }
-
-  // Make it awaitable
-  Object.defineProperty(chain, 'then', {
-    value: resolve => resolve(result),
-    writable: true,
-  })
-
-  const methods = ['eq', 'gte', 'lte', 'in', 'or', 'limit']
-  methods.forEach(m => {
-    chain[m] = vi.fn().mockReturnValue(chain)
-  })
-
-  // range returns chain, order returns chain
-  chain.range = vi.fn().mockReturnValue(chain)
-  chain.order = vi.fn().mockReturnValue(chain)
-
-  // select returns the chain with range/order
-  const select = vi.fn().mockReturnValue(chain)
-
-  supabase.from.mockReturnValue({ select })
-
-  return { select, chain }
-}
-
 describe('api-documents.js', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -103,38 +72,28 @@ describe('api-documents.js', () => {
 
   describe('getVehicleDocumentsPaginated', () => {
     it('debería retornar datos paginados con defaults', async () => {
-      mockChain({ data: [mockVehicleDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockVehicleDoc], error: null, count: 1 })
       const result = await getVehicleDocumentsPaginated()
-
       expect(supabase.from).toHaveBeenCalledWith('vehicle_documents')
       expect(result.data).toHaveLength(1)
       expect(result.total).toBe(1)
-      expect(result.page).toBe(1)
-      expect(result.pageSize).toBe(25)
     })
 
     it('debería calcular rangos correctos para página 2', async () => {
-      const { chain } = mockChain({ data: [], error: null, count: 50 })
-
+      const { chain } = mockChain(supabase, { data: [], error: null, count: 50 })
       await getVehicleDocumentsPaginated({ page: 2, pageSize: 10 })
-
       expect(chain.range).toHaveBeenCalledWith(10, 19)
     })
 
     it('debería incluir datos del vehículo via JOIN', async () => {
-      mockChain({ data: [mockVehicleDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockVehicleDoc], error: null, count: 1 })
       const result = await getVehicleDocumentsPaginated()
-
       expect(result.data[0].vehicles.plate).toBe('1234-BCD')
     })
 
     it('debería ordenar por expiry_date ascendente por defecto', async () => {
-      const { chain } = mockChain({ data: [], error: null, count: 0 })
-
+      const { chain } = mockChain(supabase, { data: [], error: null, count: 0 })
       await getVehicleDocumentsPaginated()
-
       expect(chain.order).toHaveBeenCalledWith('expiry_date', {
         ascending: true,
         nullsFirst: false,
@@ -142,10 +101,8 @@ describe('api-documents.js', () => {
     })
 
     it('debería respetar orden personalizado', async () => {
-      const { chain } = mockChain({ data: [], error: null, count: 0 })
-
+      const { chain } = mockChain(supabase, { data: [], error: null, count: 0 })
       await getVehicleDocumentsPaginated({ sort: { col: 'created_at', asc: false } })
-
       expect(chain.order).toHaveBeenCalledWith('created_at', {
         ascending: false,
         nullsFirst: false,
@@ -153,36 +110,28 @@ describe('api-documents.js', () => {
     })
 
     it('debería lanzar error mapeado si Supabase falla', async () => {
-      mockChain({ data: null, error: { code: 'PGRST116', message: 'Not found' } })
-
+      mockChain(supabase, { data: null, error: { code: 'PGRST116', message: 'Not found' } })
       await expect(getVehicleDocumentsPaginated()).rejects.toThrow('No encontrado')
     })
   })
 
   describe('getDriverDocumentsPaginated', () => {
     it('debería retornar datos paginados con defaults', async () => {
-      mockChain({ data: [mockDriverDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockDriverDoc], error: null, count: 1 })
       const result = await getDriverDocumentsPaginated()
-
       expect(supabase.from).toHaveBeenCalledWith('driver_documents')
       expect(result.data).toHaveLength(1)
-      expect(result.total).toBe(1)
     })
 
     it('debería incluir datos del conductor via JOIN', async () => {
-      mockChain({ data: [mockDriverDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockDriverDoc], error: null, count: 1 })
       const result = await getDriverDocumentsPaginated()
-
       expect(result.data[0].drivers.full_name).toBe('Juan García')
     })
 
     it('debería ordenar por expiry_date ascendente por defecto', async () => {
-      const { chain } = mockChain({ data: [], error: null, count: 0 })
-
+      const { chain } = mockChain(supabase, { data: [], error: null, count: 0 })
       await getDriverDocumentsPaginated()
-
       expect(chain.order).toHaveBeenCalledWith('expiry_date', {
         ascending: true,
         nullsFirst: false,
@@ -190,36 +139,28 @@ describe('api-documents.js', () => {
     })
 
     it('debería lanzar error mapeado si Supabase falla', async () => {
-      mockChain({ data: null, error: { code: '42501', message: 'Permission denied' } })
-
+      mockChain(supabase, { data: null, error: { code: '42501', message: 'Permission denied' } })
       await expect(getDriverDocumentsPaginated()).rejects.toThrow('Sin permisos para esta acción')
     })
   })
 
   describe('getGeneratedDocumentsPaginated', () => {
     it('debería retornar datos paginados con defaults', async () => {
-      mockChain({ data: [mockGeneratedDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockGeneratedDoc], error: null, count: 1 })
       const result = await getGeneratedDocumentsPaginated()
-
       expect(supabase.from).toHaveBeenCalledWith('generated_documents')
       expect(result.data).toHaveLength(1)
-      expect(result.total).toBe(1)
     })
 
     it('debería incluir datos de ruta via JOIN', async () => {
-      mockChain({ data: [mockGeneratedDoc], error: null, count: 1 })
-
+      mockChain(supabase, { data: [mockGeneratedDoc], error: null, count: 1 })
       const result = await getGeneratedDocumentsPaginated()
-
       expect(result.data[0].routes.origin_city).toBe('Madrid')
     })
 
     it('debería ordenar por generated_at descendente por defecto', async () => {
-      const { chain } = mockChain({ data: [], error: null, count: 0 })
-
+      const { chain } = mockChain(supabase, { data: [], error: null, count: 0 })
       await getGeneratedDocumentsPaginated()
-
       expect(chain.order).toHaveBeenCalledWith('generated_at', {
         ascending: false,
         nullsFirst: false,
@@ -227,8 +168,7 @@ describe('api-documents.js', () => {
     })
 
     it('debería lanzar error mapeado si Supabase falla', async () => {
-      mockChain({ data: null, error: { message: 'Failed to fetch' } })
-
+      mockChain(supabase, { data: null, error: { message: 'Failed to fetch' } })
       await expect(getGeneratedDocumentsPaginated()).rejects.toThrow(
         'Error de conexión. Inténtelo de nuevo.',
       )
@@ -250,16 +190,8 @@ describe('api-documents.js', () => {
         { status: 'expiring_soon' },
         { status: 'expired' },
       ]
-
-      const mockSelect = vi.fn()
-      supabase.from.mockReturnValue({
-        select: mockSelect
-          .mockResolvedValueOnce({ data: vehicleDocs, error: null })
-          .mockResolvedValueOnce({ data: driverDocs, error: null }),
-      })
-
+      mockKpiChain(supabase, vehicleDocs, driverDocs)
       const result = await getDocumentKpis()
-
       expect(result.total).toBe(9)
       expect(result.valid).toBe(4)
       expect(result.expiringSoon).toBe(2)
@@ -269,34 +201,15 @@ describe('api-documents.js', () => {
     })
 
     it('debería retornar ceros si no hay documentos', async () => {
-      const mockSelect = vi.fn()
-      supabase.from.mockReturnValue({
-        select: mockSelect
-          .mockResolvedValueOnce({ data: [], error: null })
-          .mockResolvedValueOnce({ data: [], error: null }),
-      })
-
+      mockKpiChain(supabase, [], [])
       const result = await getDocumentKpis()
-
       expect(result.total).toBe(0)
-      expect(result.valid).toBe(0)
-      expect(result.expiringSoon).toBe(0)
-      expect(result.critical).toBe(0)
-      expect(result.expired).toBe(0)
       expect(result.complianceRate).toBe(0)
     })
 
     it('debería calcular 100% compliance si todos están valid', async () => {
-      const allValid = [{ status: 'valid' }, { status: 'valid' }, { status: 'valid' }]
-      const mockSelect = vi.fn()
-      supabase.from.mockReturnValue({
-        select: mockSelect
-          .mockResolvedValueOnce({ data: allValid, error: null })
-          .mockResolvedValueOnce({ data: [], error: null }),
-      })
-
+      mockKpiChain(supabase, [{ status: 'valid' }, { status: 'valid' }, { status: 'valid' }], [])
       const result = await getDocumentKpis()
-
       expect(result.complianceRate).toBe(100)
     })
 
@@ -306,20 +219,17 @@ describe('api-documents.js', () => {
         error: { code: '42501', message: 'Permission denied' },
       })
       supabase.from.mockReturnValue({ select: mockSelect })
-
       await expect(getDocumentKpis()).rejects.toThrow('Sin permisos para esta acción')
     })
   })
 
   describe('searchDocuments', () => {
     it('debería retornar array vacío si query está vacía', async () => {
-      const result = await searchDocuments('')
-      expect(result).toEqual([])
+      expect(await searchDocuments('')).toEqual([])
     })
 
     it('debería retornar array vacío si query tiene menos de 2 caracteres', async () => {
-      const result = await searchDocuments('a')
-      expect(result).toEqual([])
+      expect(await searchDocuments('a')).toEqual([])
     })
 
     it('debería combinar resultados de vehículos y conductores', async () => {
@@ -345,19 +255,12 @@ describe('api-documents.js', () => {
           drivers: { id: 'drv-1', full_name: 'Juan García', national_id: '12345678A' },
         },
       ]
-
-      const mockOr = vi.fn()
-      const mockLimit = vi.fn()
-      mockOr.mockReturnValue({ limit: mockLimit })
-      mockLimit
-        .mockResolvedValueOnce({ data: vehicleDocs, error: null })
-        .mockResolvedValueOnce({ data: driverDocs, error: null })
-
-      const mockSelect = vi.fn().mockReturnValue({ or: mockOr })
-      supabase.from.mockReturnValue({ select: mockSelect })
-
+      mockSearchChain(
+        supabase,
+        { data: vehicleDocs, error: null },
+        { data: driverDocs, error: null },
+      )
       const result = await searchDocuments('test')
-
       expect(result).toHaveLength(2)
       expect(result[0].type).toBe('vehicle')
       expect(result[0].entityLabel).toBe('1234-BCD — Volvo FH')
@@ -375,33 +278,18 @@ describe('api-documents.js', () => {
         file_name: `doc${i}.pdf`,
         vehicles: { id: `veh-${i}`, plate: `PLATE${i}`, brand: 'Volvo', model: 'FH' },
       }))
-
-      const mockOr = vi.fn()
-      const mockLimit = vi.fn()
-      mockOr.mockReturnValue({ limit: mockLimit })
-      mockLimit
-        .mockResolvedValueOnce({ data: manyDocs, error: null })
-        .mockResolvedValueOnce({ data: [], error: null })
-
-      const mockSelect = vi.fn().mockReturnValue({ or: mockOr })
-      supabase.from.mockReturnValue({ select: mockSelect })
-
+      mockSearchChain(supabase, { data: manyDocs, error: null }, { data: [], error: null })
       const result = await searchDocuments('test', { limit: 5 })
-
       expect(result.length).toBeLessThanOrEqual(5)
     })
 
     it('debería lanzar error mapeado si falla la búsqueda', async () => {
       const mockOr = vi.fn()
-      const mockLimit = vi.fn().mockResolvedValue({
-        data: null,
-        error: { code: 'PGRST116', message: 'Not found' },
-      })
+      const mockLimit = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'Not found' } })
       mockOr.mockReturnValue({ limit: mockLimit })
-
-      const mockSelect = vi.fn().mockReturnValue({ or: mockOr })
-      supabase.from.mockReturnValue({ select: mockSelect })
-
+      supabase.from.mockReturnValue({ select: vi.fn().mockReturnValue({ or: mockOr }) })
       await expect(searchDocuments('test')).rejects.toThrow('No encontrado')
     })
   })

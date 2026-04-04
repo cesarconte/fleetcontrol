@@ -4,56 +4,13 @@
 
     <!-- KPI Cards -->
     <VRow>
-      <VCol cols="6" sm="4" md="2">
+      <VCol v-for="kpi in kpiCards" :key="kpi.label" cols="6" sm="4" md="2">
         <ReportKpiCard
-          label="Total"
-          :formatted-value="String(kpis.total)"
-          color="primary"
-          class="clickable-kpi"
-          @click="filterByStatus(null)"
-        />
-      </VCol>
-      <VCol cols="6" sm="4" md="2">
-        <ReportKpiCard
-          label="En regla"
-          :formatted-value="String(kpis.valid)"
-          color="success"
-          class="clickable-kpi"
-          @click="filterByStatus('valid')"
-        />
-      </VCol>
-      <VCol cols="6" sm="4" md="2">
-        <ReportKpiCard
-          label="Próximos"
-          :formatted-value="String(kpis.expiringSoon)"
-          color="warning"
-          class="clickable-kpi"
-          @click="filterByStatus('expiring_soon')"
-        />
-      </VCol>
-      <VCol cols="6" sm="4" md="2">
-        <ReportKpiCard
-          label="Críticos"
-          :formatted-value="String(kpis.critical)"
-          color="error"
-          class="clickable-kpi"
-          @click="filterByStatus('critical')"
-        />
-      </VCol>
-      <VCol cols="6" sm="4" md="2">
-        <ReportKpiCard
-          label="Vencidos"
-          :formatted-value="String(kpis.expired)"
-          color="error"
-          class="clickable-kpi"
-          @click="filterByStatus('expired')"
-        />
-      </VCol>
-      <VCol cols="6" sm="4" md="2">
-        <ReportKpiCard
-          label="Cumplimiento"
-          :formatted-value="`${kpis.complianceRate}%`"
-          :color="complianceColor"
+          :label="kpi.label"
+          :formatted-value="kpi.value"
+          :color="kpi.color"
+          :class="{ 'clickable-kpi': kpi.clickable }"
+          @click="kpi.status !== undefined && filterByStatus(kpi.status)"
         />
       </VCol>
     </VRow>
@@ -66,7 +23,7 @@
           v-model:search="searchQuery"
           :tab="activeTab"
           @export="exportToCsv"
-          @clear="onClearFilters"
+          @clear="clearFilters"
         />
       </VCol>
     </VRow>
@@ -94,7 +51,6 @@
 
     <!-- Tab Panels -->
     <VWindow v-model="activeTab" class="mt-2">
-      <!-- Vehicles Panel -->
       <VWindowItem value="vehicles">
         <VehicleDocumentsTable
           :items="items"
@@ -104,8 +60,6 @@
           @action="handleAction"
         />
       </VWindowItem>
-
-      <!-- Drivers Panel -->
       <VWindowItem value="drivers">
         <DriverDocumentsTable
           :items="items"
@@ -115,8 +69,6 @@
           @action="handleAction"
         />
       </VWindowItem>
-
-      <!-- Transport Panel -->
       <VWindowItem value="transport">
         <GeneratedDocumentsTable
           :items="items"
@@ -137,17 +89,19 @@
       :entity-type="entityTypeForTab"
       @saved="onDocumentSaved"
     />
+    <DeleteConfirmDialog
+      v-model="showDeleteConfirm"
+      :document="documentToDelete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </VContainer>
 </template>
 
 <script setup>
 /**
  * FleetControl — Documents List Page
- *
- * Centralized document management page for the entire fleet.
- * Shows vehicle, driver, and generated transport documents with
- * KPIs, filters, search, pagination, and export.
- *
+ * Centralized document management for the entire fleet.
  * @see docs/plans/feature-documentos-centralizados-plan.md — Fase 4
  */
 
@@ -159,12 +113,12 @@ import DriverDocumentsTable from '@/components/documents/DriverDocumentsTable.vu
 import GeneratedDocumentsTable from '@/components/documents/GeneratedDocumentsTable.vue'
 import GenerateDocumentDialog from '@/components/documents/GenerateDocumentDialog.vue'
 import DocumentActionsDialog from '@/components/documents/DocumentActionsDialog.vue'
+import DeleteConfirmDialog from '@/components/documents/DeleteConfirmDialog.vue'
 import { useDocumentManagement } from '@/composables/use-document-management.js'
 import { useNotificationStore } from '@/stores/notifications.js'
 
 const notifications = useNotificationStore()
 
-// ── Composable ───────────────────────────────────────────────────────
 const {
   activeTab,
   kpis,
@@ -179,16 +133,17 @@ const {
   setPagination,
   filterByStatus,
   exportToCsv,
+  deleteDocument,
   cleanup,
 } = useDocumentManagement()
 
-// ── Local state ──────────────────────────────────────────────────────
 const showGenerateDialog = ref(false)
 const showActionsDialog = ref(false)
+const showDeleteConfirm = ref(false)
 const selectedDocument = ref(null)
-const actionMode = ref('view') // 'create' | 'edit' | 'view'
+const actionMode = ref('view')
+const documentToDelete = ref(null)
 
-// ── Computed ─────────────────────────────────────────────────────────
 const complianceColor = computed(() => {
   if (kpis.value.complianceRate >= 90) return 'success'
   if (kpis.value.complianceRate >= 70) return 'warning'
@@ -198,47 +153,69 @@ const complianceColor = computed(() => {
 const entityTypeForTab = computed(() => {
   if (activeTab.value === 'vehicles') return 'vehicle'
   if (activeTab.value === 'drivers') return 'driver'
-  return 'vehicle' // default
+  return 'transport'
 })
 
-// ── Watchers ─────────────────────────────────────────────────────────
+const kpiCards = computed(() => [
+  {
+    label: 'Total',
+    value: String(kpis.value.total),
+    color: 'primary',
+    clickable: true,
+    status: null,
+  },
+  {
+    label: 'En regla',
+    value: String(kpis.value.valid),
+    color: 'success',
+    clickable: true,
+    status: 'valid',
+  },
+  {
+    label: 'Próximos',
+    value: String(kpis.value.expiringSoon),
+    color: 'warning',
+    clickable: true,
+    status: 'expiring_soon',
+  },
+  {
+    label: 'Críticos',
+    value: String(kpis.value.critical),
+    color: 'error',
+    clickable: true,
+    status: 'critical',
+  },
+  {
+    label: 'Vencidos',
+    value: String(kpis.value.expired),
+    color: 'error',
+    clickable: true,
+    status: 'expired',
+  },
+  {
+    label: 'Cumplimiento',
+    value: `${kpis.value.complianceRate}%`,
+    color: complianceColor.value,
+    clickable: false,
+  },
+])
+
 watch(activeTab, () => {
   fetchDocuments()
   fetchKpis()
 })
 
-// ── Lifecycle ────────────────────────────────────────────────────────
 onMounted(async () => {
   await Promise.all([fetchKpis(), fetchDocuments()])
 })
-
 onUnmounted(() => {
   cleanup()
 })
 
-// ── Handlers ─────────────────────────────────────────────────────────
-/**
- * Handle pagination update from table.
- * @param {object} newPagination
- */
-function onPaginationUpdate(newPagination) {
-  setPagination(newPagination.page, newPagination.pageSize)
-  if (newPagination.sortBy) {
-    // Sort is handled by the composable's setSort if needed
-  }
+function onPaginationUpdate(p) {
+  setPagination(p.page, p.pageSize)
 }
 
-/**
- * Handle clear filters from filter bar.
- */
-function onClearFilters() {
-  clearFilters()
-}
-
-/**
- * Handle action from table (view, edit, download, delete).
- * @param {object} payload - { action, item }
- */
 async function handleAction({ action, item }) {
   if (action === 'view') {
     selectedDocument.value = item
@@ -249,25 +226,34 @@ async function handleAction({ action, item }) {
     actionMode.value = 'edit'
     showActionsDialog.value = true
   } else if (action === 'download' && item.file_url) {
-    // Open file URL in new tab
     window.open(item.file_url, '_blank')
   } else if (action === 'delete') {
-    // TODO: implement delete with confirmation
-    notifications.warning('Eliminación pendiente de implementar')
+    documentToDelete.value = item
+    showDeleteConfirm.value = true
   }
 }
 
-/**
- * Handle document generation complete.
- */
+async function confirmDelete() {
+  if (!documentToDelete.value) return
+  try {
+    await deleteDocument(documentToDelete.value.id, entityTypeForTab.value)
+    notifications.success('Documento eliminado correctamente')
+  } catch (err) {
+    notifications.error(`Error al eliminar: ${err.message || 'Error desconocido'}`)
+  } finally {
+    documentToDelete.value = null
+    showDeleteConfirm.value = false
+  }
+}
+
+function cancelDelete() {
+  documentToDelete.value = null
+  showDeleteConfirm.value = false
+}
 function onDocumentGenerated() {
   notifications.success('Documento generado correctamente')
   fetchDocuments()
 }
-
-/**
- * Handle document saved (create/edit).
- */
 function onDocumentSaved() {
   notifications.success('Documento guardado correctamente')
   fetchDocuments()
@@ -278,12 +264,10 @@ function onDocumentSaved() {
 .documents-page {
   padding: 16px;
 }
-
 .clickable-kpi {
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
-
 .clickable-kpi:hover {
   opacity: 0.85;
 }
