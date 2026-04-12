@@ -279,16 +279,88 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
 
-      <!-- Documentación -->
-      <v-expansion-panel title="Documentación" value="docs">
+      <v-expansion-panel title="Documentación y Números de Referencia" value="docs">
         <v-expansion-panel-text>
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
-                v-model="form.linked_document_ref"
-                label="Nº CMR / Ref. documento"
+                v-model="form.invoice_number"
+                label="Nº Factura"
                 variant="outlined"
-                data-testid="route-cmr"
+                data-testid="route-invoice-num"
+                placeholder="PRO-FAC/2026/00000"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.cmr_number"
+                label="Nº CMR (Internacional)"
+                variant="outlined"
+                data-testid="route-cmr-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.delivery_note_number"
+                label="Nº Albarán"
+                variant="outlined"
+                data-testid="route-albaran-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.cpn_number"
+                label="Nº Carta Porte Nac."
+                variant="outlined"
+                data-testid="route-cpn-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.adr_number"
+                label="Nº ADR (Peligrosas)"
+                variant="outlined"
+                data-testid="route-adr-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.control_number"
+                label="Nº Control Admon."
+                variant="outlined"
+                data-testid="route-control-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.packing_list_number"
+                label="Nº Packing List"
+                variant="outlined"
+                data-testid="route-packing-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.cleaning_cert_number"
+                label="Nº Cert. Limpieza"
+                variant="outlined"
+                data-testid="route-cleaning-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.pod_number"
+                label="Nº POD (Entrega)"
+                variant="outlined"
+                data-testid="route-pod-num"
+              />
+            </v-col>
+            <v-col cols="12" sm="6" md="4">
+              <v-text-field
+                v-model="form.route_sheet_number"
+                label="Nº Hoja de Ruta"
+                variant="outlined"
+                data-testid="route-route-sheet-num"
               />
             </v-col>
           </v-row>
@@ -388,7 +460,16 @@ const form = reactive({
   status: 'planned',
   delay_minutes: null,
   result_notes: '',
-  linked_document_ref: '',
+  invoice_number: '',
+  cmr_number: '',
+  delivery_note_number: '',
+  cpn_number: '',
+  adr_number: '',
+  control_number: '',
+  packing_list_number: '',
+  cleaning_cert_number: '',
+  pod_number: '',
+  route_sheet_number: '',
   ...props.initialValues,
 })
 

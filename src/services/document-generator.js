@@ -14,6 +14,10 @@ import { generateAlbaranDocument } from './document-albaran.js'
 import { generateHojaRutaDocument } from './document-hoja-ruta.js'
 import { generateFacturaDocument } from './document-factura.js'
 import { generatePodDocument } from './document-pod.js'
+import { generateAdrDocument } from './document-adr.js'
+import { generateControlDocument } from './document-control.js'
+import { generateCleaningCertDocument } from './document-cleaning-cert.js'
+import { generatePackingListDocument } from './document-packing-list.js'
 
 /**
  * Generate a transport document PDF and store it.
@@ -33,6 +37,10 @@ export async function generateDocument({ documentType, routeId, cargoId }) {
     hoja_ruta: generateHojaRutaDocument,
     factura: generateFacturaDocument,
     pod: generatePodDocument,
+    adr: generateAdrDocument,
+    documento_control: generateControlDocument,
+    cleaning_cert: generateCleaningCertDocument,
+    packing_list: generatePackingListDocument,
   }
 
   const generator = generators[documentType]

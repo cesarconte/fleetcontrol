@@ -11,11 +11,16 @@
  * @see Reg. UE 1072/2009
  */
 
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import { applyPlugin } from 'jspdf-autotable'
+
+// Register autoTable plugin on jsPDF prototype (v5 API)
+applyPlugin(jsPDF)
+
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
 import { LEGAL_LIMITS } from '@/constants/legal-limits.js'
+import { saveDocumentRecord } from './api-documents-persistence.js'
 
 const STORAGE_BUCKET = 'transport-documents'
 
@@ -57,7 +62,14 @@ export async function generateCmrDocument({ routeId, cargoId }) {
   const doc = renderCmrPdf(mappedData, docNumber)
   const filename = `cmr_${routeId.slice(0, 8)}_${Date.now()}.pdf`
   const url = await uploadToStorage(routeId, filename, doc)
-  const docRecord = await saveDocumentRecord({ routeId, cargoId, docNumber, filename, url })
+  const docRecord = await saveDocumentRecord({
+    routeId,
+    cargoId,
+    docNumber,
+    filename,
+    url,
+    type: 'cmr',
+  })
   return { url, documentId: docRecord.id, filename }
 }
 
@@ -111,9 +123,8 @@ async function fetchDocumentData(routeId, cargoId) {
 }
 
 function mapCmrFields({ route, vehicle, driver, cargo, company }) {
-  const issueDate = route.departure_date
-    ? new Date(route.departure_date).toISOString().split('T')[0]
-    : ''
+  const issueDate = route.departure_date ? formatDateES(route.departure_date) : ''
+  const pickupDate = route.departure_date ? formatDateES(route.departure_date) : ''
   return {
     issue_place: route.origin_city || company.city || '',
     issue_date: issueDate,
@@ -123,13 +134,13 @@ function mapCmrFields({ route, vehicle, driver, cargo, company }) {
     carrier_name: company.company_name || '',
     carrier_address: company.address || '',
     carrier_tax_id: company.cif || '',
-    consignee_name: cargo.cmr_recipient || cargo.consignee_name || '',
-    consignee_address: cargo.cmr_delivery_place || cargo.consignee_address || '',
+    consignee_name: cargo.consignee_name || cargo.cmr_recipient || '',
+    consignee_address: cargo.consignee_address || cargo.cmr_delivery_place || '',
     consignee_tax_id: cargo.consignee_nif || '',
     pickup_place: route.origin_address || route.origin_city || '',
-    pickup_date: route.departure_date || '',
+    pickup_date: pickupDate,
     delivery_place: route.destination_address || route.destination_city || '',
-    goods_nature: cargo.subcategoria_id || cargo.categoria_id || cargo.description || '',
+    goods_nature: cargo.categoria_id || cargo.subcategoria_id || cargo.description || '',
     goods_description: cargo.description || '',
     packaging_type: cargo.packaging_type || '',
     packages_count: cargo.packages || '',
@@ -157,6 +168,14 @@ function mapCmrFields({ route, vehicle, driver, cargo, company }) {
   }
 }
 
+/** Format ISO date to DD/MM/YYYY */
+function formatDateES(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
 function validateCmrFields(mappedData) {
   const missing = []
   for (const field of CMR_REQUIRED_FIELDS) {
@@ -171,177 +190,172 @@ function validateCmrFields(mappedData) {
 function generateCmrNumber() {
   const year = new Date().getFullYear()
   const seq = Date.now() % 100000
-  return `${LEGAL_LIMITS.CARTA_PORTE?.CMR_NUMBER_PREFIX || 'CMR'}-${year}-${String(seq).padStart(5, '0')}`
+  const series = LEGAL_LIMITS.CARTA_PORTE?.CMR_NUMBER_PREFIX || 'CMR'
+  return `${series}/${year}/${String(seq).padStart(5, '0')}`
 }
+
+const PW = 210
+const ML = 10
+const MR = 10
+const MT = 10
+const CW = PW - ML - MR
+const PRIMARY_COLOR = [245, 124, 0]
+const PRIMARY_TEXT_COLOR = [255, 255, 255]
 
 function renderCmrPdf(data, docNumber) {
-  const doc = new jsPDF()
-  const pw = doc.internal.pageSize.width
-  const margin = 14
-  let y = 12
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  let currentY = MT
 
-  doc.setFontSize(16)
+  // ── HEADER SUPERIOR ───────────────────────────────────────
+  doc.setFillColor(...PRIMARY_COLOR)
+  doc.rect(ML, currentY, CW, 12, 'F')
+  doc.setFontSize(13)
   doc.setFont('helvetica', 'bold')
-  doc.setTextColor(245, 124, 0)
-  doc.text('CARTA DE PORTE INTERNACIONAL (CMR)', pw / 2, y, { align: 'center' })
-  y += 7
-  doc.setFontSize(8)
-  doc.setTextColor(100, 100, 100)
-  doc.text('Convenio CMR 1956, arts. 5-6 — Reg. UE 1072/2009', pw / 2, y, { align: 'center' })
-  y += 5
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(0, 0, 0)
-  doc.text(`Nº: ${docNumber}`, pw / 2, y, { align: 'center' })
-  y += 8
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(0, 0, 0)
+  doc.setTextColor(...PRIMARY_TEXT_COLOR)
+  doc.text('CARTA DE PORTE INTERNACIONAL - CONVENIO CMR', ML + 5, currentY + 8)
+  doc.setFontSize(9.5)
+  doc.text(`Nº ${docNumber}`, PW - MR - 5, currentY + 8, { align: 'right' })
+  doc.setTextColor(0)
+  currentY += 18
 
-  y = renderSection(doc, y, '1. REMITENTE (Art. 5b)', margin, [
-    data.shipper_name,
-    data.shipper_address,
-    data.shipper_tax_id && `NIF: ${data.shipper_tax_id}`,
-  ])
-  y = renderSection(doc, y, '2. TRANSPORTISTA (Art. 5b)', margin, [
-    data.carrier_name,
-    data.carrier_address,
-  ])
-  y = renderSection(doc, y, '3. DESTINATARIO (Art. 5c)', margin, [
-    data.consignee_name,
-    data.consignee_address,
-  ])
+  // ── Helpers de Layout ────────────────────────────────────
+  function sectionBox(x, y, w, h, title, num) {
+    doc.setDrawColor(...PRIMARY_COLOR)
+    doc.setLineWidth(0.2)
+    doc.rect(x, y, w, h)
+    doc.setFillColor(...PRIMARY_COLOR)
+    doc.rect(x, y, w, 5, 'F')
+    doc.setFontSize(6.5)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...PRIMARY_TEXT_COLOR)
+    doc.text(`${num} ${title}`.toUpperCase(), x + 2, y + 3.5)
+    doc.setTextColor(0)
+    return { contentY: y + 9.5, innerW: w - 4 }
+  }
 
-  y = renderSectionHeader(doc, y, '4. LUGARES Y FECHAS', margin)
+  function writeBoxText(x, y, label, value, maxWidth) {
+    doc.setFontSize(8.5)
+    let curY = y
+    const lineH = 4.2
+    if (label) {
+      doc.setFont('helvetica', 'bold')
+      doc.text(label + ': ', x, curY)
+      doc.setFont('helvetica', 'normal')
+      const labelW = doc.getTextWidth(label + ': ')
+      const valText = String(value || 'S/N')
+      const lines = doc.splitTextToSize(valText, maxWidth - labelW)
+      lines.forEach((line, i) => {
+        doc.text(line, x + (i === 0 ? labelW : 0), curY)
+        curY += lineH
+      })
+    } else {
+      doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(String(value || 'S/N'), maxWidth)
+      lines.forEach(line => {
+        doc.text(line, x, curY)
+        curY += lineH
+      })
+    }
+    return curY
+  }
+
+  // ── Cuerpo del Documento (DISTRIBUCIÓN OPTIMIZADA) ───────
+  const colW = CW / 2
+
+  // FILA 1: Remitente (1) | Consignatario (2)
+  const row1H = 45
+  const b1 = sectionBox(ML, currentY, colW, row1H, 'Remitente / Sender', '1')
+  let b1Y = b1.contentY
+  b1Y = writeBoxText(ML + 3, b1Y, '', data.shipper_name || data.sender_name, b1.innerW)
+  writeBoxText(ML + 3, b1Y + 2, 'Dir', data.shipper_address || data.sender_address, b1.innerW)
+
+  const b2 = sectionBox(ML + colW, currentY, colW, row1H, 'Consignatario / Consignee', '2')
+  let b2Y = b2.contentY
+  b2Y = writeBoxText(ML + colW + 3, b2Y, '', data.consignee_name || data.recipient_name, b2.innerW)
+  writeBoxText(
+    ML + colW + 3,
+    b2Y + 2,
+    'Dir',
+    data.consignee_address || data.recipient_address,
+    b2.innerW,
+  )
+
+  currentY += row1H + 2
+
+  // FILA 2: Lugar de entrega (3) | Lugar de carga (4)
+  const row2H = 30
+  const b3 = sectionBox(ML, currentY, colW, row2H, 'Lugar de entrega / Place of delivery', '3')
+  writeBoxText(ML + 3, b3.contentY, '', data.delivery_place || data.recipient_address, b3.innerW)
+
+  const b4 = sectionBox(ML + colW, currentY, colW, row2H, 'Lugar de carga / Place of loading', '4')
+  writeBoxText(ML + colW + 3, b4.contentY, '', data.pickup_place || data.sender_address, b4.innerW)
+
+  currentY += row2H + 2
+
+  // FILA 3: Documentos (5) | Mercancía (6-12)
+  const row3H = 80
+  sectionBox(ML, currentY, colW * 0.4, row3H, 'Doc. Anexos', '5')
+
+  const b6 = sectionBox(
+    ML + colW * 0.4,
+    currentY,
+    colW * 1.6,
+    row3H,
+    'Naturaleza de la mercancía / Nature of goods',
+    '6-12',
+  )
   doc.autoTable({
-    startY: y,
-    head: [['Campo', 'Valor']],
-    body: [
-      ['Lugar y fecha de emisión', `${data.issue_place} — ${data.issue_date}`],
-      ['Lugar y fecha de toma en carga', `${data.pickup_place} — ${data.pickup_date}`],
-      ['Lugar de entrega', data.delivery_place],
-    ],
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    margin: { left: margin, right: margin },
-  })
-  y = doc.lastAutoTable.finalY + 6
-
-  y = renderSectionHeader(doc, y, '5. MERCANCÍAS', margin)
-  doc.autoTable({
-    startY: y,
-    head: [['Naturaleza', 'Embalaje', 'Bultos', 'Marcas', 'Peso Bruto']],
+    startY: b6.contentY - 2,
+    margin: { left: ML + colW * 0.4 + 2.5 },
+    tableWidth: colW * 1.6 - 5,
+    head: [['Ref.', 'Descripción / Marcas', 'Bultos', 'Peso', 'ADR']],
     body: [
       [
-        data.goods_nature,
-        data.packaging_type,
-        String(data.packages_count ?? '—'),
-        data.package_marks || '—',
-        `${data.gross_weight_kg} kg`,
+        '01',
+        data.goods_nature || data.items_description,
+        data.packages_count || data.items_quantity,
+        (data.gross_weight_kg || data.items_weight_kg) + ' kg',
+        data.adr_class ? `CL ${data.adr_class} ${data.adr_un_number}` : 'N/A',
       ],
     ],
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    margin: { left: margin, right: margin },
+    styles: { fontSize: 8, cellPadding: 3 },
+    headStyles: { fillColor: PRIMARY_COLOR, textColor: PRIMARY_TEXT_COLOR, fontStyle: 'bold' },
+    theme: 'grid',
   })
-  y = doc.lastAutoTable.finalY + 4
 
-  if (data.adr_class) {
-    doc.setFont('helvetica', 'bold')
-    doc.text(`ADR Clase ${data.adr_class}`, margin, y)
-    if (data.adr_un_number) {
-      doc.text(` — ${data.adr_un_number}`, margin + 30, y)
-    }
-    doc.setFont('helvetica', 'normal')
-    y += 6
-  }
+  currentY += row3H + 2
 
-  y = renderSectionHeader(doc, y, '6. GASTOS DE TRANSPORTE (Art. 5i)', margin)
-  doc.text(`Importe: ${data.freight_charges} €`, margin, y)
-  y += 4
-  doc.text(`Condiciones de pago: ${data.payment_terms}`, margin, y)
-  y += 4
-  if (data.cod_amount) {
-    doc.text(`Contra reembolso: ${data.cod_amount}`, margin, y)
-    y += 4
-  }
-  if (data.goods_value) {
-    doc.text(`Valor declarado: ${data.goods_value}`, margin, y)
-    y += 4
-  }
-  y += 2
+  // FILA 4: Porteador (16) | Reservas (18)
+  const row4H = 35
+  const b16 = sectionBox(ML, currentY, colW, row4H, 'Porteador / Carrier', '16')
+  writeBoxText(ML + 3, b16.contentY, '', data.carrier_name, b16.innerW)
 
-  if (data.customs_instructions) {
-    y = renderSectionHeader(doc, y, '7. INSTRUCCIONES ADUANERAS (Art. 5l)', margin)
-    doc.text(data.customs_instructions, margin, y)
-    y += 6
-  }
+  const b18 = sectionBox(ML + colW, currentY, colW, row4H, 'Reservas y Observaciones', '18')
+  writeBoxText(ML + colW + 3, b18.contentY, '', data.transit_notes || data.observations, b18.innerW)
 
-  y = renderSectionHeader(doc, y, '8. VEHÍCULO Y CONDUCTOR', margin)
-  doc.text(`Matrícula: ${data.vehicle_plate}`, margin, y)
-  y += 4
-  doc.text(`Conductor: ${data.driver_name} — Licencia: ${data.driver_license}`, margin, y)
-  y += 8
+  currentY += row4H + 2
 
-  y = Math.max(y, doc.internal.pageSize.height - 45)
+  // SECCIÓN FIRMAS (21-24) AL PIE (297mm)
+  currentY = 250
+  const sigH = 40
+  doc.setDrawColor(...PRIMARY_COLOR)
+  doc.setLineWidth(0.3)
+  doc.rect(ML, currentY, CW, sigH)
+  doc.line(ML + CW / 3, currentY, ML + CW / 3, currentY + sigH)
+  doc.line(ML + (CW / 3) * 2, currentY, ML + (CW / 3) * 2, currentY + sigH)
+
+  doc.setFontSize(7)
   doc.setFont('helvetica', 'bold')
-  doc.text('FIRMAS', pw / 2, y, { align: 'center' })
-  y += 6
+  doc.text('21 Establecido en / Established in', ML + 2, currentY + 4.5)
+  doc.text('22 Firma y Sello Remitente', ML + CW / 3 + 2, currentY + 4.5)
+  doc.text('23 Firma y Sello Porteador', ML + (CW / 3) * 2 + 2, currentY + 4.5)
+
   doc.setFont('helvetica', 'normal')
-  renderSignatureBlock(doc, y, [
-    { label: 'Remitente', name: data.shipper_name },
-    { label: 'Transportista', name: data.carrier_name },
-    { label: 'Destinatario', name: data.consignee_name },
-  ])
+  doc.setFontSize(9)
+  doc.text(`${data.issue_place || ''}`, ML + 2, currentY + 12)
+  doc.text(`${data.issue_date || ''}`, ML + 2, currentY + 18)
 
   return doc
-}
-
-function renderSectionHeader(doc, y, title, margin) {
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(245, 124, 0)
-  doc.text(title, margin, y)
-  y += 5
-  doc.setDrawColor(245, 124, 0)
-  doc.setLineWidth(0.5)
-  doc.line(margin, y - 1, doc.internal.pageSize.width - margin, y - 1)
-  doc.setFontSize(7)
-  doc.setTextColor(0, 0, 0)
-  doc.setFont('helvetica', 'normal')
-  return y
-}
-
-function renderSection(doc, y, title, margin, lines) {
-  y = renderSectionHeader(doc, y, title, margin)
-  lines.filter(Boolean).forEach(line => {
-    doc.text(line, margin, y)
-    y += 4
-  })
-  return y + 2
-}
-
-function renderSignatureBlock(doc, y, signatures) {
-  const pw = doc.internal.pageSize.width
-  const sigWidth = 55
-  const sigGap = 10
-  const sigStartX = (pw - (sigWidth * 3 + sigGap * 2)) / 2
-  signatures.forEach((sig, i) => {
-    const x = sigStartX + i * (sigWidth + sigGap)
-    doc.setDrawColor(0, 0, 0)
-    doc.setLineWidth(0.5)
-    doc.line(x, y, x + sigWidth, y)
-    doc.setFontSize(7)
-    doc.text(sig.label, x, y + 4)
-    if (sig.name) {
-      doc.setFontSize(6)
-      doc.setTextColor(120, 120, 120)
-      doc.text(sig.name, x, y + 8)
-      doc.setTextColor(0, 0, 0)
-    }
-    doc.text('Firma: _________________', x, y + 12)
-    doc.text(`Fecha: ___/___/______`, x, y + 17)
-  })
 }
 
 async function uploadToStorage(routeId, filename, doc) {
@@ -353,22 +367,4 @@ async function uploadToStorage(routeId, filename, doc) {
   if (uploadError) throw uploadError
   const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
   return urlData.publicUrl
-}
-
-async function saveDocumentRecord({ routeId, cargoId, docNumber, filename, url }) {
-  const { data: docRecord, error: insertError } = await supabase
-    .from('generated_documents')
-    .insert({
-      route_id: routeId,
-      cargo_id: cargoId,
-      document_type: 'cmr',
-      document_number: docNumber,
-      file_url: url,
-      filename,
-      generated_by: (await supabase.auth.getUser()).data.user?.id,
-    })
-    .select()
-    .single()
-  if (insertError) throw mapSupabaseError(insertError)
-  return docRecord
 }

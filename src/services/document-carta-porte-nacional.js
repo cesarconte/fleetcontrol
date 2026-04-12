@@ -1,19 +1,32 @@
 /**
  * FleetControl — Carta de Porte Nacional Document Service
  *
- * Generates Carta de Porte Nacional PDF according to Ley 15/2009 (LCTTM), arts. 10-12.
- * Includes all 10 mandatory sections with 40+ fields.
+ * Generates Carta de Porte Nacional PDF according to the official model
+ * (Orden FOM/2861/2012, BOE 5 enero 2013).
  *
- * @see Ley 15/2009 (LCTTM) arts. 10-12
+ * Layout matches the official 24-section form used in Spanish road freight.
+ *
  * @see Orden FOM/2861/2012
+ * @see Ley 15/2009 (LCTTM) arts. 10-12
  */
 
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import { applyPlugin } from 'jspdf-autotable'
+
+applyPlugin(jsPDF)
+
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
+import { saveDocumentRecord } from './api-documents-persistence.js'
 
 const STORAGE_BUCKET = 'transport-documents'
+const PW = 210 // A4 width mm
+const ML = 10 // left margin mm
+const MR = 10 // right margin mm
+const MT = 8 // top margin mm
+const CW = PW - ML - MR // content width = 190mm
+const PRIMARY_COLOR = [245, 124, 0] // #F57C00
+const PRIMARY_TEXT_COLOR = [255, 255, 255] // #FFFFFF
 
 const NACIONAL_REQUIRED_FIELDS = [
   'shipper_name',
@@ -99,9 +112,6 @@ async function fetchDocumentData(routeId, cargoId) {
 }
 
 function mapNacionalFields({ route, vehicle, driver, cargo, company }) {
-  const issueDate = route.departure_date
-    ? new Date(route.departure_date).toISOString().split('T')[0]
-    : ''
   return {
     shipper_name: company.company_name || '',
     shipper_nif: company.cif || '',
@@ -113,29 +123,29 @@ function mapNacionalFields({ route, vehicle, driver, cargo, company }) {
     carrier_nif: company.cif || '',
     carrier_address: company.address || '',
     carrier_transport_license: company.transport_license || '',
-    consignee_name: cargo.cmr_recipient || cargo.consignee_name || '',
+    consignee_name: cargo.consignee_name || cargo.cmr_recipient || '',
     consignee_nif: cargo.consignee_nif || '',
-    consignee_address: cargo.cmr_delivery_place || cargo.consignee_address || '',
+    consignee_address: cargo.consignee_address || cargo.cmr_delivery_place || '',
     consignee_city: cargo.consignee_city || route.destination_city || '',
     consignee_province: cargo.consignee_province || route.destination_province || '',
     consignee_phone: cargo.consignee_phone || '',
     issue_place: route.origin_city || company.city || '',
-    issue_date: issueDate,
-    loading_address: route.origin_address || `${route.origin_city || ''}`,
-    loading_date: route.departure_date || '',
-    loading_time: route.departure_time || '',
-    delivery_address: route.destination_address || `${route.destination_city || ''}`,
-    delivery_date: route.estimated_arrival || '',
-    delivery_time_window: cargo.delivery_time_window || '',
-    goods_nature: cargo.subcategoria_id || cargo.categoria_id || cargo.description || '',
+    issue_date: formatDateES(new Date()),
+    loading_address: route.origin_address || route.origin_city || '',
+    loading_date: formatDateES(route.departure_date),
+    loading_time: route.departure_date ? extractTime(route.departure_date) : '',
+    delivery_address: route.destination_address || route.destination_city || '',
+    delivery_date: route.planned_arrival_date ? formatDateES(route.planned_arrival_date) : '',
+    delivery_time_window: '',
+    goods_nature: cargo.categoria_id || cargo.subcategoria_id || cargo.description || '',
     goods_description: cargo.description || '',
     packages_count: cargo.packages || '',
     gross_weight_kg: cargo.weight_kg || 0,
-    net_weight_kg: cargo.net_weight_kg || cargo.weight_kg || 0,
+    net_weight_kg: cargo.weight_kg || 0,
     volume_m3: cargo.volume_m3 || '',
     adr_class: cargo.adr_class || '',
     adr_un_number: cargo.adr_un_number || '',
-    temperature_required: cargo.temperature_required || '',
+    temperature_required: '',
     packaging_type: cargo.packaging_type || '',
     pallet_count: cargo.pallet_count || '',
     seal_number: cargo.seal_number || '',
@@ -143,23 +153,23 @@ function mapNacionalFields({ route, vehicle, driver, cargo, company }) {
     marking_codes: cargo.marks_numbers || '',
     special_handling: cargo.special_handling || '',
     sealing_instructions: cargo.sealing_instructions || '',
-    delivery_deadline: cargo.delivery_deadline || '',
+    delivery_deadline: '',
     transit_notes: route.notes || '',
     declared_value: cargo.declared_value || '',
     insurance_company: company.insurance_company || '',
     insurance_policy_number: company.insurance_policy || '',
     coverage_limit: company.insurance_coverage_limit || '',
     freight_price: route.price || 0,
-    fuel_surcharge: route.fuel_surcharge || 0,
-    toll_fees: route.toll_fees || 0,
-    waiting_fees: route.waiting_fees || 0,
-    total_amount: route.total_amount || route.price || 0,
+    fuel_surcharge: 0,
+    toll_fees: 0,
+    waiting_fees: 0,
+    total_amount: route.price || 0,
     payment_terms: route.payment_terms || '',
-    payment_method: route.payment_method || '',
+    payment_method: '',
     shipper_signature: '',
     carrier_signature: '',
     consignee_signature: '',
-    signature_date: issueDate,
+    signature_date: formatDateES(new Date()),
     damage_notes: '',
     missing_packages: '',
     condition_notes: '',
@@ -174,6 +184,20 @@ function mapNacionalFields({ route, vehicle, driver, cargo, company }) {
   }
 }
 
+function formatDateES(dateStr) {
+  if (!dateStr) return ''
+  const d = typeof dateStr === 'string' ? new Date(dateStr) : dateStr
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function extractTime(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+}
+
 function validateFields(mappedData, requiredFields) {
   const missing = []
   for (const field of requiredFields) {
@@ -186,279 +210,310 @@ function validateFields(mappedData, requiredFields) {
 function generateDocumentNumber(prefix) {
   const year = new Date().getFullYear()
   const seq = Date.now() % 100000
-  return `${prefix}-${year}-${String(seq).padStart(5, '0')}`
+  return `${prefix}/${year}/${String(seq).padStart(5, '0')}`
 }
 
 function renderNacionalPdf(data, docNumber) {
-  const doc = new jsPDF()
-  const pw = doc.internal.pageSize.width
-  const margin = 14
-  let y = 12
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  let y = MT
 
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(245, 124, 0)
-  doc.text('CARTA DE PORTE NACIONAL', pw / 2, y, { align: 'center' })
-  y += 7
-  doc.setFontSize(8)
+  // ── 1. CABECERA OFICIAL ─────────────────────────────────────────
+  doc.setFontSize(7.5)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(60, 60, 60)
+  doc.text('DOCUMENTO DE CONTROL DE LOS ENVÍOS DE TRANSPORTE PÚBLICO DE MERCANCÍAS', PW / 2, y, {
+    align: 'center',
+  })
+  y += 4.5
+  doc.setFontSize(6)
   doc.setTextColor(100, 100, 100)
-  doc.text('Ley 15/2009 (LCTTM), arts. 10-12 — Orden FOM/2861/2012', pw / 2, y, { align: 'center' })
-  y += 5
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(0, 0, 0)
-  doc.text(`Nº: ${docNumber}`, pw / 2, y, { align: 'center' })
-  y += 8
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(0, 0, 0)
-
-  y = renderSectionHeader(doc, y, '1. IDENTIFICACIÓN DE LAS PARTES', margin)
-  renderTwoColumnBlock(doc, y, margin, [
-    {
-      label: 'REMITENTE/CARGADOR',
-      fields: [
-        data.shipper_name,
-        data.shipper_nif,
-        data.shipper_address,
-        `${data.shipper_city} ${data.shipper_province}`,
-        `Tel: ${data.shipper_phone}`,
-      ],
-    },
-    {
-      label: 'TRANSPORTISTA',
-      fields: [
-        data.carrier_name,
-        data.carrier_nif,
-        data.carrier_address,
-        `Licencia: ${data.carrier_transport_license}`,
-      ],
-    },
-  ])
-  y += 38
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('DESTINATARIO:', margin, y)
-  doc.setFont('helvetica', 'normal')
-  y += 4
-  doc.text(data.consignee_name, margin + 4, y)
-  y += 4
-  if (data.consignee_nif) {
-    doc.text(`NIF: ${data.consignee_nif}`, margin + 4, y)
-    y += 4
-  }
-  doc.text(data.consignee_address, margin + 4, y)
-  y += 4
-  if (data.consignee_city) {
-    doc.text(`${data.consignee_city} ${data.consignee_province}`, margin + 4, y)
-    y += 4
-  }
-  if (data.consignee_phone) {
-    doc.text(`Tel: ${data.consignee_phone}`, margin + 4, y)
-    y += 4
-  }
-  y += 4
-
-  y = renderSectionHeader(doc, y, '2. LUGARES Y FECHAS', margin)
-  doc.autoTable({
-    startY: y,
-    head: [['Campo', 'Valor']],
-    body: [
-      ['Lugar y fecha de emisión', `${data.issue_place} — ${data.issue_date}`],
-      [
-        'Dirección de carga',
-        `${data.loading_address}${data.loading_date ? ` — ${data.loading_date}` : ''}`,
-      ],
-      [
-        'Dirección de entrega',
-        `${data.delivery_address}${data.delivery_date ? ` — ${data.delivery_date}` : ''}`,
-      ],
-    ],
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    margin: { left: margin, right: margin },
+  doc.text('Orden FOM/2861/2012 (BOE 5 enero 2013) — Ley 15/2009 (LCTTM) arts. 10-12', PW / 2, y, {
+    align: 'center',
   })
-  y = doc.lastAutoTable.finalY + 6
-
-  y = renderSectionHeader(doc, y, '3. MERCANCÍAS', margin)
-  const cargoBody = [
-    [
-      data.goods_nature,
-      data.goods_description,
-      String(data.packages_count ?? '—'),
-      `${data.gross_weight_kg} kg`,
-      data.volume_m3 ? `${data.volume_m3} m³` : '—',
-    ],
-  ]
-  doc.autoTable({
-    startY: y,
-    head: [['Naturaleza', 'Descripción', 'Bultos', 'P. Bruto', 'Volumen']],
-    body: cargoBody,
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    margin: { left: margin, right: margin },
-  })
-  y = doc.lastAutoTable.finalY + 4
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Embalaje:', margin, y)
-  doc.setFont('helvetica', 'normal')
-  doc.text(data.packaging_type, margin + 22, y)
-  y += 5
-  if (data.pallet_count) {
-    doc.text(`Palets: ${data.pallet_count}`, margin, y)
-    y += 5
-  }
-  if (data.seal_number) {
-    doc.text(`Precinto: ${data.seal_number}`, margin, y)
-    y += 5
-  }
-  y += 2
-
-  if (data.special_handling || data.transit_notes) {
-    y = renderSectionHeader(doc, y, '4. INSTRUCCIONES DE TRANSPORTE', margin)
-    if (data.special_handling) {
-      doc.text(`Manipulación: ${data.special_handling}`, margin, y)
-      y += 5
-    }
-    if (data.transit_notes) {
-      doc.text(`Observaciones: ${data.transit_notes}`, margin, y)
-      y += 5
-    }
-    y += 2
-  }
-
-  if (data.declared_value || data.insurance_company) {
-    y = renderSectionHeader(doc, y, '5. VALOR DECLARADO Y SEGUROS', margin)
-    if (data.declared_value) {
-      doc.text(
-        `Valor declarado: ${typeof data.declared_value === 'number' ? `${data.declared_value} €` : data.declared_value}`,
-        margin,
-        y,
-      )
-      y += 5
-    }
-    if (data.insurance_company) {
-      doc.text(`Aseguradora: ${data.insurance_company}`, margin, y)
-      y += 4
-    }
-    if (data.insurance_policy_number) {
-      doc.text(`Póliza: ${data.insurance_policy_number}`, margin, y)
-      y += 5
-    }
-    y += 2
-  }
-
-  y = renderSectionHeader(doc, y, '6. PRECIO DEL FLETE', margin)
-  const fleteBody = [['Porte', `${data.freight_price} €`]]
-  if (data.fuel_surcharge) fleteBody.push(['Supl. combustible', `${data.fuel_surcharge} €`])
-  if (data.toll_fees) fleteBody.push(['Peajes', `${data.toll_fees} €`])
-  if (data.waiting_fees) fleteBody.push(['Esperas', `${data.waiting_fees} €`])
-  fleteBody.push(['TOTAL', `${data.total_amount || data.freight_price} €`])
-  doc.autoTable({
-    startY: y,
-    head: [['Concepto', 'Importe']],
-    body: fleteBody,
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    margin: { left: margin, right: margin },
-  })
-  y = doc.lastAutoTable.finalY + 4
-  doc.text(`Forma de pago: ${data.payment_terms}`, margin, y)
-  y += 8
-
-  y = renderSectionHeader(doc, y, '7. RESERVA DE COMPROBACIÓN', margin)
-  doc.text('Espacio para anotar daños, faltantes o condiciones de la mercancía:', margin, y)
-  y += 4
-  doc.setDrawColor(180, 180, 180)
-  doc.setLineWidth(0.3)
-  doc.rect(margin, y, pw - margin * 2, 15)
-  y += 19
-
-  if (data.order_reference || data.additional_notes) {
-    y = renderSectionHeader(doc, y, '8. OBSERVACIONES', margin)
-    if (data.order_reference) {
-      doc.text(`Nº Pedido: ${data.order_reference}`, margin, y)
-      y += 4
-    }
-    if (data.tms_reference) {
-      doc.text(`Ref. TMS: ${data.tms_reference}`, margin, y)
-      y += 4
-    }
-    if (data.additional_notes) {
-      doc.text(data.additional_notes, margin, y)
-      y += 4
-    }
-    y += 4
-  }
-
-  y = Math.max(y, doc.internal.pageSize.height - 45)
-  doc.setFont('helvetica', 'bold')
-  doc.text('FIRMAS', pw / 2, y, { align: 'center' })
   y += 6
+
+  // Barra de título con número de documento destacado
+  doc.setDrawColor(0)
+  doc.setLineWidth(0.4)
+  doc.line(ML, y, ML + CW, y)
+
+  doc.setFillColor(...PRIMARY_COLOR)
+  doc.rect(ML, y + 0.1, CW, 10, 'F')
+
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...PRIMARY_TEXT_COLOR)
+  doc.text('CARTA DE PORTE NACIONAL (CPN)', ML + 3, y + 6.5)
+
+  doc.setFontSize(10)
+  doc.text(`Nº ${docNumber}`, PW - MR - 3, y + 6.5, { align: 'right' })
+
+  y += 10.5
+  doc.setLineWidth(0.2)
+  doc.line(ML, y, ML + CW, y)
+  y += 5
+
+  // ── 2. HELPERS DE DIBUJO ────────────────────────────────────────
+
+  function sectionBox(xPos, yPos, width, height, titleText, num) {
+    doc.setDrawColor(120)
+    doc.setLineWidth(0.2)
+    doc.rect(xPos, yPos, width, height)
+
+    // Header de casilla con color primario del proyecto
+    doc.setFillColor(...PRIMARY_COLOR)
+    doc.rect(xPos + 0.1, yPos + 0.1, width - 0.2, 5, 'F')
+
+    doc.setFontSize(6.5)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...PRIMARY_TEXT_COLOR)
+    const label = num ? `${num}  ${titleText}` : titleText
+    doc.text(label.toUpperCase(), xPos + 2, yPos + 3.8)
+    doc.setTextColor(0)
+
+    return {
+      contentY: yPos + 10,
+      innerW: width - 5,
+    }
+  }
+
+  function writeBoxText(x, yPos, label, value, maxWidth, size = 8) {
+    doc.setFontSize(size)
+    const lineH = size * 0.45
+    let curY = yPos
+
+    if (label && value) {
+      doc.setFont('helvetica', 'bold')
+      const lbl = label.endsWith(':') ? label : label + ':'
+      const labelText = lbl + ' '
+      const labelW = doc.getTextWidth(labelText)
+
+      doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(String(value), maxWidth - labelW)
+
+      lines.forEach((line, i) => {
+        if (i === 0) {
+          doc.setFont('helvetica', 'bold')
+          doc.text(labelText, x, curY)
+          doc.setFont('helvetica', 'normal')
+          doc.text(line, x + labelW, curY)
+        } else {
+          doc.text(line, x, curY)
+        }
+        curY += lineH
+      })
+    } else if (value) {
+      doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(String(value), maxWidth)
+      lines.forEach(line => {
+        doc.text(line, x, curY)
+        curY += lineH
+      })
+    } else if (label) {
+      doc.setFont('helvetica', 'bold')
+      doc.text(label, x, curY)
+      curY += lineH
+    }
+
+    return curY
+  }
+
+  // ── 3. LAYOUT DE 24 CASILLAS (DISTRIBUCIÓN POLISHED A4) ─────────
+  const colLW = CW * 0.58
+  const colRW = CW * 0.42
+  const colRX = ML + colLW
+  let currentY = y
+
+  // FILA 1: Remitente (1) | Porteador (16)
+  const row1H = 38
+  const b1 = sectionBox(ML, currentY, colLW, row1H, 'REMITENTE / EXPEDIDOR', '1')
+  let b1Y = b1.contentY
+  b1Y = writeBoxText(ML + 3, b1Y, '', data.shipper_name, b1.innerW, 8.5)
+  b1Y = writeBoxText(ML + 3, b1Y + 1, 'NIF/CIF', data.shipper_nif, b1.innerW, 8)
+  writeBoxText(
+    ML + 3,
+    b1Y + 1,
+    '',
+    data.shipper_address + '\n' + data.shipper_city + ' (' + data.shipper_province + ')',
+    b1.innerW,
+    7.5,
+  )
+
+  const b16 = sectionBox(colRX, currentY, colRW, row1H, 'TRANSPORTISTA / PORTEADOR', '16')
+  let b16Y = b16.contentY
+  b16Y = writeBoxText(colRX + 3, b16Y, '', data.carrier_name, b16.innerW, 8.5)
+  b16Y = writeBoxText(colRX + 3, b16Y + 1, 'NIF/CIF', data.carrier_nif, b16.innerW, 8)
+  writeBoxText(
+    colRX + 3,
+    b16Y + 1,
+    '',
+    data.carrier_address + '\nLicencia: ' + (data.carrier_transport_license || '—'),
+    b16.innerW,
+    7.5,
+  )
+  currentY += row1H + 2
+
+  // FILA 2: Consignatario (2) | Transportistas Sucesivos (17)
+  const row2H = 35
+  const b2 = sectionBox(ML, currentY, colLW, row2H, 'CONSIGNATARIO / DESTINATARIO', '2')
+  let b2Y = b2.contentY
+  b2Y = writeBoxText(ML + 3, b2Y, '', data.consignee_name, b2.innerW, 8.5)
+  b2Y = writeBoxText(ML + 3, b2Y + 1, 'NIF/CIF', data.consignee_nif, b2.innerW, 8)
+  writeBoxText(
+    ML + 3,
+    b2Y + 1,
+    'Dirección',
+    data.consignee_address + '\n' + data.consignee_city,
+    b2.innerW,
+    7.5,
+  )
+
+  const b17 = sectionBox(colRX, currentY, colRW, row2H, 'TRANSPORTISTAS SUCESIVOS', '17')
+  writeBoxText(
+    colRX + 3,
+    b17.contentY,
+    '',
+    'A rellenar solo en caso de transbordos o sucesiones de transportistas.',
+    b17.innerW,
+    6.5,
+  )
+  currentY += row2H + 2
+
+  // FILA 3: Lugar Entrega (3) | Reservas (18)
+  const row3H = 22
+  const b3 = sectionBox(ML, currentY, colLW, row3H, 'LUGAR DE ENTREGA DE LA MERCANCÍA', '3')
+  let b3Y = b3.contentY
+  b3Y = writeBoxText(ML + 3, b3Y, '', data.delivery_address, b3.innerW, 7.5)
+  writeBoxText(ML + 3, b3Y + 1, 'Fecha prevista', data.delivery_date || '—', b3.innerW, 7)
+
+  const b18 = sectionBox(
+    colRX,
+    currentY,
+    colRW,
+    row3H,
+    'RESERVAS Y OBSERVACIONES DEL PORTEADOR',
+    '18',
+  )
+  writeBoxText(
+    colRX + 3,
+    b18.contentY,
+    '',
+    data.condition_notes || 'Sin observaciones al momento de la carga.',
+    b18.innerW,
+    6.5,
+  )
+  currentY += row3H + 2
+
+  // FILA 4: TABLA MERCANCÍAS (AMPLIADA 6-12)
+  const tableY = currentY
+  const tableH = 75 // Expanded vertical space
+  doc.setDrawColor(120)
+  doc.rect(ML, tableY, CW, tableH)
+  const tableHeaders = [
+    '6 Marca/Núm',
+    '7 N. Bultos',
+    '8 Embalaje',
+    '9 Naturaleza de la mercancía',
+    '10 N. Estad',
+    '11 Peso (kg)',
+    '12 Vol m3',
+  ]
+  const tableCols = [25, 15, 20, 75, 15, 22, 18]
+  doc.setFillColor(...PRIMARY_COLOR)
+  doc.rect(ML, tableY, CW, 5.5, 'F')
+  doc.setFontSize(6.5)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...PRIMARY_TEXT_COLOR)
+  let curTX = ML
+  tableHeaders.forEach((th, i) => {
+    doc.rect(curTX, tableY, tableCols[i], 5.5)
+    doc.text(th, curTX + 1.5, tableY + 4)
+    curTX += tableCols[i]
+  })
+  doc.setTextColor(0)
   doc.setFont('helvetica', 'normal')
-  renderSignatureBlock(doc, y, [
-    { label: 'Cargador/Remitente', name: data.shipper_name },
-    { label: 'Transportista', name: data.carrier_name },
-    { label: 'Destinatario', name: data.consignee_name },
-  ])
+  doc.setFontSize(8.5)
+  const goodsStr =
+    (data.goods_nature || '') + (data.goods_description ? '\n' + data.goods_description : '')
+  const rowData = [
+    data.marking_codes || '—',
+    String(data.packages_count || '—'),
+    data.packaging_type || '—',
+    goodsStr,
+    '—',
+    String(data.gross_weight_kg),
+    data.volume_m3 || '—',
+  ]
+  curTX = ML
+  rowData.forEach((val, i) => {
+    doc.rect(curTX, tableY + 5.5, tableCols[i], tableH - 5.5)
+    const lines = doc.splitTextToSize(val, tableCols[i] - 3)
+    doc.text(lines, curTX + 1.5, tableY + 11)
+    curTX += tableCols[i]
+  })
+  currentY += tableH + 4
+
+  // FILA PAGO: Pago (14) y Precio (20)
+  const rowPayH = 35
+  const b14 = sectionBox(ML, currentY, colLW, rowPayH, 'FORMA DE PAGO Y REEMBOLSO', '14-15')
+  writeBoxText(
+    ML + 3,
+    b14.contentY,
+    'Condiciones',
+    data.payment_terms || 'Porte Pagado',
+    b14.innerW,
+    8,
+  )
+  writeBoxText(ML + 3, b14.contentY + 10, 'Reembolso', '—', b14.innerW, 8)
+
+  const b20 = sectionBox(colRX, currentY, colRW, rowPayH, 'PRECIO DEL TRANSPORTE', '20')
+  doc.autoTable({
+    startY: b20.contentY - 2.5,
+    head: [['Concepto', 'Total EUR']],
+    body: [
+      ['Porte / Flete', `${Number(data.freight_price).toFixed(2)}`],
+      ['Combustible', `${Number(data.fuel_surcharge).toFixed(2)}`],
+      [
+        { content: 'TOTAL', styles: { fontStyle: 'bold' } },
+        { content: `${Number(data.total_amount).toFixed(2)}`, styles: { fontStyle: 'bold' } },
+      ],
+    ],
+    styles: { fontSize: 7, cellPadding: 1.5, lineWidth: 0.1 },
+    headStyles: { fillColor: PRIMARY_COLOR, textColor: PRIMARY_TEXT_COLOR },
+    margin: { left: colRX + 1 },
+    tableWidth: colRW - 2,
+    theme: 'grid',
+  })
+  currentY += rowPayH + 4
+
+  // ── 8. FIRMAS AL PIE (Ajustadas a 297mm) ───────────────────────
+  currentY = 250 // Signatures clearly at the bottom
+  const sigH = 40
+  doc.setDrawColor(...PRIMARY_COLOR)
+  doc.setLineWidth(0.3)
+  doc.rect(ML, currentY, CW, sigH)
+
+  // Dibujar 3 columnas para firmas
+  doc.line(ML + CW / 3, currentY, ML + CW / 3, currentY + sigH)
+  doc.line(ML + (CW / 3) * 2, currentY, ML + (CW / 3) * 2, currentY + sigH)
+
+  doc.setFontSize(7)
+  doc.setFont('helvetica', 'bold')
+  doc.text('21 ESTABLECIDO EN / ISSUED AT', ML + 3, currentY + 5)
+  doc.text('22 FIRMA REMITENTE', ML + CW / 3 + 3, currentY + 5)
+  doc.text('23 FIRMA TRANSPORTISTA', ML + (CW / 3) * 2 + 3, currentY + 5)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9.5)
+  doc.text(`${data.issue_place || '—'}`, ML + 3, currentY + 14)
+  doc.text(`${data.issue_date || '—'}`, ML + 3, currentY + 22)
+
+  // Subtítulos para firmas
+  doc.setFontSize(6)
+  doc.text('FIRMA / SELLO', ML + CW / 3 + 3, currentY + sigH - 4)
+  doc.text('FIRMA / SELLO / DNI', ML + (CW / 3) * 2 + 3, currentY + sigH - 4)
 
   return doc
-}
-
-function renderSectionHeader(doc, y, title, margin) {
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(245, 124, 0)
-  doc.text(title, margin, y)
-  y += 5
-  doc.setDrawColor(245, 124, 0)
-  doc.setLineWidth(0.5)
-  doc.line(margin, y - 1, doc.internal.pageSize.width - margin, y - 1)
-  doc.setFontSize(7)
-  doc.setTextColor(0, 0, 0)
-  doc.setFont('helvetica', 'normal')
-  return y
-}
-
-function renderTwoColumnBlock(doc, y, margin, columns) {
-  const colWidth = (doc.internal.pageSize.width - margin * 2 - 10) / 2
-  columns.forEach((col, i) => {
-    const x = margin + i * (colWidth + 10)
-    doc.setFont('helvetica', 'bold')
-    doc.text(col.label, x, y)
-    doc.setFont('helvetica', 'normal')
-    y += 5
-    col.fields.forEach(field => {
-      if (field) {
-        doc.text(String(field), x + 2, y)
-        y += 4
-      }
-    })
-  })
-}
-
-function renderSignatureBlock(doc, y, signatures) {
-  const pw = doc.internal.pageSize.width
-  const sigWidth = 55
-  const sigGap = 10
-  const sigStartX = (pw - (sigWidth * 3 + sigGap * 2)) / 2
-  signatures.forEach((sig, i) => {
-    const x = sigStartX + i * (sigWidth + sigGap)
-    doc.setDrawColor(0, 0, 0)
-    doc.setLineWidth(0.5)
-    doc.line(x, y, x + sigWidth, y)
-    doc.setFontSize(7)
-    doc.text(sig.label, x, y + 4)
-    if (sig.name) {
-      doc.setFontSize(6)
-      doc.setTextColor(120, 120, 120)
-      doc.text(sig.name, x, y + 8)
-      doc.setTextColor(0, 0, 0)
-    }
-    doc.text('Firma: _________________', x, y + 12)
-    doc.text(`Fecha: ___/___/______`, x, y + 17)
-  })
 }
 
 async function uploadToStorage(routeId, filename, doc) {
@@ -470,22 +525,4 @@ async function uploadToStorage(routeId, filename, doc) {
   if (uploadError) throw uploadError
   const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
   return urlData.publicUrl
-}
-
-async function saveDocumentRecord({ routeId, cargoId, docNumber, filename, url, type }) {
-  const { data: docRecord, error: insertError } = await supabase
-    .from('generated_documents')
-    .insert({
-      route_id: routeId,
-      cargo_id: cargoId,
-      document_type: type,
-      document_number: docNumber,
-      file_url: url,
-      filename,
-      generated_by: (await supabase.auth.getUser()).data.user?.id,
-    })
-    .select()
-    .single()
-  if (insertError) throw mapSupabaseError(insertError)
-  return docRecord
 }

@@ -4,6 +4,7 @@ vi.mock('@/services/supabase-client.js', () => {
   const chain = {
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockReturnThis(),
@@ -32,6 +33,9 @@ vi.mock('jspdf', () => {
       this.internal = { pageSize: { width: 210, height: 297 } }
       this.lastAutoTable = { finalY: 100 }
     }
+    setFillColor() {
+      return this
+    }
     setFontSize() {
       return this
     }
@@ -53,12 +57,26 @@ vi.mock('jspdf', () => {
     line() {
       return this
     }
+    rect() {
+      return this
+    }
+    autoTable() {
+      return this
+    }
+    getTextWidth() {
+      return 10
+    }
+    splitTextToSize() {
+      return ['text']
+    }
     output() {
       return new ArrayBuffer(100)
     }
   }
-  return { default: MockJsPDF }
+  return { jsPDF: MockJsPDF }
 })
+
+vi.mock('jspdf-autotable', () => ({ applyPlugin: vi.fn() }))
 
 import { generatePodDocument } from './document-pod.js'
 import { supabase } from '@/services/supabase-client.js'
@@ -69,6 +87,7 @@ describe('document-pod', () => {
     const chain = supabase.from()
     chain.select.mockReturnValue(chain)
     chain.insert.mockReturnValue(chain)
+    chain.update.mockReturnValue(chain)
     chain.eq.mockReturnValue(chain)
     chain.single
       .mockResolvedValueOnce({
@@ -96,6 +115,10 @@ describe('document-pod', () => {
         },
         error: null,
       })
+      .mockResolvedValueOnce({
+        data: { id: 'template-pod' },
+        error: null,
+      })
   })
 
   it('debería ser una función exportada', () => {
@@ -108,5 +131,24 @@ describe('document-pod', () => {
     expect(result).toHaveProperty('documentId')
     expect(result).toHaveProperty('filename')
     expect(result.filename).toMatch(/pod.*\.pdf$/)
+  })
+
+  it('debería lanzar un error si faltan campos obligatorios (ej. destinatario ausente)', async () => {
+    const chain = supabase.from()
+    chain.maybeSingle.mockReset()
+    chain.maybeSingle
+      .mockResolvedValueOnce({ data: { company_name: 'Test S.L.' }, error: null })
+      .mockResolvedValueOnce({
+        data: {
+          id: 'cargo-1',
+          description: 'Mercancía',
+          // missing recipient
+        },
+        error: null,
+      })
+
+    await expect(generatePodDocument({ routeId: 'route-1' })).rejects.toThrow(
+      /Campos obligatorios faltantes: recipient_name/,
+    )
   })
 })

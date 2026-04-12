@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-03 (sesión doc-transport — 6 servicios de documentos independientes, Carta de Porte Nacional 10 secciones, schemas Zod, migración DB document_number, orquestador)
+> **Última actualización:** 2026-04-12 (sesión git-sync — validación de tests, lint y commit de centralización de documentos y persistencia)
 > **Actualizado por:** AI Agent
 
 ---
@@ -105,7 +105,7 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Módulo Combustible         | 🟢 Completado  | Registro, estadísticas                                                                                         |
 | Módulo Cargas              | 🟢 Completado  | CRUD, ADR, tipos de carga, taxonomía jerárquica 27 subcategorías, compliance                                   |
 | Módulo Tacógrafos          | 🔴 Sin empezar | Descarga DDD, análisis conducción/descanso, infracciones                                                       |
-| Gestión Documental         | 🔴 Sin empezar | Documentos centralizados, alertas vencimiento, auditoría                                                       |
+| Gestión Documental         | 🟢 Completado  | Documentos centralizados, KPIs, filtros, tabs, export CSV, generación                                          |
 | Módulo Alertas             | 🟢 Completado  | CRUD, filtros, acciones, dismiss, página completa                                                              |
 | Módulo Informes            | 🟢 Completado  | 9 informes, KPIs, gráficos ECharts, export PDF/Excel, BD financiera                                            |
 | Configuración              | 🟢 Completado  | Empresa, usuarios, RBAC, umbrales alerta, integraciones GPS, plantillas doc                                    |
@@ -113,26 +113,27 @@ Automatización:       ✅ Husky + lint-staged + commitlint + GitHub Actions CI
 | Sistema de Notificaciones  | 🔴 Sin empezar | In-app, email                                                                                                  |
 | GPS/Telemática             | 🟢 Completado  | Infraestructura GPS, adapter pattern, mock provider conectado a rutas reales, mapa FleetMap, offline indicator |
 | Sistema Realtime           | 🟢 Completado  | useRealtime composable + suscripciones en alerts, vehicles, drivers, routes                                    |
-| Testing (TDD)              | 🟢 Completado  | 1246 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
+| Testing (TDD)              | 🟢 Completado  | 1330 tests (Vitest), Cypress configurado, E2E smoke test                                                       |
 
 ### Documentación de Transporte (v1.0)
 
-| Documento                       | Estado | Base Legal                            | Obligatorio                |
-| ------------------------------- | ------ | ------------------------------------- | -------------------------- |
-| Carta de Porte CMR              | 🟢     | Convenio CMR 1956 (arts. 5-6)         | Sí (internacional)         |
-| Carta de Porte Nacional         | 🟢     | LCTTM (Ley 15/2009, art. 10-12)       | Sí (>€150 con porteador)   |
-| Documento de Control Digital    | 🔴     | Orden FOM/2861/2012 + Ley 9/2025      | **Sí (desde 05/10/2026)**  |
-| Albarán de Entrega              | 🟢     | Práctica comercial + UNE 56100        | Sí (práctica)              |
-| Hoja de Ruta                    | 🟢     | LOTT / RD 70/2019                     | Recomendado (funcional)    |
-| Nota de Gastos                  | 🔴     | IRPF + Convenio colectivo transporte  | Sí (si hay reembolso)      |
-| Factura de Transporte           | 🟢     | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal)                |
-| Certificado de Entrega (POD)    | 🟢     | LCTTM / práctica comercial            | Sí (prueba de entrega)     |
-| Documento de Transporte ADR     | 🟢     | ADR 2025 (5.4) + RD 97/2014           | Sí (mercancías peligrosas) |
-| Declaración de Valor CMR        | 🔴     | CMR art. 24/26                        | Si valor > límite CMR      |
-| Certificado ATP + control temp. | 🔴     | ATP + RD 635/1984                     | Sí (perecederos)           |
-| Packing List                    | 🔴     | Práctica comercial                    | Recomendado                |
-| Ficha de Estiba                 | 🔴     | RD 551/2020                           | Si carga pesada/especial   |
-| Doc. conductores desplazados    | 🔴     | Dir. UE 2020/1057 + RD 362/2023       | Si aplica (internacional)  |
+| Documento                       | Estado | Base Legal                            | Obligatorio                 |
+| ------------------------------- | ------ | ------------------------------------- | --------------------------- |
+| Carta de Porte CMR              | 🟢     | Convenio CMR 1956 (arts. 5-6)         | Sí (internacional)          |
+| Carta de Porte Nacional         | 🟢     | LCTTM (Ley 15/2009, art. 10-12)       | Sí (>€150 con porteador)    |
+| Documento de Control            | 🟢     | Orden FOM/2861/2012 + Ley 9/2025      | **Sí (obligatorio España)** |
+| Albarán de Entrega              | 🟢     | Práctica comercial + UNE 56100        | Sí (práctica)               |
+| Hoja de Ruta                    | 🟢     | LOTT / RD 70/2019                     | Recomendado (funcional)     |
+| Factura de Transporte           | 🟢     | RD 1619/2012 + Ley 18/2022 (eFactura) | Sí (fiscal)                 |
+| Certificado de Entrega (POD)    | 🟢     | LCTTM / práctica comercial            | Sí (prueba de entrega)      |
+| Documento de Transporte ADR     | 🟢     | ADR 2025 (5.4) + RD 97/2014           | Sí (mercancías peligrosas)  |
+| Certificado de Limpieza         | 🟢     | APPCC / Práctica sectorial            | Sí (alimentación/química)   |
+| Packing List                    | 🟢     | Práctica comercial                    | Recomendado                 |
+| Nota de Gastos                  | 🔴     | IRPF + Convenio colectivo transporte  | Sí (si hay reembolso)       |
+| Declaración de Valor CMR        | 🔴     | CMR art. 24/26                        | Si valor > límite CMR       |
+| Certificado ATP + control temp. | 🔴     | ATP + RD 635/1984                     | Sí (perecederos)            |
+| Ficha de Estiba                 | 🔴     | RD 551/2020                           | Si carga pesada/especial    |
+| Doc. conductores desplazados    | 🔴     | Dir. UE 2020/1057 + RD 362/2023       | Si aplica (internacional)   |
 
 ### Análisis (v1.5 — implementar TRAS gestión y documentación)
 
@@ -218,6 +219,17 @@ _(Complementa las de AGENTS.md)_
 ---
 
 ## 8. Contexto de la Última Sesión
+
+### Sesión git-sync — Validación final y commit
+
+**Fecha:** 2026-04-12
+**Branch:** feature/doc-hoja-ruta
+**Tests:** 1360 pasando (92 ficheros)
+
+**Trabajo realizado:**
+
+- Ejecutado `npm run check` (0 errores de lint, 0 type errors) y `npm run test` (todos los tests pasando exitosamente).
+- Realizado commit con los documentos suplementarios (ADR, control, packing list, cleaning cert), mejoras en documentos de transporte (hoja-ruta, cmr, albaran, factura) y su persistencia.
 
 **Fecha:** 2026-04-03 (sesión realtime — Suscripciones Supabase Realtime)
 **Branch:** feature/realtime (desde `dev`)
@@ -489,6 +501,100 @@ _(Complementa las de AGENTS.md)_
 - 7 anti-patrones explícitos (NEVER)
 
 **Limpieza:** 11 ramas remotas obsoletas eliminadas con `git remote prune origin`.
+
+---
+
+### Sesión documentos-centralizados — Eliminación + Tests página
+
+**Fecha:** 2026-04-04
+**Branch:** feature/documentos-centralizados
+**Tests:** 1351 pasando (+21 nuevos: 9 api-documents delete + 4 composable delete + 12 DocumentsListPage), 0 errores lint, 0 warnings críticos, typecheck limpio
+**Migraciones:** 35 aplicadas (001-035) — RLS policies para generated_documents ya existentes
+
+**Trabajo realizado:**
+
+- **Eliminación de documentos** implementada para las 3 entidades:
+  - `api-documents.js`: `deleteVehicleDocument()`, `deleteDriverDocument()`, `deleteGeneratedDocument()` (delega en `apiGeneratedDocuments.delete` que borra BD + Storage)
+  - `use-document-management.js`: método `deleteDocument(id, type)` con refresh automático de datos y KPIs
+  - `DocumentsListPage.vue`: diálogo de confirmación modal con `VDialog` persistente, información del documento a eliminar, notificación de éxito/error
+  - TODO eliminado: ya no hay `notifications.warning('Eliminación pendiente de implementar')`
+- **RLS policies verificadas**: `generated_documents` tiene SELECT (all authenticated), INSERT (authenticated), DELETE (owner)
+- **Tests**:
+  - `api-documents.spec.js`: +9 tests (delete vehicle, driver, generated + error paths)
+  - `use-document-management.spec.js`: +4 tests (deleteDocument vehicle/driver/transport + error propagation)
+  - `DocumentsListPage.spec.js`: +12 tests (renderizado, KPIs, tabs, delete confirm/cancel, view/edit actions, lifecycle)
+
+**Archivos creados (1):**
+
+- `src/pages/DocumentsListPage.spec.js` — 12 tests página
+
+**Archivos modificados (4):**
+
+- `src/services/api-documents.js` — +3 funciones de eliminación
+- `src/services/api-documents.spec.js` — +9 tests eliminación
+- `src/composables/use-document-management.js` — +función `deleteDocument()`
+- `src/composables/use-document-management.spec.js` — +4 tests eliminación
+- `src/pages/DocumentsListPage.vue` — eliminación con confirmación modal, diálogos
+
+**Resultado:** 1360 tests (92 ficheros). Lint + typecheck limpios.
+
+---
+
+### Sesión transport-doc-standard — Estandarización Total PDF
+
+**Fecha:** 2026-04-04
+**Branch:** feature/documentos-transporte (desde `dev`)
+**Tests:** 1351+ pasando
+**Migraciones:** 36 aplicadas (001-029 + fix transporte + templates obligatorios)
+
+**Trabajo realizado:**
+
+- **Estandarización de 7 Documentos**: Refactorización profunda de layouts para cumplir con modelos oficiales y profesionales:
+  - **Carta de Porte Nacional**: Replicado modelo Pretium/Ministerio con 21 casillas, aprovechamiento total de página y firmas alineadas.
+  - **CMR**: Adaptado a Convenio 1956 con campos obligatorios (1-24) y diseño corporativo.
+  - **Documento de Control**: Implementado diseño conforme a Orden FOM/2861/2012.
+  - **ADR**: Layout según ADR 2025 (cap. 5.4) con secciones de mercancía peligrosa destacadas.
+  - **Certificado de Limpieza**: Diseño industrial con checkbox para cisterna/suelo y datos de operario.
+  - **Packing List**: Tabla de bultos estandarizada con pesos netos/brutos.
+  - **Albarán**: Diseño simplificado para entrega comercial.
+- **Orquestador `document-generator.js`**: Centralización de la lógica. Sube PDFs a Supabase Storage (`transport-documents`) y registra en `generated_documents`.
+- **Integridad Referencial**:
+  - Migración 029: Añade `template_id` y `document_number` a `generated_documents` y puebla `transport_document_templates`.
+  - Todos los servicios actualizados para vincular el documento generado con su plantilla activa y el usuario (`generated_by`).
+- **UI/UX**: `GenerateDocumentDialog.vue` actualizado para garantizar que los 7 documentos siempre están disponibles.
+
+**Archivos creados/modificados:**
+
+- `document-carta-porte-nacional.js`, `document-cmr.js`, `document-adr.js`, `document-control.js`, `document-cleaning-cert.js`, `document-packing-list.js`, `document-albaran.js`, `document-generator.js`, `api-documents.js`, `GenerateDocumentDialog.vue`, `GeneratedDocumentsTable.vue`.
+- Migración: `20260404_029_fix_transport_documents_schema.sql`.
+
+---
+
+### Sesión carta-porte-nacional — PDF layout + tabla docs transporte
+
+**Fecha:** 2026-04-04
+
+**1. Carta de Porte Nacional PDF — Rediseño completo**
+
+- `src/services/document-carta-porte-nacional.js`: Layout reescrito con alturas de sección correctas (S1: 38mm, S2: 16mm, S3: 12mm, S13: 16mm, S14: 26mm, S15: 12mm, S18: 16mm, firmas: 26mm), padding de 1.5mm entre barra de título y contenido, `writeFieldStack` con cálculo dinámico de Y para evitar solapamientos, tabla mercancías a ancho completo (190mm), `splitTextToSize` en todas las celdas.
+- `supabase/migrations/20260404_028_add_carta_porte_nacional_template.sql`: Migración para añadir carta_porte_nacional a document_templates.
+- `src/services/document-carta-porte-nacional.spec.js`: Añadidos mocks `splitTextToSize` y `getTextWidth`.
+
+**2. Tabla Transporte Generado — Columna Carga**
+
+- `src/services/api-documents.js`: Query `getGeneratedDocumentsPaginated` ahora obtiene carga vía `routes → cargo_records` (nested join) en lugar de JOIN directo por `cargo_id` (que puede ser null).
+- `src/components/documents/GeneratedDocumentsTable.vue`: Template `#item.cargo` lee `item.routes?.cargo_records?.[0]?.description` con fallback a `item.cargo_records?.description`.
+
+**Archivos creados (1):**
+
+- `supabase/migrations/20260404_028_add_carta_porte_nacional_template.sql`
+
+**Archivos modificados (3):**
+
+- `src/services/document-carta-porte-nacional.js` — PDF layout completo reescrito
+- `src/services/document-carta-porte-nacional.spec.js` — mocks jsPDF
+- `src/services/api-documents.js` — nested join routes → cargo_records
+- `src/components/documents/GeneratedDocumentsTable.vue` — cargo template + helper function
 
 ---
 
