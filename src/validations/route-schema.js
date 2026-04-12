@@ -85,6 +85,16 @@ export const routeSchema = z.object({
 
   // ── Documentación ───────────────────────────────────
   linked_document_ref: z.string().optional().or(z.literal('')),
+  invoice_number: z.string().optional().or(z.literal('')),
+  cmr_number: z.string().optional().or(z.literal('')),
+  delivery_note_number: z.string().optional().or(z.literal('')),
+  cpn_number: z.string().optional().or(z.literal('')),
+  adr_number: z.string().optional().or(z.literal('')),
+  control_number: z.string().optional().or(z.literal('')),
+  packing_list_number: z.string().optional().or(z.literal('')),
+  cleaning_cert_number: z.string().optional().or(z.literal('')),
+  pod_number: z.string().optional().or(z.literal('')),
+  route_sheet_number: z.string().optional().or(z.literal('')),
 })
 
 export const routeUpdateSchema = routeSchema.partial()

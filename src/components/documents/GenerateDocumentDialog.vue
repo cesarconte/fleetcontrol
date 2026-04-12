@@ -118,10 +118,29 @@ async function loadOptions() {
   loadingTypes.value = true
   try {
     await fetchTemplates()
-    activeTypes.value = templates.value.map(t => ({
+
+    // Mandatory professional types to ensure they always appear in the Spanish transport context
+    const mandatoryTypes = [
+      { value: 'documento_control', label: 'Documento de Control Administrativo (BOE)' },
+      { value: 'carta_porte_nacional', label: 'Carta de Porte Nacional (LCTTM)' },
+      { value: 'cmr', label: 'Carta de Porte Internacional (Convenio CMR)' },
+      { value: 'adr', label: 'Carta de Porte ADR (Mercancías Peligrosas)' },
+      { value: 'albaran', label: 'Albarán de Entrega (Nota de Entrega)' },
+      { value: 'packing_list', label: 'Packing List / Listado de Contenido' },
+      { value: 'pod', label: 'Prueba de Entrega (P.O.D. Certificado)' },
+      { value: 'factura', label: 'Factura Proforma / Comercial' },
+      { value: 'hoja_ruta', label: 'Hoja de Ruta / Plan de Viaje' },
+      { value: 'cleaning_cert', label: 'Certificado de Limpieza de Cuba/Cisterna' },
+    ]
+
+    const dbTypes = templates.value.map(t => ({
       value: t.document_type,
       label: t.name,
     }))
+
+    // Merge and remove duplicates by value (favoring mandatory translation labels)
+    const allTypes = [...mandatoryTypes, ...dbTypes]
+    activeTypes.value = Array.from(new Map(allTypes.map(item => [item.value, item])).values())
   } finally {
     loadingTypes.value = false
   }

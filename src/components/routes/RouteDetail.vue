@@ -335,11 +335,63 @@
             <v-row>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Nº CMR</div>
-                <div class="text-body-1">{{ route.cmr_number || '—' }}</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.cmr_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Factura</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.invoice_number || '—' }}
+                </div>
               </v-col>
               <v-col cols="6" sm="4">
                 <div class="text-caption text-medium-emphasis">Nº Albarán</div>
-                <div class="text-body-1">{{ route.delivery_note_number || '—' }}</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.delivery_note_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Control Admon.</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.control_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº ADR</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.adr_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Packing List</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.packing_list_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Carta Porte Nac.</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.cpn_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Cert. Limpieza</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.cleaning_cert_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº POD</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.pod_number || '—' }}
+                </div>
+              </v-col>
+              <v-col cols="6" sm="4">
+                <div class="text-caption text-medium-emphasis">Nº Hoja de Ruta</div>
+                <div class="text-body-1 font-weight-medium text-primary">
+                  {{ route.route_sheet_number || '—' }}
+                </div>
               </v-col>
             </v-row>
             <v-row v-if="route.notes">
@@ -416,7 +468,6 @@ import { getStatusColor, getStatusLabel } from '@/utils/status-helpers.js'
 import { formatDate } from '@/utils/format-helpers.js'
 import GenerateDocumentDialog from '@/components/documents/GenerateDocumentDialog.vue'
 import { supabase } from '@/services/supabase-client.js'
-import { mapSupabaseError } from '@/utils/error-map.js'
 
 const props = defineProps({
   routeId: { type: String, required: true },
@@ -519,7 +570,9 @@ async function handleDelete() {
   }
 }
 
-function handleDocGenerated(result) {
+async function handleDocGenerated(result) {
   notifications.success(`Documento generado: ${result.filename}`)
+  // Refresh route data to show the new document number
+  await getById(props.routeId)
 }
 </script>

@@ -17,11 +17,16 @@ applyPlugin(jsPDF)
 
 import { supabase } from './supabase-client.js'
 import { mapSupabaseError } from '@/utils/error-map.js'
+import { saveDocumentRecord } from './api-documents-persistence.js'
 
 const STORAGE_BUCKET = 'transport-documents'
 const PW = 210 // A4 width mm
-const PH = 297 // A4 height mm
-const M = 10 // margin mm
+const ML = 10 // left margin mm
+const MR = 10 // right margin mm
+const MT = 8 // top margin mm
+const CW = PW - ML - MR // content width = 190mm
+const PRIMARY_COLOR = [245, 124, 0] // #F57C00
+const PRIMARY_TEXT_COLOR = [255, 255, 255] // #FFFFFF
 
 const NACIONAL_REQUIRED_FIELDS = [
   'shipper_name',
@@ -205,354 +210,310 @@ function validateFields(mappedData, requiredFields) {
 function generateDocumentNumber(prefix) {
   const year = new Date().getFullYear()
   const seq = Date.now() % 100000
-  return `${prefix}-${year}-${String(seq).padStart(5, '0')}`
+  return `${prefix}/${year}/${String(seq).padStart(5, '0')}`
 }
 
 function renderNacionalPdf(data, docNumber) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const contentW = PW - M * 2
-  let y = 8
+  let y = MT
 
-  // ── Header ──────────────────────────────────────────────────────
-  doc.setFontSize(8)
+  // ── 1. CABECERA OFICIAL ─────────────────────────────────────────
+  doc.setFontSize(7.5)
   doc.setFont('helvetica', 'normal')
-  doc.setTextColor(80, 80, 80)
+  doc.setTextColor(60, 60, 60)
   doc.text('DOCUMENTO DE CONTROL DE LOS ENVÍOS DE TRANSPORTE PÚBLICO DE MERCANCÍAS', PW / 2, y, {
     align: 'center',
   })
-  y += 4
-  doc.setFontSize(6)
-  doc.setTextColor(120, 120, 120)
-  doc.text(
-    'Orden FOM/2861/2012 de 13 de diciembre (BOE 5 de enero de 2013) — Deroga Orden FOM 238/2003',
-    PW / 2,
-    y,
-    { align: 'center' },
-  )
-  y += 5
-
-  // Title bar
-  doc.setFillColor(245, 124, 0)
-  doc.rect(M, y, contentW, 8, 'F')
-  doc.setFontSize(11)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(255, 255, 255)
-  doc.text('CARTA DE PORTE NACIONAL', PW / 2, y + 5.5, { align: 'center' })
-  y += 10
-
+  y += 4.5
   doc.setFontSize(6)
   doc.setTextColor(100, 100, 100)
-  doc.text(
-    'A rellenar bajo la responsabilidad del remitente (1-15, 19, 21, 22). Los recuadros en línea gruesa deben ser rellenados por el porteador.',
-    PW / 2,
-    y,
-    { align: 'center' },
-  )
-  y += 3
-
-  // Doc number
-  doc.setFontSize(8)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(0, 0, 0)
-  doc.text(`Nº ${docNumber}`, PW - M, y, { align: 'right' })
-  y += 2
-
-  // ── Section 1: Remitente + Cargador + Operador ─────────────────
-  y = drawBox(doc, y, contentW, 22, '1  REMITENTE / CARGADOR / OPERADOR')
-  y += 1
-  doc.setFontSize(7)
-  doc.setFont('helvetica', 'normal')
-  doc.setTextColor(0, 0, 0)
-  const leftCol = M + 2
-  const rightCol = M + contentW / 2 + 2
-  const colW = contentW / 2 - 4
-
-  doc.setFont('helvetica', 'bold')
-  doc.text('Remitente:', leftCol, y)
-  doc.setFont('helvetica', 'normal')
-  y += 3.5
-  doc.text(data.shipper_name, leftCol, y)
-  y += 3.5
-  doc.text(`NIF: ${data.shipper_nif}`, leftCol, y)
-  y += 3.5
-  doc.text(data.shipper_address, leftCol, y)
-  y += 3.5
-  doc.text(`${data.shipper_city} ${data.shipper_province}`, leftCol, y)
-
-  // Reset y for right column
-  let yR = y - 14
-  doc.setFont('helvetica', 'bold')
-  doc.text('Cargador Contractual:', rightCol, yR)
-  doc.setFont('helvetica', 'normal')
-  yR += 3.5
-  doc.text(data.shipper_name, rightCol, yR)
-  yR += 3.5
-  doc.text(`NIF: ${data.shipper_nif}`, rightCol, yR)
-  yR += 3.5
-  doc.text(data.carrier_address, rightCol, yR)
-  yR += 3.5
-  doc.text(`${data.shipper_city}`, rightCol, yR)
-
-  y = Math.max(y, yR) + 1
-  doc.setFont('helvetica', 'bold')
-  doc.text('Operador de Transporte:', leftCol, y)
-  doc.setFont('helvetica', 'normal')
-  y += 3
-  doc.text(data.carrier_name, leftCol, y)
-  y += 3
-  doc.text(`NIF: ${data.carrier_nif}`, leftCol, y)
-  y += 3
-  doc.text(data.carrier_address, leftCol, y)
-  y += 3
-  doc.text(`Licencia: ${data.carrier_transport_license}`, leftCol, y)
-
-  y += 2
-
-  // ── Sections 2 + 3 + 16 + 17 + Vehículo ────────────────────────
-  const rowH = 14
-  y = drawBox(doc, y, contentW, rowH, '2  CONSIGNATARIO')
-  y += 1
-  doc.setFontSize(7)
-  doc.setFont('helvetica', 'normal')
-  doc.text(data.consignee_name, leftCol, y)
-  y += 3.5
-  doc.text(`NIF: ${data.consignee_nif}`, leftCol, y)
-  y += 3.5
-  doc.text(data.consignee_address, leftCol, y)
-  y += 3.5
-  doc.text(`${data.consignee_city} ${data.consignee_province}`, leftCol, y)
-
-  y = drawBox(doc, y, contentW, rowH, '3  LUGAR DE ENTREGA DE LA MERCANCÍA')
-  y += 1
-  doc.text(data.delivery_address, leftCol, y)
-  y += 3
-
-  // ── Sections 4 + 5 + 18 ────────────────────────────────────────
-  y = drawBox(doc, y, contentW, rowH, '4  LUGAR Y FECHA DE CARGA')
-  y += 1
-  doc.text(`${data.loading_address}`, leftCol, y)
-  y += 3.5
-  doc.text(`Fecha: ${data.loading_date}  Hora: ${data.loading_time}`, leftCol, y)
-  y += 3
-
-  y = drawBox(doc, y, contentW, 8, '5  DOCUMENTOS ANEXOS')
-  y += 1
-  doc.text(data.order_reference || data.tms_reference || '—', leftCol, y)
-  y += 3
-
-  // ── Vehículo ────────────────────────────────────────────────────
-  y = drawBox(doc, y, contentW, 8, 'VEHÍCULO')
-  y += 1
-  doc.text(`Matrícula: ${data.vehicle_plate}`, leftCol, y)
-  y += 3
-  doc.text(`Tipo: ${data.vehicle_type}`, leftCol + 50, y)
-  y += 3
-  doc.text(`Conductor: ${data.driver_name}`, leftCol + 100, y)
-  y += 3
-  doc.text(`Licencia: ${data.driver_license}`, leftCol + 145, y)
-  y += 2
-
-  // ── Section 6-12: Mercancías table ─────────────────────────────
-  y = drawBox(doc, y, contentW, 6, 'MERCANCÍAS')
-  y += 0.5
-
-  doc.autoTable({
-    startY: y,
-    head: [
-      [
-        '6 Marca y\nnúmeros',
-        '7 Nº\nbultos',
-        '8 Clases de\nembalaje',
-        '9 Naturaleza de la mercancía',
-        '10 Nº\nEstadístico',
-        '11 Peso\nbruto (kg)',
-        '12 Vol.\n(m³)',
-      ],
-    ],
-    body: [
-      [
-        data.marking_codes || '—',
-        String(data.packages_count ?? '—'),
-        data.packaging_type || '—',
-        data.goods_nature + (data.goods_description ? `\n${data.goods_description}` : ''),
-        '—',
-        `${data.gross_weight_kg}`,
-        data.volume_m3 ? `${data.volume_m3}` : '—',
-      ],
-    ],
-    styles: {
-      fontSize: 6.5,
-      cellPadding: 1.5,
-      valign: 'middle',
-    },
-    headStyles: {
-      fillColor: [245, 124, 0],
-      textColor: 255,
-      fontStyle: 'bold',
-      halign: 'center',
-    },
-    columnStyles: {
-      0: { cellWidth: 22 },
-      1: { cellWidth: 12, halign: 'center' },
-      2: { cellWidth: 20 },
-      3: { cellWidth: 65 },
-      4: { cellWidth: 14, halign: 'center' },
-      5: { cellWidth: 18, halign: 'center' },
-      6: { cellWidth: 14, halign: 'center' },
-    },
-    margin: { left: M, right: M },
-    theme: 'grid',
+  doc.text('Orden FOM/2861/2012 (BOE 5 enero 2013) — Ley 15/2009 (LCTTM) arts. 10-12', PW / 2, y, {
+    align: 'center',
   })
-  y = doc.lastAutoTable.finalY + 3
+  y += 6
 
-  // ADR note
-  if (data.adr_class) {
-    doc.setFontSize(6)
-    doc.setFont('helvetica', 'bold')
-    doc.text(
-      `Mercancías peligrosas: Clase ${data.adr_class}${data.adr_un_number ? ` — UN ${data.adr_un_number}` : ''}`,
-      M,
-      y,
-    )
-    y += 5
-  }
+  // Barra de título con número de documento destacado
+  doc.setDrawColor(0)
+  doc.setLineWidth(0.4)
+  doc.line(ML, y, ML + CW, y)
 
-  // ── Section 13: Instrucciones + Estipulaciones ─────────────────
-  y = drawBox(doc, y, contentW, 6, '13  INSTRUCCIONES DEL REMITENTE / ESTIPULACIONES PARTICULARES')
-  y += 1
-  doc.setFontSize(6.5)
-  doc.setFont('helvetica', 'normal')
-  if (data.special_handling) {
-    doc.text(`Manipulación: ${data.special_handling}`, M + 1, y)
-    y += 3.5
-  }
-  if (data.sealing_instructions) {
-    doc.text(`Precinto: ${data.sealing_instructions}`, M + 1, y)
-    y += 3.5
-  }
-  if (data.transit_notes) {
-    doc.text(`Observaciones: ${data.transit_notes}`, M + 1, y)
-    y += 3.5
-  }
-  if (!data.special_handling && !data.sealing_instructions && !data.transit_notes) {
-    doc.text('—', M + 1, y)
-    y += 3.5
-  }
-  y += 1
+  doc.setFillColor(...PRIMARY_COLOR)
+  doc.rect(ML, y + 0.1, CW, 10, 'F')
 
-  // Arbitration clause
-  doc.setFontSize(5.5)
+  doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
-  doc.setTextColor(100, 100, 100)
-  doc.text(
-    'LAS PARTES INTERVINIENTES EN ESTE CONTRATO SE SOMETEN EXPRESAMENTE A LA JUNTA ARBITRAL DEL TRANSPORTE DE ESTA PROVINCIA, INCLUSO EN CONTROVERSIAS QUE EXCEDAN DE 3.000 €',
-    PW / 2,
-    y,
-    { align: 'center' },
-  )
-  doc.setTextColor(0, 0, 0)
+  doc.setTextColor(...PRIMARY_TEXT_COLOR)
+  doc.text('CARTA DE PORTE NACIONAL (CPN)', ML + 3, y + 6.5)
+
+  doc.setFontSize(10)
+  doc.text(`Nº ${docNumber}`, PW - MR - 3, y + 6.5, { align: 'right' })
+
+  y += 10.5
+  doc.setLineWidth(0.2)
+  doc.line(ML, y, ML + CW, y)
   y += 5
 
-  // ── Section 14 + 20: Precio del transporte ─────────────────────
-  y = drawBox(doc, y, contentW, 6, '14  FORMA DE PAGO / PRECIO DEL TRANSPORTE')
-  y += 0.5
+  // ── 2. HELPERS DE DIBUJO ────────────────────────────────────────
 
+  function sectionBox(xPos, yPos, width, height, titleText, num) {
+    doc.setDrawColor(120)
+    doc.setLineWidth(0.2)
+    doc.rect(xPos, yPos, width, height)
+
+    // Header de casilla con color primario del proyecto
+    doc.setFillColor(...PRIMARY_COLOR)
+    doc.rect(xPos + 0.1, yPos + 0.1, width - 0.2, 5, 'F')
+
+    doc.setFontSize(6.5)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...PRIMARY_TEXT_COLOR)
+    const label = num ? `${num}  ${titleText}` : titleText
+    doc.text(label.toUpperCase(), xPos + 2, yPos + 3.8)
+    doc.setTextColor(0)
+
+    return {
+      contentY: yPos + 10,
+      innerW: width - 5,
+    }
+  }
+
+  function writeBoxText(x, yPos, label, value, maxWidth, size = 8) {
+    doc.setFontSize(size)
+    const lineH = size * 0.45
+    let curY = yPos
+
+    if (label && value) {
+      doc.setFont('helvetica', 'bold')
+      const lbl = label.endsWith(':') ? label : label + ':'
+      const labelText = lbl + ' '
+      const labelW = doc.getTextWidth(labelText)
+
+      doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(String(value), maxWidth - labelW)
+
+      lines.forEach((line, i) => {
+        if (i === 0) {
+          doc.setFont('helvetica', 'bold')
+          doc.text(labelText, x, curY)
+          doc.setFont('helvetica', 'normal')
+          doc.text(line, x + labelW, curY)
+        } else {
+          doc.text(line, x, curY)
+        }
+        curY += lineH
+      })
+    } else if (value) {
+      doc.setFont('helvetica', 'normal')
+      const lines = doc.splitTextToSize(String(value), maxWidth)
+      lines.forEach(line => {
+        doc.text(line, x, curY)
+        curY += lineH
+      })
+    } else if (label) {
+      doc.setFont('helvetica', 'bold')
+      doc.text(label, x, curY)
+      curY += lineH
+    }
+
+    return curY
+  }
+
+  // ── 3. LAYOUT DE 24 CASILLAS (DISTRIBUCIÓN POLISHED A4) ─────────
+  const colLW = CW * 0.58
+  const colRW = CW * 0.42
+  const colRX = ML + colLW
+  let currentY = y
+
+  // FILA 1: Remitente (1) | Porteador (16)
+  const row1H = 38
+  const b1 = sectionBox(ML, currentY, colLW, row1H, 'REMITENTE / EXPEDIDOR', '1')
+  let b1Y = b1.contentY
+  b1Y = writeBoxText(ML + 3, b1Y, '', data.shipper_name, b1.innerW, 8.5)
+  b1Y = writeBoxText(ML + 3, b1Y + 1, 'NIF/CIF', data.shipper_nif, b1.innerW, 8)
+  writeBoxText(
+    ML + 3,
+    b1Y + 1,
+    '',
+    data.shipper_address + '\n' + data.shipper_city + ' (' + data.shipper_province + ')',
+    b1.innerW,
+    7.5,
+  )
+
+  const b16 = sectionBox(colRX, currentY, colRW, row1H, 'TRANSPORTISTA / PORTEADOR', '16')
+  let b16Y = b16.contentY
+  b16Y = writeBoxText(colRX + 3, b16Y, '', data.carrier_name, b16.innerW, 8.5)
+  b16Y = writeBoxText(colRX + 3, b16Y + 1, 'NIF/CIF', data.carrier_nif, b16.innerW, 8)
+  writeBoxText(
+    colRX + 3,
+    b16Y + 1,
+    '',
+    data.carrier_address + '\nLicencia: ' + (data.carrier_transport_license || '—'),
+    b16.innerW,
+    7.5,
+  )
+  currentY += row1H + 2
+
+  // FILA 2: Consignatario (2) | Transportistas Sucesivos (17)
+  const row2H = 35
+  const b2 = sectionBox(ML, currentY, colLW, row2H, 'CONSIGNATARIO / DESTINATARIO', '2')
+  let b2Y = b2.contentY
+  b2Y = writeBoxText(ML + 3, b2Y, '', data.consignee_name, b2.innerW, 8.5)
+  b2Y = writeBoxText(ML + 3, b2Y + 1, 'NIF/CIF', data.consignee_nif, b2.innerW, 8)
+  writeBoxText(
+    ML + 3,
+    b2Y + 1,
+    'Dirección',
+    data.consignee_address + '\n' + data.consignee_city,
+    b2.innerW,
+    7.5,
+  )
+
+  const b17 = sectionBox(colRX, currentY, colRW, row2H, 'TRANSPORTISTAS SUCESIVOS', '17')
+  writeBoxText(
+    colRX + 3,
+    b17.contentY,
+    '',
+    'A rellenar solo en caso de transbordos o sucesiones de transportistas.',
+    b17.innerW,
+    6.5,
+  )
+  currentY += row2H + 2
+
+  // FILA 3: Lugar Entrega (3) | Reservas (18)
+  const row3H = 22
+  const b3 = sectionBox(ML, currentY, colLW, row3H, 'LUGAR DE ENTREGA DE LA MERCANCÍA', '3')
+  let b3Y = b3.contentY
+  b3Y = writeBoxText(ML + 3, b3Y, '', data.delivery_address, b3.innerW, 7.5)
+  writeBoxText(ML + 3, b3Y + 1, 'Fecha prevista', data.delivery_date || '—', b3.innerW, 7)
+
+  const b18 = sectionBox(
+    colRX,
+    currentY,
+    colRW,
+    row3H,
+    'RESERVAS Y OBSERVACIONES DEL PORTEADOR',
+    '18',
+  )
+  writeBoxText(
+    colRX + 3,
+    b18.contentY,
+    '',
+    data.condition_notes || 'Sin observaciones al momento de la carga.',
+    b18.innerW,
+    6.5,
+  )
+  currentY += row3H + 2
+
+  // FILA 4: TABLA MERCANCÍAS (AMPLIADA 6-12)
+  const tableY = currentY
+  const tableH = 75 // Expanded vertical space
+  doc.setDrawColor(120)
+  doc.rect(ML, tableY, CW, tableH)
+  const tableHeaders = [
+    '6 Marca/Núm',
+    '7 N. Bultos',
+    '8 Embalaje',
+    '9 Naturaleza de la mercancía',
+    '10 N. Estad',
+    '11 Peso (kg)',
+    '12 Vol m3',
+  ]
+  const tableCols = [25, 15, 20, 75, 15, 22, 18]
+  doc.setFillColor(...PRIMARY_COLOR)
+  doc.rect(ML, tableY, CW, 5.5, 'F')
+  doc.setFontSize(6.5)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...PRIMARY_TEXT_COLOR)
+  let curTX = ML
+  tableHeaders.forEach((th, i) => {
+    doc.rect(curTX, tableY, tableCols[i], 5.5)
+    doc.text(th, curTX + 1.5, tableY + 4)
+    curTX += tableCols[i]
+  })
+  doc.setTextColor(0)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(8.5)
+  const goodsStr =
+    (data.goods_nature || '') + (data.goods_description ? '\n' + data.goods_description : '')
+  const rowData = [
+    data.marking_codes || '—',
+    String(data.packages_count || '—'),
+    data.packaging_type || '—',
+    goodsStr,
+    '—',
+    String(data.gross_weight_kg),
+    data.volume_m3 || '—',
+  ]
+  curTX = ML
+  rowData.forEach((val, i) => {
+    doc.rect(curTX, tableY + 5.5, tableCols[i], tableH - 5.5)
+    const lines = doc.splitTextToSize(val, tableCols[i] - 3)
+    doc.text(lines, curTX + 1.5, tableY + 11)
+    curTX += tableCols[i]
+  })
+  currentY += tableH + 4
+
+  // FILA PAGO: Pago (14) y Precio (20)
+  const rowPayH = 35
+  const b14 = sectionBox(ML, currentY, colLW, rowPayH, 'FORMA DE PAGO Y REEMBOLSO', '14-15')
+  writeBoxText(
+    ML + 3,
+    b14.contentY,
+    'Condiciones',
+    data.payment_terms || 'Porte Pagado',
+    b14.innerW,
+    8,
+  )
+  writeBoxText(ML + 3, b14.contentY + 10, 'Reembolso', '—', b14.innerW, 8)
+
+  const b20 = sectionBox(colRX, currentY, colRW, rowPayH, 'PRECIO DEL TRANSPORTE', '20')
   doc.autoTable({
-    startY: y,
-    head: [['Concepto', 'Importe (€)']],
+    startY: b20.contentY - 2.5,
+    head: [['Concepto', 'Total EUR']],
     body: [
-      ['Porte / Flete', `${Number(data.freight_price).toFixed(2)} €`],
-      ['Supl. combustible', `${Number(data.fuel_surcharge).toFixed(2)} €`],
-      ['Peajes', `${Number(data.toll_fees).toFixed(2)} €`],
-      ['Esperas', `${Number(data.waiting_fees).toFixed(2)} €`],
+      ['Porte / Flete', `${Number(data.freight_price).toFixed(2)}`],
+      ['Combustible', `${Number(data.fuel_surcharge).toFixed(2)}`],
       [
         { content: 'TOTAL', styles: { fontStyle: 'bold' } },
-        {
-          content: `${Number(data.total_amount || data.freight_price).toFixed(2)} €`,
-          styles: { fontStyle: 'bold' },
-        },
+        { content: `${Number(data.total_amount).toFixed(2)}`, styles: { fontStyle: 'bold' } },
       ],
     ],
-    styles: { fontSize: 7, cellPadding: 2 },
-    headStyles: { fillColor: [245, 124, 0], textColor: 255 },
-    columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 40, halign: 'right' } },
-    margin: { left: M, right: M },
+    styles: { fontSize: 7, cellPadding: 1.5, lineWidth: 0.1 },
+    headStyles: { fillColor: PRIMARY_COLOR, textColor: PRIMARY_TEXT_COLOR },
+    margin: { left: colRX + 1 },
+    tableWidth: colRW - 2,
     theme: 'grid',
   })
-  y = doc.lastAutoTable.finalY + 2
+  currentY += rowPayH + 4
+
+  // ── 8. FIRMAS AL PIE (Ajustadas a 297mm) ───────────────────────
+  currentY = 250 // Signatures clearly at the bottom
+  const sigH = 40
+  doc.setDrawColor(...PRIMARY_COLOR)
+  doc.setLineWidth(0.3)
+  doc.rect(ML, currentY, CW, sigH)
+
+  // Dibujar 3 columnas para firmas
+  doc.line(ML + CW / 3, currentY, ML + CW / 3, currentY + sigH)
+  doc.line(ML + (CW / 3) * 2, currentY, ML + (CW / 3) * 2, currentY + sigH)
 
   doc.setFontSize(7)
+  doc.setFont('helvetica', 'bold')
+  doc.text('21 ESTABLECIDO EN / ISSUED AT', ML + 3, currentY + 5)
+  doc.text('22 FIRMA REMITENTE', ML + CW / 3 + 3, currentY + 5)
+  doc.text('23 FIRMA TRANSPORTISTA', ML + (CW / 3) * 2 + 3, currentY + 5)
+
   doc.setFont('helvetica', 'normal')
-  const payLabel = data.payment_terms?.toLowerCase().includes('debido')
-    ? 'Porte debido'
-    : 'Porte pagado'
-  doc.text(`Forma de pago: ${payLabel} — ${data.payment_terms}`, M + 1, y)
-  y += 4
+  doc.setFontSize(9.5)
+  doc.text(`${data.issue_place || '—'}`, ML + 3, currentY + 14)
+  doc.text(`${data.issue_date || '—'}`, ML + 3, currentY + 22)
 
-  // ── Section 15: Formalizado + Reembolso ────────────────────────
-  y = drawBox(doc, y, contentW, 8, '15  FORMALIZADO / REEMBOLSO')
-  y += 1
-  doc.text(`Formalizado en: ${data.issue_place} el ${data.issue_date}`, M + 1, y)
-  y += 4
-  doc.text('Reembolso: —', M + 1, y)
-  y += 4
-
-  // ── Section 18: Reservas ───────────────────────────────────────
-  y = drawBox(doc, y, contentW, 12, '18  RESERVAS Y OBSERVACIONES DEL PORTADOR')
-  y += 1
-  doc.text(data.damage_notes || data.condition_notes || 'Sin reservas', M + 1, y)
-  y += 5
-
-  // ── Signatures ──────────────────────────────────────────────────
-  y = Math.max(y, PH - 62)
-  y = drawBox(doc, y, contentW, 6, 'FIRMAS')
-  y += 1
-
-  const sigW = contentW / 3 - 4
-  const sigPositions = [
-    { label: '21 REMITENTE/CARGADOR', name: data.shipper_name },
-    { label: '23 TRANSPORTISTA', name: data.carrier_name },
-    { label: '24 CONSIGNATARIO', name: data.consignee_name },
-  ]
-  sigPositions.forEach((sig, i) => {
-    const x = M + 2 + i * (sigW + 4)
-    doc.setFontSize(6)
-    doc.setFont('helvetica', 'bold')
-    doc.text(sig.label, x, y)
-    y += 3
-    doc.setFont('helvetica', 'normal')
-    doc.text(sig.name || '', x, y)
-    y += 3
-    doc.setDrawColor(0, 0, 0)
-    doc.setLineWidth(0.3)
-    doc.line(x, y, x + sigW, y)
-    y += 3
-    doc.setFontSize(5.5)
-    doc.text('Firma y sello', x, y)
-    y += 3
-    doc.text('Fecha: ___/___/______', x, y)
-    y -= 9 // reset y for next column
-  })
+  // Subtítulos para firmas
+  doc.setFontSize(6)
+  doc.text('FIRMA / SELLO', ML + CW / 3 + 3, currentY + sigH - 4)
+  doc.text('FIRMA / SELLO / DNI', ML + (CW / 3) * 2 + 3, currentY + sigH - 4)
 
   return doc
-}
-
-function drawBox(doc, y, width, height, title) {
-  doc.setDrawColor(100, 100, 100)
-  doc.setLineWidth(0.3)
-  doc.rect(M, y, width, height)
-
-  if (title) {
-    doc.setFillColor(245, 124, 0)
-    doc.rect(M, y, width, 5, 'F')
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(255, 255, 255)
-    doc.text(title, M + 1, y + 3.5)
-    doc.setTextColor(0, 0, 0)
-    return y + 5
-  }
-  return y
 }
 
 async function uploadToStorage(routeId, filename, doc) {
@@ -564,22 +525,4 @@ async function uploadToStorage(routeId, filename, doc) {
   if (uploadError) throw uploadError
   const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath)
   return urlData.publicUrl
-}
-
-async function saveDocumentRecord({ routeId, cargoId, docNumber, filename, url, type }) {
-  const { data: docRecord, error: insertError } = await supabase
-    .from('generated_documents')
-    .insert({
-      route_id: routeId,
-      cargo_id: cargoId,
-      document_type: type,
-      document_number: docNumber,
-      file_url: url,
-      filename,
-      generated_by: (await supabase.auth.getUser()).data.user?.id,
-    })
-    .select()
-    .single()
-  if (insertError) throw mapSupabaseError(insertError)
-  return docRecord
 }

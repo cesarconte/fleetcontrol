@@ -38,8 +38,8 @@
 
       <!-- Cargo -->
       <template #item.cargo="{ item }">
-        <span v-if="item.cargo_description" class="text-body-2">
-          {{ item.cargo_description }}
+        <span v-if="cargoDescription(item)" class="text-body-2">
+          {{ cargoDescription(item) }}
         </span>
         <span v-else class="text-medium-emphasis">—</span>
       </template>
@@ -192,5 +192,9 @@ function onOptionsUpdate(options) {
     sortBy,
     sortAsc,
   })
+}
+
+function cargoDescription(item) {
+  return item.routes?.cargo_records?.[0]?.description || item.cargo_records?.description || null
 }
 </script>

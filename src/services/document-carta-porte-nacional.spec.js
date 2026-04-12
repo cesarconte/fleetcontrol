@@ -4,6 +4,7 @@ vi.mock('@/services/supabase-client.js', () => {
   const chain = {
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn().mockReturnThis(),
     maybeSingle: vi.fn().mockReturnThis(),
@@ -62,6 +63,12 @@ vi.mock('jspdf', () => {
     autoTable() {
       return this
     }
+    splitTextToSize(text) {
+      return [text]
+    }
+    getTextWidth() {
+      return 20
+    }
     output() {
       return new ArrayBuffer(100)
     }
@@ -80,6 +87,7 @@ describe('document-carta-porte-nacional', () => {
     const chain = supabase.from()
     chain.select.mockReturnValue(chain)
     chain.insert.mockReturnValue(chain)
+    chain.update.mockReturnValue(chain)
     chain.eq.mockReturnValue(chain)
     chain.single
       .mockResolvedValueOnce({
@@ -120,6 +128,10 @@ describe('document-carta-porte-nacional', () => {
           packaging_type: 'Palets',
           packages: 10,
         },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: { id: 'template-cpn' },
         error: null,
       })
   })

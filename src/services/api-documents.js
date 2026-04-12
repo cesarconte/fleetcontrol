@@ -148,7 +148,12 @@ export async function getGeneratedDocumentsPaginated({
         routes!inner (
           id,
           origin_city,
-          destination_city
+          destination_city,
+          cargo_records (
+            id,
+            description,
+            weight_kg
+          )
         )
       `,
       { count: 'exact' },
