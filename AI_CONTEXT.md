@@ -7,7 +7,7 @@
 > para tener el contexto exacto del estado del proyecto sin necesidad de
 > explicarlo en cada conversación.
 >
-> **Última actualización:** 2026-04-11 (sesión audit-hoja-ruta — auditoría roadmap, fix 5 tests fallando en 6 spec files de documentos transporte)
+> **Última actualización:** 2026-04-12 (sesión git-sync — validación de tests, lint y commit de centralización de documentos y persistencia)
 > **Actualizado por:** AI Agent
 
 ---
@@ -219,6 +219,17 @@ _(Complementa las de AGENTS.md)_
 ---
 
 ## 8. Contexto de la Última Sesión
+
+### Sesión git-sync — Validación final y commit
+
+**Fecha:** 2026-04-12
+**Branch:** feature/doc-hoja-ruta
+**Tests:** 1360 pasando (92 ficheros)
+
+**Trabajo realizado:**
+
+- Ejecutado `npm run check` (0 errores de lint, 0 type errors) y `npm run test` (todos los tests pasando exitosamente).
+- Realizado commit con los documentos suplementarios (ADR, control, packing list, cleaning cert), mejoras en documentos de transporte (hoja-ruta, cmr, albaran, factura) y su persistencia.
 
 **Fecha:** 2026-04-03 (sesión realtime — Suscripciones Supabase Realtime)
 **Branch:** feature/realtime (desde `dev`)

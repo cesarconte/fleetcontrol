@@ -132,4 +132,23 @@ describe('document-pod', () => {
     expect(result).toHaveProperty('filename')
     expect(result.filename).toMatch(/pod.*\.pdf$/)
   })
+
+  it('debería lanzar un error si faltan campos obligatorios (ej. destinatario ausente)', async () => {
+    const chain = supabase.from()
+    chain.maybeSingle.mockReset()
+    chain.maybeSingle
+      .mockResolvedValueOnce({ data: { company_name: 'Test S.L.' }, error: null })
+      .mockResolvedValueOnce({
+        data: {
+          id: 'cargo-1',
+          description: 'Mercancía',
+          // missing recipient
+        },
+        error: null,
+      })
+
+    await expect(generatePodDocument({ routeId: 'route-1' })).rejects.toThrow(
+      /Campos obligatorios faltantes: recipient_name/,
+    )
+  })
 })

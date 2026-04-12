@@ -138,4 +138,46 @@ describe('document-factura', () => {
     expect(result).toHaveProperty('filename')
     expect(result.filename).toMatch(/factura.*\.pdf$/)
   })
+
+  it('debería lanzar un error si faltan campos obligatorios (ej. importe de servicio)', async () => {
+    const chain = supabase.from()
+    chain.single.mockReset()
+    chain.single
+      .mockResolvedValueOnce({
+        data: {
+          id: 'route-1',
+          origin_city: 'Madrid',
+          destination_city: 'Barcelona',
+          vehicle_id: 'v-1',
+          driver_id: 'd-1',
+          // price is missing
+          iva_rate: 21,
+          payment_terms: '30 días',
+          client_name: '', // missing client name
+          client_tax_id: 'A87654321',
+          invoice_number: 'FAC-2026-001',
+          invoice_date: '2026-04-01',
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: { id: 'v-1', plate: '1234-ABC' }, error: null })
+      .mockResolvedValueOnce({ data: { id: 'd-1', full_name: 'Juan García' }, error: null })
+      .mockResolvedValueOnce({ data: { id: 'doc-1' }, error: null })
+
+    chain.maybeSingle.mockReset()
+    chain.maybeSingle
+      .mockResolvedValueOnce({
+        data: {
+          company_name: 'Test S.L.',
+          cif: 'B12345678',
+          address: 'Calle Test 1',
+        },
+        error: null,
+      })
+      .mockResolvedValueOnce({ data: { id: 'cargo-1', cmr_recipient: '' }, error: null })
+
+    await expect(generateFacturaDocument({ routeId: 'route-1' })).rejects.toThrow(
+      /Campos obligatorios faltantes: recipient_name/,
+    )
+  })
 })
